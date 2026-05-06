@@ -800,6 +800,136 @@
   font-size: 14px;
 }
 
+.customerSearch input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #344054;
+  font: inherit;
+  outline: none;
+}
+
+.quickFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quickFilters button {
+  min-height: 34px;
+  border: 1px solid #d9dee7;
+  border-radius: 999px;
+  padding: 0 14px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.quickFilters .activeFilterChip {
+  border-color: #175cff;
+  background: #eff6ff;
+  color: #175cff;
+}
+
+.advancedPanel,
+.exportMenu {
+  border: 1px solid #d9dee7;
+  border-radius: 12px;
+  padding: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.advancedPanel h3 {
+  margin-bottom: 14px;
+  color: #101828;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.advancedGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.advancedGrid label,
+.columnGrid label {
+  display: grid;
+  gap: 6px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.advancedGrid select {
+  min-height: 36px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #ffffff;
+  color: #344054;
+  font: inherit;
+}
+
+.advancedPanel footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.advancedPanel footer button {
+  min-height: 36px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.columnGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.columnGrid label {
+  display: flex;
+  align-items: center;
+}
+
+.exportMenu {
+  width: 220px;
+  justify-self: end;
+  display: grid;
+  gap: 8px;
+}
+
+.exportMenu button {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: transparent;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.exportMenu button:hover {
+  background: #f2f4f7;
+}
+
 .blueButton,
 .greenButton {
   min-height: 36px;
@@ -874,6 +1004,12 @@
   color: #344054;
   font-size: 14px;
   vertical-align: middle;
+}
+
+.memberTable .emptyTableCell {
+  height: 120px;
+  color: #667085;
+  text-align: center;
 }
 
 .memberCode {
@@ -1106,6 +1242,17 @@
   color: #101828;
   font-size: 16px;
   font-weight: 800;
+}
+
+.formError {
+  margin-bottom: 14px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .formGrid {
