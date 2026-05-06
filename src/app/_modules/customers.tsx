@@ -27,6 +27,7 @@ import {
   InfoBlock,
   InfoLine,
   MiniTable,
+  SelectField,
   SimpleMetric,
 } from "../_shared/components";
 import { customerRows } from "../_shared/data";
@@ -331,18 +332,26 @@ function AddCustomerModal({
             <FormField required label="Số điện thoại" name="phone" placeholder="Nhập số điện thoại" />
             <FormField label="Email" name="email" placeholder="Nhập email" />
             <FormField label="Ngày sinh" name="birth" type="date" />
-            <FormField label="Nhân viên phụ trách" />
-            <FormField label="Thẻ khách hàng" placeholder="Nhập số thẻ" />
-            <FormField
+            <SelectField
+              label="Nhân viên phụ trách"
+              name="assignedSale"
+              options={["Tự chọn Sale phụ trách", "Admin", "Nguyễn Văn Thành", "Lê Thị Mai", "Trần Minh Hoàng"]}
+            />
+            <FormField label="Thẻ khách hàng (RFID)" placeholder="Nhập số thẻ vật lý" />
+            <SelectField
               action="Thêm mới"
               label="Nhóm khách hàng"
+              name="customerGroup"
               onAction={() => onOpenNested("group")}
+              options={["Chọn nhóm", "VIP", "Premium", "Standard", "Khách vãng lai"]}
             />
           </div>
-          <FormField area label="Ghi chú" placeholder="Nhập ghi chú về khách hàng..." />
-          <FormField
+          <FormField area label="Ghi chú" placeholder="Sở thích, đặc điểm khách hàng..." />
+          <SelectField
             action="Thêm mới"
             label="Nguồn khách hàng"
+            name="customerSource"
+            options={["Chọn nguồn", "Walk-in", "Facebook", "Google", "Giới thiệu", "CN khác"]}
           />
 
           <div className={styles.formDivider} />
@@ -522,31 +531,11 @@ function CustomerDetailTab({ activeTab }: { activeTab: string }) {
   }
 
   if (activeTab === "Kết quả tập luyện") {
-    return (
-      <section className={styles.detailCard}>
-        <h3>Kết quả tập luyện <button className={styles.blueButton} type="button"><Plus size={16} />Thêm kết quả</button></h3>
-        <div className={styles.statsGrid}>
-          <SimpleMetric label="Điểm TB" value="82" />
-          <SimpleMetric label="Handicap WHS" value="18.4" />
-          <SimpleMetric label="Tổng buổi" value="24" />
-          <SimpleMetric label="Giờ tập" value="36h" />
-        </div>
-        <MiniTable rows={[["24/04/2026 · Thứ 5", "Buổi 5", "Swing cơ bản · HLV Minh"], ["18/04/2026 · Thứ 6", "Buổi 4", "Putting và short game"]]} />
-      </section>
-    );
+    return <TrainingResultsTab />;
   }
 
   if (activeTab === "Inbody") {
-    return (
-      <section className={styles.detailCard}>
-        <h3>Inbody <button className={styles.blueButton} type="button"><Plus size={16} />Thêm</button></h3>
-        <div className={styles.detailThree}>
-          {["Cân nặng 65kg", "Cơ xương 31.2kg", "Mỡ cơ thể 18%", "BMI 22.4", "Carry 168 yards", "Spin Rate 2,450rpm"].map((item) => (
-            <InfoBlock key={item} label={item.split(" ")[0]}>{item.replace(item.split(" ")[0], "").trim()}</InfoBlock>
-          ))}
-        </div>
-      </section>
-    );
+    return <InbodyTab />;
   }
 
   if (activeTab === "Meal Plan") {
@@ -563,15 +552,153 @@ function CustomerDetailTab({ activeTab }: { activeTab: string }) {
   }
 
   if (activeTab === "Thông tin TA") {
-    return (
-      <section className={styles.detailCard}>
-        <h3>Thông tin TA <button className={styles.greenButton} type="button"><Plus size={16} />Gán TA mới</button></h3>
-        <MiniTable rows={[["TA001", "Lê Minh Anh", "Thứ 2-4-6 · 17:30", "Ghi chú: hỗ trợ swing"], ["TA002", "Phạm Hoàng Nam", "Cuối tuần · 08:00", "Hỗ trợ short game"]]} />
-      </section>
-    );
+    return <TaTab />;
   }
 
   return <BasicInfoTab />;
+}
+
+function TrainingResultsTab() {
+  const sessions: Array<{ date: string; weekday: string; session: string; pkg: string; coach: string; ta: string; content: string; homework: string; note: string }> = [
+    { date: "24/04/2026", weekday: "Thứ 5", session: "Buổi 5", pkg: "Gói Golf Swing 3 tháng", coach: "HLV Minh", ta: "TA Hoàng Nam", content: "Swing cơ bản, chỉnh tư thế stance", homework: "Tập chipping 30 phút/ngày", note: "Tiến bộ rõ rệt ở pitch shot" },
+    { date: "18/04/2026", weekday: "Thứ 6", session: "Buổi 4", pkg: "Gói Golf Swing 3 tháng", coach: "HLV Minh", ta: "TA Hoàng Nam", content: "Putting và short game", homework: "30 cú putt 2m mỗi ngày", note: "Cần cải thiện grip" },
+    { date: "11/04/2026", weekday: "Thứ 6", session: "Buổi 3", pkg: "Gói Golf Swing 3 tháng", coach: "HLV An", ta: "—", content: "Driver 200y - line drill", homework: "Đo carry 50 swing", note: "—" },
+  ];
+  return (
+    <section className={styles.detailCard}>
+      <h3>Kết quả tập luyện <button className={styles.blueButton} type="button"><Plus size={16} />Thêm kết quả</button></h3>
+      <div className={styles.statsGrid}>
+        <SimpleMetric label="Điểm TB" value="82" />
+        <SimpleMetric label="Handicap WHS" value="18.4" />
+        <SimpleMetric label="Tổng buổi" value="24" />
+        <SimpleMetric label="Giờ tập" value="36h" />
+      </div>
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Ngày kiểm tra</th>
+              <th>Buổi</th>
+              <th>Gói tập</th>
+              <th>HLV / Trợ giảng</th>
+              <th>Nội dung</th>
+              <th>BTVN</th>
+              <th>Ghi chú</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sessions.map((s) => (
+              <tr key={s.date}>
+                <td><strong>{s.date}</strong><div className={styles.cellMuted}>{s.weekday}</div></td>
+                <td><span className={styles.sessionBadge}>{s.session}</span></td>
+                <td>{s.pkg}</td>
+                <td><strong>{s.coach}</strong><div className={styles.cellMuted}>{s.ta}</div></td>
+                <td className={styles.cellTruncate}>{s.content}</td>
+                <td className={styles.cellTruncate}>{s.homework}</td>
+                <td className={styles.cellTruncate}>{s.note}</td>
+                <td className={styles.rowActions}>
+                  <button type="button"><Edit size={14} /></button>
+                  <button type="button"><X size={14} /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function InbodyTab() {
+  const metrics: Array<{ label: string; value: string; trend?: string }> = [
+    { label: "Cân nặng", value: "65 kg", trend: "−1.2 kg" },
+    { label: "Chiều cao", value: "1.70 m" },
+    { label: "Cơ xương", value: "31.2 kg", trend: "+0.4 kg" },
+    { label: "Mỡ cơ thể", value: "18 %", trend: "−0.6 %" },
+    { label: "BMI", value: "22.4", trend: "Bình thường" },
+    { label: "Carry (Driver)", value: "168 yards", trend: "+4 yards" },
+    { label: "Total (Driver)", value: "212 yards" },
+    { label: "Angle Attack", value: "−3.2 °" },
+    { label: "Spin Rate", value: "2,450 rpm" },
+  ];
+  return (
+    <section className={styles.detailCard}>
+      <h3>Inbody · 9 chỉ số <button className={styles.blueButton} type="button"><Plus size={16} />Thêm Inbody</button></h3>
+      <div className={styles.inbodyGrid}>
+        {metrics.map((m) => (
+          <article className={styles.inbodyCard} key={m.label}>
+            <span>{m.label}</span>
+            <strong>{m.value}</strong>
+            {m.trend ? <small>{m.trend}</small> : null}
+          </article>
+        ))}
+      </div>
+      <div className={styles.detailTwo}>
+        <article className={styles.chartCard}>
+          <h4>Radar 5 chiều</h4>
+          <div className={styles.radarPlaceholder}>★ Carry · Total · Spin · Angle · Path</div>
+        </article>
+        <article className={styles.chartCard}>
+          <h4>Lịch sử cân nặng</h4>
+          <div className={styles.chartBars}>{[58, 60, 62, 64, 66, 65, 65].map((h, i) => <span key={i} style={{ height: `${h}%` }} />)}</div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function TaTab() {
+  const tas: Array<{ code: string; name: string; phone: string; email: string; course: string; schedule: string; note: string; status: "active" | "off" }> = [
+    { code: "NV-0012", name: "Lê Minh Anh", phone: "0923456712", email: "leminhanh@epga.vn", course: "Golf Swing 3 tháng", schedule: "T2-T4-T6 · 07:00-09:00", note: "Hỗ trợ swing — KH tiến bộ", status: "active" },
+    { code: "NV-0027", name: "Phạm Hoàng Nam", phone: "0901224578", email: "phnam@epga.vn", course: "Short Game Premium", schedule: "Cuối tuần · 08:00-10:00", note: "Chuyên short game", status: "active" },
+    { code: "NV-0033", name: "Trần Quốc Bảo", phone: "0987654312", email: "tqbao@epga.vn", course: "Driving Range", schedule: "T3-T5 · 17:30-19:00", note: "Đã nghỉ việc", status: "off" },
+  ];
+  return (
+    <section className={styles.detailCard}>
+      <h3>
+        <span className={styles.taBadge}>{tas.filter((t) => t.status === "active").length} TA đang phụ trách</span>
+        <button className={styles.greenButton} type="button"><Plus size={16} />Gán TA mới</button>
+      </h3>
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Tên TA</th>
+              <th>Mã NV</th>
+              <th>Liên hệ</th>
+              <th>Khoá học</th>
+              <th>Lịch làm việc</th>
+              <th>Ghi chú</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tas.map((t) => (
+              <tr key={t.code}>
+                <td>
+                  <div className={styles.taName}>
+                    <span>{t.name.charAt(0)}</span>
+                    <strong>{t.name}</strong>
+                    {t.status === "off" ? <span className={styles.taOff}>Đã nghỉ việc</span> : null}
+                  </div>
+                </td>
+                <td className={styles.cellMuted}>{t.code}</td>
+                <td>{t.phone}<div className={styles.cellMuted}>{t.email}</div></td>
+                <td>{t.course}</td>
+                <td>{t.schedule}</td>
+                <td className={styles.cellTruncate}>{t.note}</td>
+                <td className={styles.rowActions}>
+                  <button type="button"><Edit size={14} /></button>
+                  <button type="button"><X size={14} /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
 }
 
 function BasicInfoTab() {

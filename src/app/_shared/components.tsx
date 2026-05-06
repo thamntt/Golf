@@ -241,6 +241,36 @@ export function InfoLine({ danger, icon: Icon, label, value }: { danger?: boolea
   );
 }
 
+export function SelectField({
+  action,
+  label,
+  name,
+  onAction,
+  options,
+  required,
+}: {
+  action?: string;
+  label: string;
+  name?: string;
+  onAction?: () => void;
+  options: string[];
+  required?: boolean;
+}) {
+  return (
+    <label>
+      <span>{label} {required ? <b>*</b> : null}</span>
+      <div className={styles.inputWrap}>
+        <select defaultValue={options[0]} name={name} required={required}>
+          {options.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
+        {action ? <button onClick={onAction} type="button">{action}</button> : null}
+      </div>
+    </label>
+  );
+}
+
 export function FormField({
   action,
   area,

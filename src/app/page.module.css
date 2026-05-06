@@ -1898,3 +1898,163 @@
     gap: 10px;
   }
 }
+
+/* Module 01 — Tab refinements */
+.cellMuted {
+  color: #667085;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.cellTruncate {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ebf5ff;
+  color: #0b63ff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rowActions {
+  display: flex;
+  gap: 6px;
+}
+
+.rowActions button {
+  background: #f4f6fa;
+  border: 1px solid #d9dee7;
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  color: #475467;
+}
+
+.rowActions button:hover {
+  border-color: #0b63ff;
+  color: #0b63ff;
+}
+
+.rowActions button:last-child:hover {
+  border-color: #e23131;
+  color: #e23131;
+}
+
+.inbodyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.inbodyCard {
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inbodyCard span {
+  color: #667085;
+  font-size: 13px;
+}
+
+.inbodyCard strong {
+  color: #101828;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.inbodyCard small {
+  color: #00a651;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chartCard {
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.chartCard h4 {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.radarPlaceholder {
+  height: 180px;
+  border: 1px dashed #d9dee7;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #667085;
+  font-size: 13px;
+  background: #fafbfd;
+}
+
+.taBadge {
+  display: inline-block;
+  margin-right: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e7f8ec;
+  color: #00a651;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.taName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.taName > span {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #0b63ff;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.taName strong {
+  color: #101828;
+  font-weight: 700;
+}
+
+.taOff {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #fde8e8;
+  color: #e23131;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .inbodyGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
