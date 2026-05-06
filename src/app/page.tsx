@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import {
   BarChart3,
   BriefcaseBusiness,
@@ -7,102 +10,67 @@ import {
   ChevronDown,
   ClipboardCheck,
   DollarSign,
+  Download,
   FileBarChart,
   FileText,
+  Filter,
   Flag,
   Menu,
   Percent,
+  Plus,
+  Search,
   Settings,
   SlidersHorizontal,
   Target,
   Ticket,
   TrendingUp,
+  Upload,
   Users,
   WalletCards,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import styles from "./page.module.css";
 
-type ModuleSpec = {
-  id: string;
-  code: string;
-  title: string;
-  subtitle: string;
-  audience: string;
+type ModuleKey =
+  | "dashboard"
+  | "customers"
+  | "pricing"
+  | "contracts"
+  | "tickets"
+  | "teetime"
+  | "line"
+  | "coach"
+  | "classes"
+  | "checkin"
+  | "cashbook"
+  | "commission"
+  | "settings"
+  | "reports";
+
+type NavItem = {
+  key: ModuleKey;
+  label: string;
   Icon: LucideIcon;
-  tone: string;
-  metrics: string[];
-  workflow: string[];
-  screens: string[];
-  features: string[];
 };
 
-const navigation = [
-  { label: "Dashboard", href: "#dashboard", Icon: BarChart3 },
-  { label: "Khách Hàng", href: "#customers", Icon: Users },
-  { label: "Bảng Giá", href: "#pricing", Icon: SlidersHorizontal },
-  { label: "Hợp Đồng", href: "#contracts", Icon: FileText },
-  { label: "Vé Lẻ", href: "#tickets", Icon: Ticket },
-  { label: "Golf Teetime", href: "#teetime", Icon: Flag },
-  { label: "Golf Line Tập", href: "#line", Icon: Target },
-  { label: "Lịch HLV", href: "#coach", Icon: CalendarCheck },
-  { label: "Lịch Lớp", href: "#classes", Icon: CalendarDays },
-  { label: "Check-in/out", href: "#checkin", Icon: ClipboardCheck },
-  { label: "Sổ Quỹ", href: "#cashbook", Icon: WalletCards },
-  { label: "Hoa Hồng Sale", href: "#commission", Icon: Percent },
-  { label: "Cài Đặt", href: "#settings", Icon: Settings },
-  { label: "Báo cáo", href: "#reports", Icon: FileBarChart },
+const navItems: NavItem[] = [
+  { key: "dashboard", label: "Dashboard", Icon: BarChart3 },
+  { key: "customers", label: "Khách Hàng", Icon: Users },
+  { key: "pricing", label: "Bảng Giá", Icon: SlidersHorizontal },
+  { key: "contracts", label: "Hợp Đồng", Icon: FileText },
+  { key: "tickets", label: "Vé Lẻ", Icon: Ticket },
+  { key: "teetime", label: "Golf Teetime", Icon: Flag },
+  { key: "line", label: "Golf Line Tập", Icon: Target },
+  { key: "coach", label: "Lịch HLV", Icon: CalendarCheck },
+  { key: "classes", label: "Lịch Lớp", Icon: CalendarDays },
+  { key: "checkin", label: "Check-in/out", Icon: ClipboardCheck },
+  { key: "cashbook", label: "Sổ Quỹ", Icon: WalletCards },
+  { key: "commission", label: "Hoa Hồng Sale", Icon: Percent },
+  { key: "settings", label: "Cài Đặt", Icon: Settings },
+  { key: "reports", label: "Báo cáo", Icon: FileBarChart },
 ];
 
-const stats = [
-  {
-    label: "Tổng Đặt Chỗ Hôm Nay",
-    value: "50",
-    trend: "+12%",
-    Icon: Calendar,
-    tone: "blue",
-  },
-  {
-    label: "Khách Hàng Hoạt Động",
-    value: "1,234",
-    trend: "+8%",
-    Icon: Users,
-    tone: "green",
-  },
-  {
-    label: "Doanh Thu Hôm Nay",
-    value: "17.3M VNĐ",
-    trend: "+23%",
-    Icon: DollarSign,
-    tone: "amber",
-  },
-  {
-    label: "Tỷ Lệ Sử Dụng",
-    value: "78%",
-    trend: "+5%",
-    Icon: TrendingUp,
-    tone: "purple",
-  },
-];
-
-const facilities = [
-  {
-    name: "Golf Teetime",
-    Icon: Flag,
-    booked: "32",
-    available: "8",
-    revenue: "12.5M VNĐ",
-  },
-  {
-    name: "Golf Line Tập",
-    Icon: Target,
-    booked: "18",
-    available: "12",
-    revenue: "4.8M VNĐ",
-  },
-];
-
-const bookings = [
+const recentBookings = [
   ["BK001", "Nguyễn Văn A", "Golf Teetime", "14:00 - 16:00", "Đã Xác Nhận"],
   ["BK002", "Trần Thị B", "Golf Teetime", "15:00 - 16:00", "Đã Xác Nhận"],
   ["BK003", "Lê Văn C", "Golf Line Tập", "16:00 - 17:00", "Chờ Xác Nhận"],
@@ -110,386 +78,67 @@ const bookings = [
   ["BK005", "Hoàng Thị E", "Golf Line Tập", "10:00 - 11:00", "Chờ Xác Nhận"],
 ];
 
-const modules: ModuleSpec[] = [
-  {
-    id: "customers",
-    code: "M01",
-    title: "Khách Hàng",
-    subtitle:
-      "Single source of truth cho hồ sơ golfer, sinh trắc học, hợp đồng, giao dịch và kết quả tập luyện.",
-    audience: "Lễ tân · Sale · Manager",
-    Icon: Users,
-    tone: "moduleBlue",
-    metrics: ["1,234 hồ sơ", "186 còn hạn", "32 sắp hết hạn"],
-    workflow: [
-      "Thêm mới khách hàng với Họ tên + SĐT bắt buộc, tự sinh mã HV và mã sinh trắc học.",
-      "Kiểm tra SĐT không trùng trong cùng chi nhánh, lưu audit log.",
-      "Từ hồ sơ KH có thể ký HĐ, check-in, ghi scorecard, đo Inbody và lập Meal Plan.",
-    ],
-    screens: [
-      "Danh sách KH với chip: Tất cả, Còn hạn, Hết hạn, Sắp hết hạn, Chưa đăng ký.",
-      "Panel lọc nâng cao: ngày hết hạn, sinh nhật, đăng ký, giới tính, CN, nhóm KH, sale phụ trách.",
-      "Modal chi tiết 8 tab: Tổng quan, Hợp đồng, Giao dịch, Check-in, Tập luyện, Inbody, Meal Plan, TA.",
-      "Form thêm/sửa KH, modal thêm người đi cùng, thêm nhóm/nguồn, gán trợ giảng.",
-    ],
-    features: [
-      "Badge FaceID / Vân tay / Thẻ",
-      "Soft delete 30 ngày cho Admin",
-      "Công nợ realtime từ Sổ Quỹ",
-    ],
-  },
-  {
-    id: "pricing",
-    code: "M02",
-    title: "Bảng Giá",
-    subtitle:
-      "Cấu hình Khu vực, Khung giờ, Bảng giá hợp đồng và Bảng giá vé lẻ theo thứ tự phụ thuộc.",
-    audience: "Admin · Manager chi nhánh",
-    Icon: SlidersHorizontal,
-    tone: "moduleViolet",
-    metrics: ["4 khu vực", "18 khung giờ", "12 gói active"],
-    workflow: [
-      "Tạo Khu vực trước, sau đó tạo Khung giờ gắn khu vực và chi nhánh.",
-      "Chỉ mở form Bảng giá khi đã có đủ Khu vực + Khung giờ.",
-      "Bảng giá active mới xuất hiện trong form Hợp Đồng và Vé Lẻ; giá được snapshot khi bán.",
-    ],
-    screens: [
-      "Quản lý Bảng Giá với tab Bảng giá hợp đồng table view và Bảng giá vé lẻ card view.",
-      "Modal Quản lý Khu vực, Quản lý Khung giờ, form tạo/sửa và dialog chặn xóa nếu đang tham chiếu.",
-      "Import/Export Excel, bộ lọc tên/mã, loại dịch vụ, cơ sở, trạng thái.",
-    ],
-    features: [
-      "Draft / Active / Inactive",
-      "Optimistic lock khi sửa giá",
-      "Kết nối ma trận hoa hồng M11",
-    ],
-  },
-  {
-    id: "contracts",
-    code: "M03",
-    title: "Hợp Đồng",
-    subtitle:
-      "Trung tâm bán hàng và quản lý vòng đời hợp đồng hội viên từ ký mới đến hết hạn hoặc chuyển đổi.",
-    audience: "Sales · Lễ tân · Manager",
-    Icon: FileText,
-    tone: "moduleIndigo",
-    metrics: ["CT102 active", "18 gia hạn", "6 bảo lưu"],
-    workflow: [
-      "Chọn KH có sẵn hoặc tạo KH mới, chọn gói từ Bảng Giá active.",
-      "Lưu HĐ sinh mã CTxxx và phiếu thu trong Sổ Quỹ.",
-      "Các trạng thái mở rộng gồm Gia hạn, Nâng cấp, Bảo lưu, Chuyển nhượng, Chuyển đổi HĐ.",
-    ],
-    screens: [
-      "Quản lý Hợp Đồng với 6 tab: Hợp đồng, Gia hạn, Nâng cấp, Bảo lưu, Chuyển nhượng, Chuyển đổi.",
-      "Danh sách HĐ có sub-tab filter và modal chi tiết 8 section + timeline sự kiện.",
-      "Form 2-panel/3-column cho các nghiệp vụ nâng cấp, bảo lưu, chuyển nhượng, chuyển đổi.",
-    ],
-    features: [
-      "In HĐ theo mẫu cấu hình",
-      "Audit contract_history",
-      "Tự sinh phiếu thu M10",
-    ],
-  },
-  {
-    id: "tickets",
-    code: "M04",
-    title: "Vé Lẻ",
-    subtitle:
-      "Bán vé sử dụng đơn lẻ hoặc vé nhóm cho khách vãng lai, kèm voucher và dịch vụ add-on.",
-    audience: "Lễ tân",
-    Icon: Ticket,
-    tone: "moduleOrange",
-    metrics: ["72 vé hôm nay", "9 voucher", "5 add-on"],
-    workflow: [
-      "Lễ tân xem KPI và danh sách vé, tạo vé mới với toggle Vé lẻ / Vé nhóm.",
-      "Vé CONFIRMED tự sinh phiếu thu trong Sổ Quỹ.",
-      "Tab Voucher quản lý card 3 cột, điều kiện áp dụng và giới hạn sử dụng.",
-    ],
-    screens: [
-      "Tab Danh sách vé: KPI, search mã vé/tên/SĐT, bộ lọc thời gian và trạng thái.",
-      "Form tạo/sửa vé đơn, vé nhóm, thêm KH inline nếu chưa có.",
-      "Tab Vouchers và Dịch vụ đi kèm với QR chứa ticket_id + add-ons + total.",
-    ],
-    features: [
-      "Soft cancel giữ lịch sử",
-      "Sinh phiếu thu bổ sung khi thêm add-on",
-      "Voucher theo % hoặc số tiền",
-    ],
-  },
-  {
-    id: "teetime",
-    code: "M05",
-    title: "Golf Teetime",
-    subtitle:
-      "Lưới khung giờ phát bóng trong ngày, mỗi slot phục vụ 1-6 người chơi.",
-    audience: "Lễ tân · Admin",
-    Icon: Flag,
-    tone: "moduleGreen",
-    metrics: ["150 slot/ngày", "32 đã đặt", "8 còn trống"],
-    workflow: [
-      "Đổi ngày hoặc chi nhánh để refresh lưới teetime.",
-      "Ô xanh mở form đăng ký, ô vàng cam mở chi tiết để book thêm hoặc thao tác vòng đời.",
-      "Cho đổi lịch, hủy, xóa cứng có audit log và thông báo khách.",
-    ],
-    screens: [
-      "Màn lưới Teetime: mỗi hàng 6 ô, header ngày + chi nhánh + nút Thiết lập.",
-      "Form Thiết lập dãy teetime, Form Đăng ký lịch chơi, Popup chi tiết booking.",
-      "Danh sách booking trong slot với trạng thái, đại diện HV và số khách.",
-    ],
-    features: [
-      "Load ~150 ô dưới 2 giây",
-      "Hoàn buổi khi hủy",
-      "Tái sử dụng form thêm HV",
-    ],
-  },
-  {
-    id: "line",
-    code: "M06",
-    title: "Golf Line Tập",
-    subtitle:
-      "Quản lý lane driving range, sơ đồ line, in vé lẻ, bán dịch vụ kèm và gia hạn giờ.",
-    audience: "Lễ tân · Admin",
-    Icon: Target,
-    tone: "moduleCyan",
-    metrics: ["30 line", "18 đang dùng", "12 còn trống"],
-    workflow: [
-      "Line là trạm tập cố định; mỗi line có trạng thái màu theo khả dụng.",
-      "Mở form In vé để chọn bảng giá, khách hàng, số khách và dịch vụ kèm.",
-      "Gia hạn giờ cập nhật booking line và sinh thu bổ sung khi cần.",
-    ],
-    screens: [
-      "Danh sách Line có phân trang, nút + Thêm mới, ô tìm kiếm và icon sửa.",
-      "Sơ đồ Line theo màu: trống, đang dùng, bảo trì, quá giờ.",
-      "Form thêm/sửa Line và form In vé lẻ + add-on.",
-    ],
-    features: [
-      "Quản lý trạng thái line",
-      "Dịch vụ bán kèm",
-      "In vé/QR tại quầy",
-    ],
-  },
-  {
-    id: "coach",
-    code: "M07",
-    title: "Lịch HLV",
-    subtitle:
-      "Calendar lịch tập 1-1 giữa HLV và học viên theo HLV × slot 15 phút.",
-    audience: "HLV · Lễ tân · Admin",
-    Icon: CalendarCheck,
-    tone: "moduleRose",
-    metrics: ["14 HLV", "96 slot", "28 đã tập"],
-    workflow: [
-      "Lọc theo chi nhánh, thời gian, HLV, trợ lý HLV và khách hàng.",
-      "Đăng ký lịch linh hoạt, lịch tập tháng hoặc lịch theo hội viên.",
-      "Đánh dấu Đã tập tự động trừ buổi và đẩy dữ liệu sang Hoa Hồng Sale.",
-    ],
-    screens: [
-      "Calendar HLV × giờ với panel filter trái.",
-      "Form đăng ký lịch linh hoạt, lịch tháng, lịch hội viên.",
-      "Modal chi tiết buổi tập, trạng thái tham gia và ghi chú tiến độ.",
-    ],
-    features: [
-      "Slot 15 phút",
-      "Trợ giảng HLV",
-      "Tính buổi đã dạy cho M11",
-    ],
-  },
-  {
-    id: "classes",
-    code: "M08",
-    title: "Lịch Lớp",
-    subtitle:
-      "Quản lý lớp học nhóm, lịch tuần, booking học viên, điểm danh và báo cáo buổi học.",
-    audience: "Giáo viên · Lễ tân · Admin",
-    Icon: CalendarDays,
-    tone: "modulePurple",
-    metrics: ["12 lớp", "86 học viên", "21 buổi/tuần"],
-    workflow: [
-      "Tạo lớp nhóm, cấu hình lịch học theo tuần và giới hạn sĩ số.",
-      "Booking kiểm tra HV có thuộc lớp và còn quyền tham gia hay không.",
-      "Giáo viên điểm danh, lễ tân in báo cáo buổi, tổng buổi dạy sang M11.",
-    ],
-    screens: [
-      "Danh sách lớp: header tím, 3 KPI, search và grid card lớp học.",
-      "Form thêm/sửa lớp, cấu hình lịch tuần từng ngày.",
-      "Weekly calendar hiển thị cả lịch lớp và booking đã phát sinh.",
-    ],
-    features: [
-      "Điểm danh buổi",
-      "In báo cáo lớp",
-      "Hoa hồng giáo viên",
-    ],
-  },
-  {
-    id: "checkin",
-    code: "M09",
-    title: "Check-in / Checkout",
-    subtitle:
-      "Quản lý realtime lượt vào/ra, thiết bị FaceID/vân tay/thẻ và cấu hình khu vực.",
-    audience: "Lễ tân · Admin",
-    Icon: ClipboardCheck,
-    tone: "moduleTeal",
-    metrics: ["98 lượt hôm nay", "6 thiết bị", "3 khu vực"],
-    workflow: [
-      "Thiết bị gửi sự kiện check-in, lễ tân xác nhận hoặc check-in thủ công.",
-      "Chi tiết lượt vào/ra tham chiếu customer_id, hợp đồng, khu vực và thiết bị.",
-      "Checkout ghi thời gian ra, cập nhật trạng thái và báo cáo check-in.",
-    ],
-    screens: [
-      "Tab Danh sách Check-in realtime với KPI dashboard.",
-      "Bảng check-in/checkout, bộ lọc và panel phải gồm tabs thông tin chi tiết.",
-      "Màn quản lý thiết bị và đăng ký FaceID/Vân tay/Thẻ.",
-    ],
-    features: [
-      "Realtime tại quầy",
-      "Thiết bị gắn khu vực",
-      "Badge sinh trắc học",
-    ],
-  },
-  {
-    id: "cashbook",
-    code: "M10",
-    title: "Sổ Quỹ",
-    subtitle:
-      "Quản lý thu chi tiền mặt tại chi nhánh, công nợ và phiếu tự sinh từ hợp đồng/vé lẻ.",
-    audience: "Kế toán · Lễ tân",
-    Icon: WalletCards,
-    tone: "moduleEmerald",
-    metrics: ["17.3M thu", "2.1M chi", "8 công nợ"],
-    workflow: [
-      "Phiếu thu có 2 loại: Công nợ và Phiếu thu khác.",
-      "Hợp đồng thanh toán, vé lẻ confirmed và hoa hồng chi trả tự sinh phiếu.",
-      "Modal chi tiết phiếu thu/chi có tabs chứng từ và lịch sử xử lý.",
-    ],
-    screens: [
-      "Tab Phiếu thu, Tab Phiếu chi, bộ lọc theo thời gian, đối tượng nộp, trạng thái.",
-      "Form thêm Phiếu thu Công nợ chọn KH + danh sách HĐ còn nợ.",
-      "Modal chi tiết phiếu và kết nối công nợ trong hồ sơ KH.",
-    ],
-    features: [
-      "Auto receipt từ M03/M04",
-      "Auto expense từ M11",
-      "Theo dõi công nợ realtime",
-    ],
-  },
-  {
-    id: "commission",
-    code: "M11",
-    title: "Hoa Hồng Sale",
-    subtitle:
-      "Cấu hình ma trận hoa hồng Sales và Coach, theo nhóm khách hàng, nhóm dịch vụ và số buổi dạy.",
-    audience: "Manager · Sales",
-    Icon: Percent,
-    tone: "modulePink",
-    metrics: ["24 sale", "14 coach", "38.5M chờ chi"],
-    workflow: [
-      "Manager cấu hình Ma trận Hoa hồng theo Nhóm KH × Loại HĐ.",
-      "Khi tạo HĐ mới, hệ thống snapshot tỷ lệ hoa hồng.",
-      "Lịch sử chi trả sinh phiếu chi sang Sổ Quỹ khi xác nhận.",
-    ],
-    screens: [
-      "Quản Lý Hoa Hồng với tab Ma trận Hoa hồng và Lịch sử chi trả.",
-      "KPI cố định theo tổng hoa hồng, đã chi, chờ chi, số nhân sự.",
-      "Màn quản lý nhóm, nhân viên sales, coach và chính sách chi trả.",
-    ],
-    features: [
-      "Ma trận 2 chiều",
-      "Snapshot tỷ lệ",
-      "Phiếu chi tự động M10",
-    ],
-  },
-  {
-    id: "settings",
-    code: "M12",
-    title: "Cài Đặt Hệ Thống",
-    subtitle:
-      "10 tab cấu hình lõi dành cho Admin: doanh nghiệp, mẫu in, phân quyền, chi nhánh, thiết bị và khuyến mãi.",
-    audience: "Admin",
-    Icon: Settings,
-    tone: "moduleSlate",
-    metrics: ["10 tab", "6 chi nhánh", "12 mẫu in"],
-    workflow: [
-      "Admin cập nhật cấu hình hệ thống dùng chung cho tất cả module.",
-      "Quản lý phân quyền theo module, mời Agent qua SSO và sơ đồ tổ chức.",
-      "Khôi phục dữ liệu soft delete trong thùng rác 30 ngày.",
-    ],
-    screens: [
-      "Header gradient Cài đặt hệ thống + thanh tab 10 mục.",
-      "Tabs: Thông tin DN, Mẫu in, HĐĐT, Phân quyền, Chi nhánh, Sinh mã, Thiết bị, VAT, KM, Chung.",
-      "Quản lý thiết bị check-in, mã tự sinh HV/CT/Vé và chính sách khuyến mãi.",
-    ],
-    features: [
-      "Role based access",
-      "Print templates",
-      "VAT & promotion rules",
-    ],
-  },
-  {
-    id: "reports",
-    code: "M14",
-    title: "Báo cáo",
-    subtitle:
-      "Tập hợp báo cáo vận hành, doanh thu, check-in, hợp đồng, vé lẻ và hoa hồng theo chi nhánh.",
-    audience: "Admin · Manager · Kế toán",
-    Icon: FileBarChart,
-    tone: "moduleGray",
-    metrics: ["Doanh thu", "Check-in", "Công nợ"],
-    workflow: [
-      "Người dùng chọn chi nhánh, thời gian, module nguồn và trạng thái.",
-      "Báo cáo tổng hợp dữ liệu từ HĐ, Vé lẻ, Teetime, Line, Check-in, Sổ Quỹ.",
-      "Xuất Excel/PDF theo quyền và ghi audit log thao tác export.",
-    ],
-    screens: [
-      "Dashboard báo cáo theo ngày/tuần/tháng/quý.",
-      "Báo cáo doanh thu, check-in, hợp đồng, vé lẻ, hoa hồng, công nợ.",
-      "Panel bộ lọc nâng cao và bảng chi tiết drill-down.",
-    ],
-    features: [
-      "Export Excel/PDF",
-      "Drill-down theo module",
-      "Theo dõi chi nhánh",
-    ],
-  },
+const customers = [
+  ["HV0001", "Nguyễn Văn A", "0901234567", "VIP", "Còn hạn", "12.5M"],
+  ["HV0002", "Trần Thị B", "0912345678", "Premium", "Sắp hết hạn", "0"],
+  ["HV0003", "Lê Văn C", "0987654321", "Standard", "Chưa đăng ký", "1.8M"],
+  ["HV0004", "Hoàng Thị E", "0934567890", "Vãng lai", "Hết hạn", "0"],
 ];
 
-const settingsTabs = [
-  "Thông tin DN",
-  "Mẫu in",
-  "HĐĐT",
-  "Phân quyền",
-  "Chi nhánh",
-  "Sinh mã",
-  "Thiết bị",
-  "VAT",
-  "Khuyến mãi",
-  "Cài đặt chung",
+const teetimeSlots = [
+  ["06:00", "Trống", "green"],
+  ["06:15", "Trống", "green"],
+  ["06:30", "Nguyễn Văn A · 4 khách", "orange"],
+  ["06:45", "Trống", "green"],
+  ["07:00", "Trần Thị B · 2 khách", "orange"],
+  ["07:15", "Trống", "green"],
+  ["07:30", "Trống", "green"],
+  ["07:45", "Lê Văn C · 6 khách", "orange"],
+  ["08:00", "Trống", "green"],
+  ["08:15", "Trống", "green"],
+  ["08:30", "Bảo trì sân", "gray"],
+  ["08:45", "Trống", "green"],
 ];
+
+const lineSlots = Array.from({ length: 18 }, (_, index) => {
+  const status = index % 6 === 0 ? "maintenance" : index % 3 === 0 ? "busy" : "free";
+  return {
+    name: `Line ${String(index + 1).padStart(2, "0")}`,
+    status,
+  };
+});
 
 export default function Home() {
+  const [active, setActive] = useState<ModuleKey>("dashboard");
+  const activeItem = useMemo(
+    () => navItems.find((item) => item.key === active) ?? navItems[0],
+    [active],
+  );
+
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <h1>Golf Manager</h1>
           <button type="button" aria-label="Thu gọn menu">
-            <Menu size={20} strokeWidth={2} />
+            <Menu size={20} />
           </button>
         </div>
 
         <nav className={styles.navigation} aria-label="Menu quản trị">
           <p className={styles.navGroup}>Vận hành</p>
-          {navigation.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.Icon;
-
             return (
-              <a
-                className={item.href === "#dashboard" ? styles.activeNav : undefined}
-                href={item.href}
-                key={item.label}
+              <button
+                className={active === item.key ? styles.activeNav : undefined}
+                key={item.key}
+                onClick={() => setActive(item.key)}
+                type="button"
               >
-                <Icon size={19} strokeWidth={2} />
+                <Icon size={19} />
                 {item.label}
-              </a>
+              </button>
             );
           })}
         </nav>
@@ -497,248 +146,515 @@ export default function Home() {
 
       <main className={styles.main}>
         <header className={styles.topbar}>
-          <p>Thứ Ba, 7 tháng 4, 2026</p>
+          <div>
+            <p>Thứ Ba, 7 tháng 4, 2026</p>
+            <strong>{activeItem.label}</strong>
+          </div>
 
           <div className={styles.userTools}>
             <button className={styles.branchButton} type="button">
-              <BriefcaseBusiness size={16} strokeWidth={1.8} />
+              <BriefcaseBusiness size={16} />
               NextVision
-              <ChevronDown size={16} strokeWidth={1.8} />
+              <ChevronDown size={16} />
             </button>
             <span className={styles.role}>Admin</span>
             <span className={styles.avatar}>A</span>
           </div>
         </header>
 
-        <section className={styles.dashboard} id="dashboard">
-          <div className={styles.titleBlock}>
-            <span className={styles.kicker}>SRS v3.0 · EPGA Golf Manager</span>
-            <h2>Dashboard</h2>
-            <p>Tổng quan hệ thống quản lý cơ sở thể thao theo chi nhánh đang chọn.</p>
-          </div>
+        <div className={styles.content}>
+          {active === "dashboard" && <Dashboard onOpen={setActive} />}
+          {active === "customers" && <CustomersScreen />}
+          {active === "pricing" && <PricingScreen />}
+          {active === "contracts" && <ContractsScreen />}
+          {active === "tickets" && <TicketsScreen />}
+          {active === "teetime" && <TeetimeScreen />}
+          {active === "line" && <LineScreen />}
+          {active === "coach" && <CoachScreen />}
+          {active === "classes" && <ClassesScreen />}
+          {active === "checkin" && <CheckinScreen />}
+          {active === "cashbook" && <CashbookScreen />}
+          {active === "commission" && <CommissionScreen />}
+          {active === "settings" && <SettingsScreen />}
+          {active === "reports" && <ReportsScreen />}
+        </div>
+      </main>
+    </div>
+  );
+}
 
-          <section className={styles.statsGrid} aria-label="Chỉ số tổng quan">
-            {stats.map((item) => {
-              const Icon = item.Icon;
+function Dashboard({ onOpen }: { onOpen: (key: ModuleKey) => void }) {
+  const dashboardStats: Array<{
+    label: string;
+    value: string;
+    trend: string;
+    Icon: LucideIcon;
+    tone: string;
+  }> = [
+    { label: "Tổng Đặt Chỗ Hôm Nay", value: "50", trend: "+12%", Icon: Calendar, tone: "blue" },
+    { label: "Khách Hàng Hoạt Động", value: "1,234", trend: "+8%", Icon: Users, tone: "green" },
+    { label: "Doanh Thu Hôm Nay", value: "17.3M VNĐ", trend: "+23%", Icon: DollarSign, tone: "amber" },
+    { label: "Tỷ Lệ Sử Dụng", value: "78%", trend: "+5%", Icon: TrendingUp, tone: "purple" },
+  ];
 
-              return (
-                <article className={styles.statCard} key={item.label}>
-                  <div>
-                    <p>{item.label}</p>
-                    <strong>{item.value}</strong>
-                    <span>{item.trend}</span>
-                  </div>
-                  <span className={`${styles.statIcon} ${styles[item.tone]}`}>
-                    <Icon size={24} strokeWidth={2} />
-                  </span>
-                </article>
-              );
-            })}
-          </section>
+  const dashboardFacilities: Array<{
+    name: string;
+    booked: string;
+    available: string;
+    revenue: string;
+    Icon: LucideIcon;
+  }> = [
+    { name: "Golf Teetime", booked: "32", available: "8", revenue: "12.5M VNĐ", Icon: Flag },
+    { name: "Golf Line Tập", booked: "18", available: "12", revenue: "4.8M VNĐ", Icon: Target },
+  ];
 
-          <section className={`${styles.card} ${styles.facilityCard}`}>
-            <div className={styles.cardHeading}>
+  return (
+    <Screen title="Dashboard" subtitle="Tổng quan hệ thống quản lý cơ sở thể thao">
+      <div className={styles.statsGrid}>
+        {dashboardStats.map(({ Icon, label, tone, trend, value }) => {
+          return (
+            <article className={styles.statCard} key={label}>
               <div>
-                <h3>Tổng Quan Cơ Sở</h3>
-                <p>Click vào card để đi sang màn chi tiết cơ sở tương ứng.</p>
+                <p>{label}</p>
+                <strong>{value}</strong>
+                <span>{trend}</span>
               </div>
-              <a href="#teetime">Xem lịch</a>
-            </div>
-            <div className={styles.facilityGrid}>
-              {facilities.map((facility) => {
-                const Icon = facility.Icon;
+              <span className={`${styles.statIcon} ${styles[tone]}`}>
+                <Icon size={24} />
+              </span>
+            </article>
+          );
+        })}
+      </div>
 
-                return (
-                  <article className={styles.facility} key={facility.name}>
-                    <div className={styles.facilityTitle}>
-                      <Icon size={20} strokeWidth={2} />
-                      <h4>{facility.name}</h4>
-                    </div>
-                    <dl>
-                      <div>
-                        <dt>Đã đặt:</dt>
-                        <dd>{facility.booked}</dd>
-                      </div>
-                      <div>
-                        <dt>Còn trống:</dt>
-                        <dd className={styles.positive}>{facility.available}</dd>
-                      </div>
-                      <div>
-                        <dt>Doanh thu:</dt>
-                        <dd>{facility.revenue}</dd>
-                      </div>
-                    </dl>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className={`${styles.card} ${styles.tableCard}`}>
-            <div className={styles.cardHeading}>
-              <div>
-                <h3>Đặt Chỗ Gần Đây</h3>
-                <p>5 booking mới nhất từ Teetime và Line Tập.</p>
-              </div>
-              <a href="#teetime">Xem tất cả</a>
-            </div>
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Mã</th>
-                    <th>Khách Hàng</th>
-                    <th>Cơ Sở</th>
-                    <th>Thời Gian</th>
-                    <th>Trạng Thái</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map(([code, customer, facility, time, status]) => (
-                    <tr key={code}>
-                      <td>{code}</td>
-                      <td>{customer}</td>
-                      <td>{facility}</td>
-                      <td>{time}</td>
-                      <td>
-                        <span
-                          className={
-                            status === "Đã Xác Nhận"
-                              ? styles.confirmed
-                              : styles.pending
-                          }
-                        >
-                          {status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-
-        <section className={styles.moduleOverview}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.kicker}>Đầy đủ module theo SRS</span>
-            <h2>Kiến trúc màn hình nghiệp vụ</h2>
-            <p>
-              Prototype bên dưới gom đủ module, flow, màn danh sách, form, dialog
-              và các kết nối liên module để kiểm tra nghiệp vụ trước khi tách route.
-            </p>
-          </div>
-
-          <div className={styles.moduleGrid}>
-            {modules.map((module) => {
-              const Icon = module.Icon;
-
-              return (
-                <a className={styles.moduleTile} href={`#${module.id}`} key={module.id}>
-                  <span className={`${styles.moduleIcon} ${styles[module.tone]}`}>
-                    <Icon size={22} strokeWidth={2} />
-                  </span>
-                  <small>{module.code}</small>
-                  <strong>{module.title}</strong>
-                  <p>{module.subtitle}</p>
-                </a>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className={styles.flowBoard}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.kicker}>End-to-end flow</span>
-            <h2>Luồng vận hành chính</h2>
-          </div>
-
-          <div className={styles.flowGrid}>
-            {[
-              ["01", "Khách hàng", "Tạo hồ sơ, sinh mã HV, lưu sinh trắc học."],
-              ["02", "Bán hàng", "Ký HĐ hoặc bán vé lẻ theo bảng giá active."],
-              ["03", "Thanh toán", "Tự sinh phiếu thu/chi và cập nhật công nợ."],
-              ["04", "Sử dụng dịch vụ", "Book teetime, line tập, HLV, lớp nhóm, check-in."],
-              ["05", "Đối soát", "Hoa hồng, báo cáo doanh thu, check-in và công nợ."],
-            ].map(([step, title, description]) => (
-              <article className={styles.flowStep} key={step}>
-                <span>{step}</span>
-                <h3>{title}</h3>
-                <p>{description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className={styles.moduleSections}>
-          {modules.map((module) => {
-            const Icon = module.Icon;
-
+      <section className={styles.card}>
+        <CardTitle title="Tổng Quan Cơ Sở" action="Mở lịch sân" onClick={() => onOpen("teetime")} />
+        <div className={styles.facilityGrid}>
+          {dashboardFacilities.map(({ Icon, available, booked, name, revenue }) => {
             return (
-              <article className={styles.moduleSection} id={module.id} key={module.id}>
-                <div className={styles.moduleHeader}>
-                  <span className={`${styles.moduleIcon} ${styles[module.tone]}`}>
-                    <Icon size={24} strokeWidth={2} />
-                  </span>
-                  <div>
-                    <small>{module.code} · {module.audience}</small>
-                    <h2>{module.title}</h2>
-                    <p>{module.subtitle}</p>
-                  </div>
+              <article className={styles.facility} key={name}>
+                <div className={styles.facilityTitle}>
+                  <Icon size={20} />
+                  <h4>{name}</h4>
                 </div>
-
-                <div className={styles.metricRow}>
-                  {module.metrics.map((metric) => (
-                    <span key={metric}>{metric}</span>
-                  ))}
-                </div>
-
-                <div className={styles.detailGrid}>
-                  <div className={styles.detailPanel}>
-                    <h3>Flow nghiệp vụ</h3>
-                    <ol>
-                      {module.workflow.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ol>
-                  </div>
-
-                  <div className={styles.detailPanel}>
-                    <h3>Màn hình / Form / Dialog</h3>
-                    <ul>
-                      {module.screens.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className={styles.previewPanel}>
-                    <h3>Tính năng trọng tâm</h3>
-                    <div className={styles.featureList}>
-                      {module.features.map((item) => (
-                        <span key={item}>{item}</span>
-                      ))}
-                    </div>
-                    {module.id === "settings" ? (
-                      <div className={styles.settingsTabs}>
-                        {settingsTabs.map((tab) => (
-                          <span key={tab}>{tab}</span>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className={styles.mockScreen}>
-                        <div />
-                        <div />
-                        <div />
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <dl>
+                  <Row label="Đã đặt:" value={booked} />
+                  <Row label="Còn trống:" value={available} positive />
+                  <Row label="Doanh thu:" value={revenue} />
+                </dl>
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section className={styles.card}>
+        <CardTitle title="Đặt Chỗ Gần Đây" action="Xem tất cả" onClick={() => onOpen("teetime")} />
+        <BookingTable />
+      </section>
+    </Screen>
+  );
+}
+
+function CustomersScreen() {
+  return (
+    <Screen title="Khách Hàng" subtitle="Hồ sơ golfer, sinh trắc học, hợp đồng, giao dịch và kết quả tập luyện">
+      <Toolbar primary="+ Thêm mới khách hàng" filters={["Tất cả", "Còn hạn", "Hết hạn", "Sắp hết hạn", "Chưa đăng ký"]} />
+      <section className={styles.card}>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Mã HV</th>
+                <th>Họ và tên</th>
+                <th>Số điện thoại</th>
+                <th>Nhóm KH</th>
+                <th>Trạng thái</th>
+                <th>Công nợ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {customers.map(([code, name, phone, group, status, debt]) => (
+                <tr key={code}>
+                  <td className={styles.linkCell}>{code}</td>
+                  <td>{name}</td>
+                  <td>{phone}</td>
+                  <td>{group}</td>
+                  <td><StatusBadge status={status} /></td>
+                  <td>{debt}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <DetailLayout
+        title="Modal chi tiết khách hàng"
+        tabs={["Tổng quan", "Hợp đồng", "Giao dịch", "Check-in", "Tập luyện", "Inbody", "Meal Plan", "Trợ giảng"]}
+        fields={["Mã HV tự sinh HV####", "SĐT không trùng trong chi nhánh", "FaceID / Vân tay / Thẻ", "Soft delete 30 ngày"]}
+      />
+    </Screen>
+  );
+}
+
+function PricingScreen() {
+  return (
+    <Screen title="Bảng Giá" subtitle="Khu vực, Khung giờ, Bảng giá hợp đồng và Bảng giá vé lẻ">
+      <Toolbar primary="Tạo Bảng Giá Mới" filters={["Bảng giá hợp đồng", "Bảng giá vé lẻ", "Khu vực", "Khung giờ"]} />
+      <div className={styles.twoColumn}>
+        <section className={styles.card}>
+          <CardTitle title="Bảng giá hợp đồng" action="Nhập Excel" />
+          <MiniTable rows={[["Gói Premium", "Teetime", "Active"], ["Gói Standard", "Line Tập", "Nháp"], ["Gói Family", "Combo", "Active"]]} />
         </section>
-      </main>
+        <section className={styles.card}>
+          <CardTitle title="Thiết lập phụ thuộc" action="Quản lý" />
+          <Process steps={["Khu vực", "Khung giờ", "Bảng giá", "Kích hoạt"]} />
+        </section>
+      </div>
+    </Screen>
+  );
+}
+
+function ContractsScreen() {
+  return (
+    <Screen title="Hợp Đồng" subtitle="Quản lý vòng đời hợp đồng hội viên: ký mới, gia hạn, nâng cấp, bảo lưu, chuyển nhượng">
+      <Toolbar primary="+ Tạo hợp đồng" filters={["Hợp đồng", "Gia hạn", "Nâng cấp", "Bảo lưu", "Chuyển nhượng", "Chuyển đổi HĐ"]} />
+      <section className={styles.card}>
+        <MiniTable rows={[["CT001", "Nguyễn Văn A", "Active"], ["CT002", "Trần Thị B", "Pending"], ["CT003", "Lê Văn C", "Expired"]]} />
+      </section>
+      <DetailLayout title="Form tạo hợp đồng 6 section" tabs={["Khách hàng", "Gói dịch vụ", "Thanh toán", "Hoa hồng", "Mẫu in", "Timeline"]} fields={["Chọn KH hoặc tạo mới", "Snapshot giá từ M02", "Sinh phiếu thu M10", "Audit contract_history"]} />
+    </Screen>
+  );
+}
+
+function TicketsScreen() {
+  return (
+    <Screen title="Vé Lẻ" subtitle="Bán vé đơn, vé nhóm, voucher và dịch vụ đi kèm">
+      <Toolbar primary="+ Tạo vé mới" filters={["Danh sách vé", "Vouchers", "Dịch vụ đi kèm", "Vé lẻ", "Vé nhóm"]} />
+      <div className={styles.statsGrid}>
+        <SimpleMetric label="Vé hôm nay" value="72" />
+        <SimpleMetric label="Doanh thu" value="8.6M" />
+        <SimpleMetric label="Voucher active" value="9" />
+        <SimpleMetric label="Add-ons" value="5" />
+      </div>
+      <section className={styles.card}>
+        <MiniTable rows={[["VL001", "Khách vãng lai", "Confirmed"], ["VL002", "Nhóm 4 người", "Pending"], ["VC001", "Voucher 20%", "Active"]]} />
+      </section>
+    </Screen>
+  );
+}
+
+function TeetimeScreen() {
+  return (
+    <Screen title="Golf Teetime" subtitle="Lưới khung giờ phát bóng theo ngày và chi nhánh">
+      <Toolbar primary="Thiết lập teetime" filters={["Hôm nay", "NextVision", "Tất cả trạng thái"]} />
+      <section className={styles.card}>
+        <div className={styles.slotGrid}>
+          {teetimeSlots.map(([time, label, tone]) => (
+            <button className={`${styles.slot} ${styles[String(tone)]}`} key={time} type="button">
+              <strong>{time}</strong>
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+      <DetailLayout title="Form đăng ký lịch chơi" tabs={["Khách đại diện", "Số khách", "Caddie", "Thanh toán", "Ghi chú"]} fields={["Ô xanh mở đăng ký", "Ô vàng mở chi tiết booking", "Đổi lịch / Hủy / Xóa", "Hoàn buổi vào HĐ khi hủy"]} />
+    </Screen>
+  );
+}
+
+function LineScreen() {
+  return (
+    <Screen title="Golf Line Tập" subtitle="Danh sách line, sơ đồ line, in vé và dịch vụ bán kèm">
+      <Toolbar primary="+ Thêm mới Line" filters={["Danh sách Line", "Sơ đồ Line", "In vé lẻ", "Gia hạn giờ"]} />
+      <section className={styles.card}>
+        <div className={styles.lineGrid}>
+          {lineSlots.map((line) => (
+            <article className={`${styles.lineBox} ${styles[line.status]}`} key={line.name}>
+              <strong>{line.name}</strong>
+              <span>{line.status === "free" ? "Còn trống" : line.status === "busy" ? "Đang dùng" : "Bảo trì"}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+    </Screen>
+  );
+}
+
+function CoachScreen() {
+  return (
+    <Screen title="Lịch HLV" subtitle="Calendar HLV × slot 15 phút cho buổi tập 1-1">
+      <Toolbar primary="+ Đăng ký lịch tập" filters={["Chi nhánh", "HLV", "Trợ lý HLV", "Khách hàng", "Cấu hình booking"]} />
+      <CalendarMatrix columns={["HLV Minh", "HLV An", "HLV Khoa", "HLV Trang"]} rows={["06:00", "06:15", "06:30", "06:45", "07:00", "07:15"]} />
+    </Screen>
+  );
+}
+
+function ClassesScreen() {
+  return (
+    <Screen title="Lịch Lớp" subtitle="Lớp học nhóm theo lịch tuần, booking và điểm danh">
+      <Toolbar primary="+ Thêm lớp mới" filters={["Danh sách lớp", "Lịch tuần", "Điểm danh"]} />
+      <div className={styles.cardGrid}>
+        {["Beginner Kids", "Advanced Swing", "Weekend Group"].map((name) => (
+          <article className={styles.classCard} key={name}>
+            <strong>{name}</strong>
+            <span>12 học viên · 3 buổi/tuần</span>
+            <p>Thứ 2, 4, 6 · 17:30 - 19:00</p>
+          </article>
+        ))}
+      </div>
+    </Screen>
+  );
+}
+
+function CheckinScreen() {
+  return (
+    <Screen title="Check-in / Checkout" subtitle="Realtime lượt vào/ra, thiết bị và sinh trắc học">
+      <Toolbar primary="Check-in thủ công" filters={["Danh sách Check-in", "Thiết bị", "FaceID", "Vân tay", "Thẻ"]} />
+      <div className={styles.twoColumn}>
+        <section className={styles.card}>
+          <MiniTable rows={[["HV0001", "07:12", "Đang trong sân"], ["HV0002", "08:05", "Đã checkout"], ["HV0003", "08:20", "Chờ xác nhận"]]} />
+        </section>
+        <DetailLayout title="Panel chi tiết lượt vào/ra" tabs={["Khách hàng", "Hợp đồng", "Thiết bị", "Khu vực"]} fields={["FaceID matched", "Thiết bị cổng 01", "Khu vực Teetime", "Checkout 10:35"]} compact />
+      </div>
+    </Screen>
+  );
+}
+
+function CashbookScreen() {
+  return (
+    <Screen title="Sổ Quỹ" subtitle="Phiếu thu, phiếu chi, công nợ và chứng từ tự sinh">
+      <Toolbar primary="+ Phiếu thu" filters={["Phiếu thu", "Phiếu chi", "Công nợ", "Hôm nay", "Đã hạch toán"]} />
+      <div className={styles.statsGrid}>
+        <SimpleMetric label="Tổng thu" value="17.3M" />
+        <SimpleMetric label="Tổng chi" value="2.1M" />
+        <SimpleMetric label="Công nợ" value="8.4M" />
+        <SimpleMetric label="Phiếu tự sinh" value="23" />
+      </div>
+      <section className={styles.card}>
+        <MiniTable rows={[["PT001", "Hợp đồng CT001", "12.5M"], ["PT002", "Vé lẻ VL001", "650K"], ["PC001", "Hoa hồng HLV", "1.2M"]]} />
+      </section>
+    </Screen>
+  );
+}
+
+function CommissionScreen() {
+  return (
+    <Screen title="Hoa Hồng Sale" subtitle="Ma trận hoa hồng Sales và Coach, lịch sử chi trả">
+      <Toolbar primary="+ Cấu hình hoa hồng" filters={["Ma trận Hoa hồng", "Lịch sử chi trả", "Sales", "Coach"]} />
+      <section className={styles.card}>
+        <div className={styles.matrix}>
+          {["VIP × Teetime 8%", "Premium × Line 6%", "Coach × Buổi tập 120K", "Sale × HĐ mới 10%"].map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      </section>
+    </Screen>
+  );
+}
+
+function SettingsScreen() {
+  return (
+    <Screen title="Cài Đặt Hệ Thống" subtitle="10 tab cấu hình lõi dành cho Admin">
+      <Toolbar primary="Lưu cấu hình" filters={["Thông tin DN", "Mẫu in", "HĐĐT", "Phân quyền", "Chi nhánh", "Sinh mã", "Thiết bị", "VAT", "Khuyến mãi", "Chung"]} />
+      <DetailLayout title="Thông tin doanh nghiệp" tabs={["Hồ sơ", "Mẫu in", "Phân quyền", "Thiết bị"]} fields={["Tên doanh nghiệp", "Mã số thuế", "Chi nhánh mặc định", "Múi giờ GMT+7"]} />
+    </Screen>
+  );
+}
+
+function ReportsScreen() {
+  return (
+    <Screen title="Báo cáo" subtitle="Doanh thu, check-in, hợp đồng, vé lẻ, hoa hồng và công nợ">
+      <Toolbar primary="Xuất báo cáo" filters={["Doanh thu", "Check-in", "Hợp đồng", "Vé lẻ", "Hoa hồng", "Công nợ"]} />
+      <div className={styles.reportGrid}>
+        <SimpleMetric label="Doanh thu tháng" value="486M" />
+        <SimpleMetric label="Lượt check-in" value="2,842" />
+        <SimpleMetric label="Hợp đồng mới" value="64" />
+      </div>
+      <section className={styles.card}>
+        <div className={styles.chartBars}>
+          {[40, 64, 48, 72, 58, 84, 68, 92].map((height, index) => (
+            <span key={index} style={{ height: `${height}%` }} />
+          ))}
+        </div>
+      </section>
+    </Screen>
+  );
+}
+
+function Screen({ children, subtitle, title }: { children: React.ReactNode; subtitle: string; title: string }) {
+  return (
+    <section className={styles.screen}>
+      <div className={styles.titleBlock}>
+        <h2>{title}</h2>
+        <p>{subtitle}</p>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Toolbar({ filters, primary }: { filters: string[]; primary: string }) {
+  return (
+    <div className={styles.toolbar}>
+      <div className={styles.searchBox}>
+        <Search size={18} />
+        <span>Tìm kiếm theo mã, tên, SĐT...</span>
+      </div>
+      <div className={styles.chips}>
+        {filters.map((filter, index) => (
+          <button className={index === 0 ? styles.activeChip : undefined} key={filter} type="button">
+            {filter}
+          </button>
+        ))}
+      </div>
+      <button className={styles.iconButton} type="button"><Filter size={18} /></button>
+      <button className={styles.iconButton} type="button"><Upload size={18} /></button>
+      <button className={styles.iconButton} type="button"><Download size={18} /></button>
+      <button className={styles.primaryButton} type="button"><Plus size={18} />{primary}</button>
     </div>
+  );
+}
+
+function CardTitle({ action, onClick, title }: { action?: string; onClick?: () => void; title: string }) {
+  return (
+    <div className={styles.cardHeading}>
+      <h3>{title}</h3>
+      {action ? <button onClick={onClick} type="button">{action}</button> : null}
+    </div>
+  );
+}
+
+function Row({ label, positive, value }: { label: string; positive?: boolean; value: React.ReactNode }) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd className={positive ? styles.positive : undefined}>{value}</dd>
+    </div>
+  );
+}
+
+function BookingTable() {
+  return (
+    <div className={styles.tableWrap}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Mã</th>
+            <th>Khách Hàng</th>
+            <th>Cơ Sở</th>
+            <th>Thời Gian</th>
+            <th>Trạng Thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          {recentBookings.map(([code, customer, facility, time, status]) => (
+            <tr key={code}>
+              <td className={styles.linkCell}>{code}</td>
+              <td>{customer}</td>
+              <td>{facility}</td>
+              <td>{time}</td>
+              <td><StatusBadge status={status} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const className =
+    status.includes("Xác Nhận") || status.includes("Còn hạn") || status.includes("Active")
+      ? styles.confirmed
+      : status.includes("Chờ") || status.includes("Sắp")
+        ? styles.pending
+        : status.includes("Hết")
+          ? styles.danger
+          : styles.neutral;
+  return <span className={className}>{status}</span>;
+}
+
+function SimpleMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <article className={styles.simpleMetric}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </article>
+  );
+}
+
+function MiniTable({ rows }: { rows: string[][] }) {
+  return (
+    <div className={styles.miniRows}>
+      {rows.map((row) => (
+        <div key={row.join("-")}>
+          {row.map((cell, index) => (
+            <span key={cell} className={index === 0 ? styles.linkCell : undefined}>{cell}</span>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DetailLayout({ compact, fields, tabs, title }: { compact?: boolean; fields: string[]; tabs: string[]; title: string }) {
+  return (
+    <section className={`${styles.detailLayout} ${compact ? styles.compactDetail : ""}`}>
+      <div className={styles.cardHeading}>
+        <h3>{title}</h3>
+      </div>
+      <div className={styles.tabs}>
+        {tabs.map((tab, index) => (
+          <button className={index === 0 ? styles.activeChip : undefined} key={tab} type="button">{tab}</button>
+        ))}
+      </div>
+      <div className={styles.formPreview}>
+        {fields.map((field) => (
+          <label key={field}>
+            <span>{field}</span>
+            <input readOnly value="Dữ liệu mẫu theo SRS" />
+          </label>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Process({ steps }: { steps: string[] }) {
+  return (
+    <div className={styles.process}>
+      {steps.map((step, index) => (
+        <article key={step}>
+          <span>{index + 1}</span>
+          <strong>{step}</strong>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function CalendarMatrix({ columns, rows }: { columns: string[]; rows: string[] }) {
+  return (
+    <section className={styles.card}>
+      <div className={styles.calendarMatrix}>
+        <span />
+        {columns.map((column) => <strong key={column}>{column}</strong>)}
+        {rows.map((row, rowIndex) => (
+          <>
+            <time key={`${row}-time`}>{row}</time>
+            {columns.map((column, columnIndex) => (
+              <button
+                className={(rowIndex + columnIndex) % 3 === 0 ? styles.bookedCell : styles.emptyCell}
+                key={`${row}-${column}`}
+                type="button"
+              >
+                {(rowIndex + columnIndex) % 3 === 0 ? "Đã đặt" : "Trống"}
+              </button>
+            ))}
+          </>
+        ))}
+      </div>
+    </section>
   );
 }
