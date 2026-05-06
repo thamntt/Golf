@@ -78,7 +78,7 @@ export default function CustomersScreen() {
   const [addOpen, setAddOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailTab, setDetailTab] = useState("Thông tin cơ bản");
-  const [nestedModal, setNestedModal] = useState<"group" | "companion" | null>(null);
+  const [nestedModal, setNestedModal] = useState<"group" | "source" | "companion" | null>(null);
   const [rows, setRows] = useState(customerRows);
   const [query, setQuery] = useState("");
   const [quickFilter, setQuickFilter] = useState("Tất cả");
@@ -149,11 +149,56 @@ export default function CustomersScreen() {
             <button className={styles.squareButton} onClick={() => setSettingsOpen((value) => !value)} type="button">
               <Settings size={18} />
             </button>
-            <button className={styles.greenButton} onClick={() => setExportOpen((value) => !value)} type="button">
-              <Download size={18} />
-              Nhập xuất
-              <ChevronDown size={16} />
-            </button>
+            <div className={styles.exportContainer}>
+              <button
+                className={`${styles.greenButton} ${exportOpen ? styles.exportButtonActive : ""}`}
+                onClick={() => setExportOpen((value) => !value)}
+                type="button"
+              >
+                <Download size={18} />
+                Nhập xuất
+                <ChevronDown size={16} />
+              </button>
+              {exportOpen ? (
+                <>
+                  <button
+                    aria-label="Đóng menu nhập xuất"
+                    className={styles.popoverBackdrop}
+                    onClick={() => setExportOpen(false)}
+                    type="button"
+                  />
+                  <section className={styles.exportMenu}>
+                    <button
+                      onClick={() => {
+                        alert("Đang chuẩn bị file mẫu import khách hàng (.xlsx)...");
+                        setExportOpen(false);
+                      }}
+                      type="button"
+                    >
+                      <Upload size={16} /> Nhập Excel
+                    </button>
+                    <button
+                      onClick={() => {
+                        alert(`Đang xuất ${filteredRows.length} hội viên ra file .xlsx...`);
+                        setExportOpen(false);
+                      }}
+                      type="button"
+                    >
+                      <Download size={16} /> Xuất Excel
+                    </button>
+                    <button
+                      onClick={() => {
+                        alert("Đang tải file mẫu import_khach_hang.xlsx...");
+                        setExportOpen(false);
+                      }}
+                      type="button"
+                    >
+                      Tải file mẫu import
+                    </button>
+                  </section>
+                </>
+              ) : null}
+            </div>
           </div>
         </div>
 
@@ -252,14 +297,6 @@ export default function CustomersScreen() {
           </section>
         ) : null}
 
-        {exportOpen ? (
-          <section className={styles.exportMenu}>
-            <button type="button"><Upload size={16} /> Nhập Excel</button>
-            <button type="button"><Download size={16} /> Xuất Excel</button>
-            <button type="button">Tải file mẫu import</button>
-          </section>
-        ) : null}
-
         <section className={styles.memberTableCard}>
           <div className={styles.memberTableWrap}>
             <table className={styles.memberTable}>
@@ -348,6 +385,7 @@ export default function CustomersScreen() {
       ) : null}
 
       {nestedModal === "group" ? <AddGroupModal onClose={() => setNestedModal(null)} /> : null}
+      {nestedModal === "source" ? <AddSourceModal onClose={() => setNestedModal(null)} /> : null}
       {nestedModal === "companion" ? <AddCompanionModal onClose={() => setNestedModal(null)} /> : null}
 
       {detailOpen ? (
@@ -367,10 +405,10 @@ function AddCustomerModal({
   onClose,
   onOpenNested,
 }: {
-  nestedModal: "group" | "companion" | null;
+  nestedModal: "group" | "source" | "companion" | null;
   onCreate: (customer: Customer) => void;
   onClose: () => void;
-  onOpenNested: (modal: "group" | "companion") => void;
+  onOpenNested: (modal: "group" | "source" | "companion") => void;
 }) {
   const [error, setError] = useState("");
   const [showExtra, setShowExtra] = useState(true);
@@ -457,6 +495,7 @@ function AddCustomerModal({
             action="Thêm mới"
             label="Nguồn khách hàng"
             name="customerSource"
+            onAction={() => onOpenNested("source")}
             options={["Chọn nguồn", "Walk-in", "Facebook", "Google", "Giới thiệu", "CN khác"]}
           />
 
@@ -558,12 +597,34 @@ function AddGroupModal({ onClose }: { onClose: () => void }) {
         </header>
         <div className={styles.smallModalBody}>
           <FormField action="Tự động" required label="Mã nhóm" value="NG001" />
-          <FormField required label="Tên nhóm" placeholder="Nhập tên nhóm khách hàng" />
-          <FormField label="Mô tả" placeholder="Nhập mô tả" />
+          <FormField required label="Tên nhóm" placeholder="VD: VIP, Premium, Doanh nghiệp" />
+          <FormField label="Mô tả" placeholder="Nhập mô tả ngắn (tùy chọn)" />
         </div>
         <footer>
           <button onClick={onClose} type="button">Hủy bỏ</button>
-          <button className={styles.blueButton} type="button">Thêm</button>
+          <button className={styles.blueButton} onClick={onClose} type="button">Thêm</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function AddSourceModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className={styles.nestedOverlay}>
+      <section className={styles.smallModal}>
+        <header>
+          <h2>Thêm nguồn khách hàng</h2>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.smallModalBody}>
+          <FormField action="Tự động" required label="Mã nguồn" value="NS001" />
+          <FormField required label="Tên nguồn" placeholder="VD: Facebook Ads, Google Ads, Walk-in" />
+          <FormField label="Mô tả" placeholder="Mô tả chiến dịch / chi tiết nguồn" />
+        </div>
+        <footer>
+          <button onClick={onClose} type="button">Hủy bỏ</button>
+          <button className={styles.blueButton} onClick={onClose} type="button">Thêm</button>
         </footer>
       </section>
     </div>

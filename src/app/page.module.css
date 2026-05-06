@@ -1069,30 +1069,60 @@
   align-items: center;
 }
 
+.exportContainer {
+  position: relative;
+}
+
+.exportButtonActive {
+  background: #068157 !important;
+  box-shadow: 0 0 0 3px rgba(7, 155, 103, 0.18);
+}
+
+.popoverBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+}
+
 .exportMenu {
-  width: 220px;
-  justify-self: end;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  width: 240px;
   display: grid;
-  gap: 8px;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid #d9dee7;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
 }
 
 .exportMenu button {
-  min-height: 34px;
+  min-height: 38px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   border: 0;
   border-radius: 8px;
-  padding: 0 10px;
+  padding: 0 12px;
   background: transparent;
   color: #344054;
   cursor: pointer;
   font: inherit;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
 }
 
 .exportMenu button:hover {
   background: #f2f4f7;
+  color: #175cff;
 }
 
 .blueButton,
