@@ -33,6 +33,47 @@ import {
 import { customerRows } from "../_shared/data";
 import type { Customer } from "../_shared/types";
 
+type AdvFilter = {
+  expiry: string;
+  birth: string;
+  registerDate: string;
+  gender: string;
+  customerGroup: string;
+  status: string;
+  biometric: string;
+  assignee: string;
+};
+
+const DEFAULT_ADV_FILTER: AdvFilter = {
+  expiry: "Toàn thời gian",
+  birth: "Toàn thời gian",
+  registerDate: "Toàn thời gian",
+  gender: "Tất cả",
+  customerGroup: "Tất cả",
+  status: "Tất cả",
+  biometric: "Tất cả",
+  assignee: "Tất cả",
+};
+
+const ALL_COLUMNS: { id: string; label: string }[] = [
+  { id: "code", label: "Mã HV" },
+  { id: "name", label: "Họ và tên" },
+  { id: "phone", label: "Số điện thoại" },
+  { id: "email", label: "Email" },
+  { id: "gender", label: "Giới tính" },
+  { id: "birth", label: "Ngày sinh" },
+  { id: "biometric", label: "Sinh trắc học" },
+  { id: "status", label: "Trạng thái" },
+  { id: "cards", label: "Thẻ" },
+  { id: "customerGroup", label: "Nhóm KH" },
+  { id: "source", label: "Nguồn KH" },
+  { id: "registerDate", label: "Ngày đăng ký" },
+  { id: "endDate", label: "Ngày hết hạn" },
+  { id: "createdDate", label: "Ngày tạo" },
+  { id: "creator", label: "Người tạo" },
+  { id: "debt", label: "Công nợ" },
+];
+
 export default function CustomersScreen() {
   const [addOpen, setAddOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -44,27 +85,44 @@ export default function CustomersScreen() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [activeAdvancedFilter, setActiveAdvancedFilter] = useState<string | null>(null);
+  const [advFilter, setAdvFilter] = useState<AdvFilter>(DEFAULT_ADV_FILTER);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(ALL_COLUMNS.map((c) => c.id));
 
   const quickFilters = ["Tất cả", "Còn hạn", "Hết hạn", "Sắp hết hạn", "Chưa đăng ký"];
+
+  const setAdvField = (key: keyof AdvFilter, value: string) =>
+    setAdvFilter((current) => ({ ...current, [key]: value }));
+
+  const isVisible = (id: string) => visibleColumns.includes(id);
+  const toggleColumn = (id: string) =>
+    setVisibleColumns((current) =>
+      current.includes(id) ? current.filter((c) => c !== id) : [...current, id]
+    );
+
   const filteredRows = rows.filter((customer) => {
     const normalizedQuery = query.trim().toLowerCase();
-    const matchesQuery = normalizedQuery
-      ? [customer.code, customer.name, customer.phone, customer.email, customer.creator]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalizedQuery)
-      : true;
-    const matchesQuickFilter = quickFilter === "Tất cả" ? true : customer.status === quickFilter;
-    const matchesAdvancedFilter = activeAdvancedFilter ? customer.status === activeAdvancedFilter : true;
-    return matchesQuery && matchesQuickFilter && matchesAdvancedFilter;
+    if (normalizedQuery) {
+      const haystack = [customer.code, customer.name, customer.phone, customer.email, customer.creator]
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(normalizedQuery)) return false;
+    }
+    if (quickFilter !== "Tất cả" && customer.status !== quickFilter) return false;
+    if (advFilter.gender !== "Tất cả" && customer.gender !== advFilter.gender) return false;
+    if (advFilter.status !== "Tất cả" && customer.status !== advFilter.status) return false;
+    if (advFilter.assignee !== "Tất cả" && customer.creator !== advFilter.assignee) return false;
+    return true;
   });
 
   const handleCreateCustomer = (customer: Customer) => {
     setRows((current) => [customer, ...current]);
     setQuickFilter("Tất cả");
-    setActiveAdvancedFilter(null);
+    setAdvFilter(DEFAULT_ADV_FILTER);
   };
+
+  const activeAdvCount = (Object.keys(advFilter) as Array<keyof AdvFilter>).filter(
+    (key) => advFilter[key] !== DEFAULT_ADV_FILTER[key]
+  ).length;
 
   return (
     <>
@@ -114,27 +172,59 @@ export default function CustomersScreen() {
 
         {filterOpen ? (
           <section className={styles.advancedPanel}>
-            <h3>Bộ lọc nâng cao</h3>
+            <h3>Bộ lọc nâng cao{activeAdvCount > 0 ? <span className={styles.advCountBadge}>{activeAdvCount} đang áp dụng</span> : null}</h3>
             <div className={styles.advancedGrid}>
-              <label>Ngày hết hạn<select><option>Toàn thời gian</option><option>Lựa chọn khác</option></select></label>
-              <label>Ngày sinh<select><option>Toàn thời gian</option><option>Trong tháng này</option></select></label>
-              <label>Ngày đăng ký<select><option>30 ngày gần đây</option><option>Quý này</option></select></label>
-              <label>Giới tính<select><option>Tất cả</option><option>Nam</option><option>Nữ</option></select></label>
-              <label>Nhóm khách hàng<select><option>Tất cả</option><option>VIP</option><option>Premium</option><option>Standard</option></select></label>
               <label>
-                Trạng thái
-                <select onChange={(event) => setActiveAdvancedFilter(event.target.value || null)} value={activeAdvancedFilter ?? ""}>
-                  <option value="">Tất cả</option>
-                  <option>Còn hạn</option>
-                  <option>Hết hạn</option>
-                  <option>Chưa đăng ký</option>
+                Ngày hết hạn
+                <select className={styles.selectInput} onChange={(e) => setAdvField("expiry", e.target.value)} value={advFilter.expiry}>
+                  {["Toàn thời gian", "30 ngày tới", "Đã hết hạn", "Lựa chọn khác"].map((o) => <option key={o}>{o}</option>)}
                 </select>
               </label>
-              <label>Sinh trắc học<select><option>Có</option><option>Chưa</option><option>Face</option><option>Vân tay</option><option>Thẻ</option></select></label>
-              <label>Nhân viên phụ trách<select><option>Tất cả</option><option>Admin</option><option>Nguyễn Văn Thành</option><option>Lê Thị Mai</option></select></label>
+              <label>
+                Ngày sinh
+                <select className={styles.selectInput} onChange={(e) => setAdvField("birth", e.target.value)} value={advFilter.birth}>
+                  {["Toàn thời gian", "Trong tháng này", "Trong tuần này"].map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </label>
+              <label>
+                Ngày đăng ký
+                <select className={styles.selectInput} onChange={(e) => setAdvField("registerDate", e.target.value)} value={advFilter.registerDate}>
+                  {["Toàn thời gian", "30 ngày gần đây", "Quý này", "Năm nay"].map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </label>
+              <label>
+                Giới tính
+                <select className={styles.selectInput} onChange={(e) => setAdvField("gender", e.target.value)} value={advFilter.gender}>
+                  {["Tất cả", "Nam", "Nữ"].map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </label>
+              <label>
+                Nhóm khách hàng
+                <select className={styles.selectInput} onChange={(e) => setAdvField("customerGroup", e.target.value)} value={advFilter.customerGroup}>
+                  {["Tất cả", "VIP", "Premium", "Standard", "Khách vãng lai"].map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </label>
+              <label>
+                Trạng thái
+                <select className={styles.selectInput} onChange={(e) => setAdvField("status", e.target.value)} value={advFilter.status}>
+                  {["Tất cả", "Còn hạn", "Hết hạn", "Sắp hết hạn", "Chưa đăng ký"].map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </label>
+              <label>
+                Sinh trắc học
+                <select className={styles.selectInput} onChange={(e) => setAdvField("biometric", e.target.value)} value={advFilter.biometric}>
+                  {["Tất cả", "Có", "Chưa", "Face", "Vân tay", "Thẻ"].map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </label>
+              <label>
+                Nhân viên phụ trách
+                <select className={styles.selectInput} onChange={(e) => setAdvField("assignee", e.target.value)} value={advFilter.assignee}>
+                  {["Tất cả", "Admin", "Nguyễn Văn Thành", "Lê Thị Mai", "Trần Minh Hoàng"].map((o) => <option key={o}>{o}</option>)}
+                </select>
+              </label>
             </div>
             <footer>
-              <button onClick={() => { setActiveAdvancedFilter(null); setQuickFilter("Tất cả"); }} type="button">Xóa bộ lọc</button>
+              <button onClick={() => { setAdvFilter(DEFAULT_ADV_FILTER); setQuickFilter("Tất cả"); }} type="button">Xóa bộ lọc</button>
               <button className={styles.blueButton} onClick={() => setFilterOpen(false)} type="button">Áp dụng lọc</button>
             </footer>
           </section>
@@ -142,12 +232,23 @@ export default function CustomersScreen() {
 
         {settingsOpen ? (
           <section className={styles.advancedPanel}>
-            <h3>Cài đặt cột hiển thị</h3>
+            <h3>Cài đặt cột hiển thị <span className={styles.advCountBadge}>{visibleColumns.length}/{ALL_COLUMNS.length} cột</span></h3>
             <div className={styles.columnGrid}>
-              {["Mã HV", "Họ và tên", "Số điện thoại", "Email", "Sinh trắc học", "Trạng thái", "Thẻ", "Công nợ"].map((column) => (
-                <label key={column}><input defaultChecked type="checkbox" /> {column}</label>
+              {ALL_COLUMNS.map((column) => (
+                <label key={column.id}>
+                  <input
+                    checked={isVisible(column.id)}
+                    onChange={() => toggleColumn(column.id)}
+                    type="checkbox"
+                  />
+                  {column.label}
+                </label>
               ))}
             </div>
+            <footer>
+              <button onClick={() => setVisibleColumns(ALL_COLUMNS.map((c) => c.id))} type="button">Hiện tất cả</button>
+              <button className={styles.blueButton} onClick={() => setSettingsOpen(false)} type="button">Xong</button>
+            </footer>
           </section>
         ) : null}
 
@@ -164,66 +265,57 @@ export default function CustomersScreen() {
             <table className={styles.memberTable}>
               <thead>
                 <tr>
-                  <th>Mã HV</th>
-                  <th>Họ và tên</th>
-                  <th>Số điện thoại</th>
-                  <th>Email</th>
-                  <th>Giới tính</th>
-                  <th>Ngày sinh</th>
-                  <th>Sinh trắc học</th>
-                  <th>Trạng thái</th>
-                  <th>Thẻ</th>
-                  <th>Nhóm KH</th>
-                  <th>Nguồn KH</th>
-                  <th>Ngày đăng ký</th>
-                  <th>Ngày hết hạn</th>
-                  <th>Ngày tạo</th>
-                  <th>Người tạo</th>
-                  <th>Công nợ</th>
+                  {ALL_COLUMNS.filter((c) => isVisible(c.id)).map((c) => (
+                    <th key={c.id}>{c.label}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {filteredRows.map((customer) => (
                   <tr key={customer.code}>
-                    <td>
-                      <button
-                        className={styles.memberCode}
-                        onClick={() => {
-                          setDetailTab("Thông tin cơ bản");
-                          setDetailOpen(true);
-                        }}
-                        type="button"
-                      >
-                        {customer.code}
-                      </button>
-                    </td>
-                    <td className={styles.memberName}>{customer.name}</td>
-                    <td>{customer.phone}</td>
-                    <td>{customer.email}</td>
-                    <td>{customer.gender}</td>
-                    <td>{customer.birth}</td>
-                    <td><BiometricBadges /></td>
-                    <td><CustomerStatus status={customer.status} /></td>
-                    <td>
-                      <div className={styles.cardDots}>
-                        {customer.cards.map((card, index) => (
-                          <span className={styles[`${card}Dot`]} key={`${customer.code}-${card}-${index}`} />
-                        ))}
-                        <button type="button">+</button>
-                      </div>
-                    </td>
-                    <td className={styles.mutedCell}>---</td>
-                    <td className={styles.mutedCell}>---</td>
-                    <td className={customer.registerDate === "---" ? styles.mutedCell : styles.dateGreen}>{customer.registerDate}</td>
-                    <td className={customer.endDate === "---" ? styles.mutedCell : styles.dateRed}>{customer.endDate}</td>
-                    <td className={styles.dateGreen}>{customer.createdDate}</td>
-                    <td>{customer.creator}</td>
-                    <td>{customer.debt}</td>
+                    {isVisible("code") ? (
+                      <td>
+                        <button
+                          className={styles.memberCode}
+                          onClick={() => {
+                            setDetailTab("Thông tin cơ bản");
+                            setDetailOpen(true);
+                          }}
+                          type="button"
+                        >
+                          {customer.code}
+                        </button>
+                      </td>
+                    ) : null}
+                    {isVisible("name") ? <td className={styles.memberName}>{customer.name}</td> : null}
+                    {isVisible("phone") ? <td>{customer.phone}</td> : null}
+                    {isVisible("email") ? <td>{customer.email}</td> : null}
+                    {isVisible("gender") ? <td>{customer.gender}</td> : null}
+                    {isVisible("birth") ? <td>{customer.birth}</td> : null}
+                    {isVisible("biometric") ? <td><BiometricBadges /></td> : null}
+                    {isVisible("status") ? <td><CustomerStatus status={customer.status} /></td> : null}
+                    {isVisible("cards") ? (
+                      <td>
+                        <div className={styles.cardDots}>
+                          {customer.cards.map((card, index) => (
+                            <span className={styles[`${card}Dot`]} key={`${customer.code}-${card}-${index}`} />
+                          ))}
+                          <button type="button">+</button>
+                        </div>
+                      </td>
+                    ) : null}
+                    {isVisible("customerGroup") ? <td className={styles.mutedCell}>---</td> : null}
+                    {isVisible("source") ? <td className={styles.mutedCell}>---</td> : null}
+                    {isVisible("registerDate") ? <td className={customer.registerDate === "---" ? styles.mutedCell : styles.dateGreen}>{customer.registerDate}</td> : null}
+                    {isVisible("endDate") ? <td className={customer.endDate === "---" ? styles.mutedCell : styles.dateRed}>{customer.endDate}</td> : null}
+                    {isVisible("createdDate") ? <td className={styles.dateGreen}>{customer.createdDate}</td> : null}
+                    {isVisible("creator") ? <td>{customer.creator}</td> : null}
+                    {isVisible("debt") ? <td>{customer.debt}</td> : null}
                   </tr>
                 ))}
                 {filteredRows.length === 0 ? (
                   <tr>
-                    <td className={styles.emptyTableCell} colSpan={16}>
+                    <td className={styles.emptyTableCell} colSpan={visibleColumns.length || 1}>
                       Không có hội viên phù hợp với điều kiện tìm kiếm/lọc.
                     </td>
                   </tr>
@@ -281,6 +373,20 @@ function AddCustomerModal({
   onOpenNested: (modal: "group" | "companion") => void;
 }) {
   const [error, setError] = useState("");
+  const [showExtra, setShowExtra] = useState(true);
+  const [customFields, setCustomFields] = useState<Array<{ id: string; label: string }>>([]);
+  const [customPanelOpen, setCustomPanelOpen] = useState(false);
+  const [newFieldLabel, setNewFieldLabel] = useState("");
+
+  const addCustomField = () => {
+    const trimmed = newFieldLabel.trim();
+    if (!trimmed) return;
+    setCustomFields((current) => [...current, { id: `cf-${Date.now()}`, label: trimmed }]);
+    setNewFieldLabel("");
+  };
+
+  const removeCustomField = (id: string) =>
+    setCustomFields((current) => current.filter((field) => field.id !== id));
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -356,30 +462,81 @@ function AddCustomerModal({
 
           <div className={styles.formDivider} />
           <div className={styles.customFieldRow}>
-            <strong>Trường tùy chỉnh (0)</strong>
-            <button type="button">Quản lý trường</button>
-            <p>Chưa có trường tùy chỉnh nào được thêm</p>
+            <strong>Trường tùy chỉnh ({customFields.length})</strong>
+            <button onClick={() => setCustomPanelOpen((value) => !value)} type="button">
+              {customPanelOpen ? "Đóng" : "+ Quản lý trường"}
+            </button>
+            {customFields.length === 0 && !customPanelOpen ? (
+              <p>Chưa có trường tùy chỉnh nào được thêm</p>
+            ) : null}
           </div>
+
+          {customPanelOpen ? (
+            <div className={styles.customFieldPanel}>
+              <input
+                onChange={(event) => setNewFieldLabel(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    addCustomField();
+                  }
+                }}
+                placeholder="Tên trường mới (VD: Câu lạc bộ, Mã giới thiệu...)"
+                value={newFieldLabel}
+              />
+              <button className={styles.blueButton} onClick={addCustomField} type="button">
+                + Thêm trường
+              </button>
+            </div>
+          ) : null}
+
+          {customFields.length > 0 ? (
+            <div className={styles.formGrid}>
+              {customFields.map((field) => (
+                <div className={styles.customFieldItem} key={field.id}>
+                  <FormField label={field.label} placeholder={`Nhập ${field.label.toLowerCase()}`} />
+                  <button
+                    aria-label={`Xóa trường ${field.label}`}
+                    className={styles.customFieldRemove}
+                    onClick={() => removeCustomField(field.id)}
+                    type="button"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
 
           <div className={styles.formDivider} />
-          <button className={styles.collapseButton} type="button">⌃ Ẩn bớt</button>
+          <button
+            className={styles.collapseButton}
+            onClick={() => setShowExtra((value) => !value)}
+            type="button"
+          >
+            {showExtra ? "⌃ Ẩn bớt" : "⌄ Hiển thị thêm"}
+          </button>
 
-          <div className={styles.formGrid}>
-            <FormField label="Số CMND/CCCD" placeholder="Nhập số CMND/CCCD" />
-            <FormField label="Giới tính" name="gender" placeholder="Nam / Nữ" />
-            <FormField
-              action="Thêm"
-              label="Người đi cùng"
-              onAction={() => onOpenNested("companion")}
-              placeholder="Không có"
-            />
-            <FormField label="Người liên hệ" placeholder="Tên người liên hệ" />
-            <FormField label="SĐT liên hệ" placeholder="Số điện thoại" />
-            <FormField label="Tỉnh/Thành phố" />
-            <FormField label="Phường/Xã" />
-          </div>
-          <FormField label="Thôn/Xóm/Số nhà" placeholder="Nhập địa chỉ chi tiết" />
-          <FormField area label="Ghi chú" placeholder="Nhập ghi chú" />
+          {showExtra ? (
+            <>
+              <div className={styles.formGrid}>
+                <FormField label="Số CMND/CCCD" placeholder="Nhập số CMND/CCCD" />
+                <FormField label="Giới tính" name="gender" placeholder="Nam / Nữ" />
+                <FormField
+                  action="Thêm"
+                  label="Người đi cùng"
+                  onAction={() => onOpenNested("companion")}
+                  placeholder="Không có"
+                />
+                <FormField label="Người liên hệ" placeholder="Tên người liên hệ" />
+                <FormField label="SĐT liên hệ" placeholder="Số điện thoại" />
+                <FormField label="Tỉnh/Thành phố" />
+                <FormField label="Phường/Xã" />
+              </div>
+              <FormField label="Thôn/Xóm/Số nhà" placeholder="Nhập địa chỉ chi tiết" />
+              <FormField area label="Ghi chú" placeholder="Nhập ghi chú" />
+            </>
+          ) : null}
         </div>
 
         <footer className={styles.modalFooter}>

@@ -248,6 +248,8 @@ export function SelectField({
   onAction,
   options,
   required,
+  value,
+  onChange,
 }: {
   action?: string;
   label: string;
@@ -255,17 +257,29 @@ export function SelectField({
   onAction?: () => void;
   options: string[];
   required?: boolean;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
+  const isControlled = value !== undefined;
   return (
     <label>
       <span>{label} {required ? <b>*</b> : null}</span>
-      <div className={styles.inputWrap}>
-        <select defaultValue={options[0]} name={name} required={required}>
+      <div className={styles.selectControl}>
+        <select
+          className={styles.selectInput}
+          defaultValue={isControlled ? undefined : options[0]}
+          name={name}
+          onChange={onChange ? (event) => onChange(event.target.value) : undefined}
+          required={required}
+          value={isControlled ? value : undefined}
+        >
           {options.map((option) => (
             <option key={option}>{option}</option>
           ))}
         </select>
-        {action ? <button onClick={onAction} type="button">{action}</button> : null}
+        {action ? (
+          <button className={styles.selectAction} onClick={onAction} type="button">{action}</button>
+        ) : null}
       </div>
     </label>
   );
