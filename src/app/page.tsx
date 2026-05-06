@@ -1367,12 +1367,15 @@ function BookingTable() {
 
 function StatusBadge({ status }: { status: string }) {
   const className =
-    status.includes("Xác Nhận") || status.includes("Còn hạn") || status.includes("Active")
-      ? styles.confirmed
-      : status.includes("Chờ") || status.includes("Sắp")
-        ? styles.pending
-        : status.includes("Hết")
-          ? styles.danger
+    status.includes("Chờ") || status.includes("Sắp") || status.includes("Pending")
+      ? styles.pending
+      : status.includes("Hết") || status.includes("Expired")
+        ? styles.danger
+        : status.includes("Đã Xác Nhận") ||
+            status.includes("Xác nhận") ||
+            status.includes("Còn hạn") ||
+            status.includes("Active")
+          ? styles.confirmed
           : styles.neutral;
   return <span className={className}>{status}</span>;
 }

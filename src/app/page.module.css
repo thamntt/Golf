@@ -327,7 +327,7 @@
 .statCard {
   min-height: 130px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   padding: 24px;
