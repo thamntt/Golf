@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   BarChart3,
   BriefcaseBusiness,
@@ -263,23 +263,23 @@ const lineSlots = Array.from({ length: 18 }, (_, index) => {
 
 export default function Home() {
   const [active, setActive] = useState<ModuleKey>("dashboard");
-  const activeItem = useMemo(
-    () => navItems.find((item) => item.key === active) ?? navItems[0],
-    [active],
-  );
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} ${collapsed ? styles.collapsedShell : ""}`}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <h1>Golf Manager</h1>
-          <button type="button" aria-label="Thu gọn menu">
+          <button
+            aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
+            onClick={() => setCollapsed((value) => !value)}
+            type="button"
+          >
             <Menu size={20} />
           </button>
         </div>
 
         <nav className={styles.navigation} aria-label="Menu quản trị">
-          <p className={styles.navGroup}>Vận hành</p>
           {navItems.map((item) => {
             const Icon = item.Icon;
             return (
@@ -288,9 +288,10 @@ export default function Home() {
                 key={item.key}
                 onClick={() => setActive(item.key)}
                 type="button"
+                title={collapsed ? item.label : undefined}
               >
                 <Icon size={19} />
-                {item.label}
+                <span>{item.label}</span>
               </button>
             );
           })}
@@ -301,7 +302,6 @@ export default function Home() {
         <header className={styles.topbar}>
           <div>
             <p>Thứ Ba, 7 tháng 4, 2026</p>
-            <strong>{activeItem.label}</strong>
           </div>
 
           <div className={styles.userTools}>
