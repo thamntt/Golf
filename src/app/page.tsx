@@ -228,7 +228,7 @@ const customerRows = [
 ];
 
 export default function Home() {
-  const [active, setActive] = useState<ModuleKey>("customers");
+  const [active, setActive] = useState<ModuleKey>("dashboard");
   const activeItem = useMemo(
     () => navItems.find((item) => item.key === active) ?? navItems[0],
     [active],
@@ -288,11 +288,8 @@ export default function Home() {
         </header>
 
         <div className={styles.content}>
-          {active === "customers" ? (
-            <CustomersScreen />
-          ) : (
-            <PlaceholderScreen title={activeItem.label} />
-          )}
+          {active === "customers" && <CustomersScreen />}
+          {active !== "customers" && <PlaceholderScreen title={activeItem.label} />}
         </div>
       </main>
     </div>
