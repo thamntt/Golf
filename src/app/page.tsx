@@ -1,19 +1,37 @@
+import {
+  BarChart3,
+  BriefcaseBusiness,
+  Calendar,
+  CalendarDays,
+  ChartNoAxesColumn,
+  ChevronDown,
+  ClipboardList,
+  CreditCard,
+  DollarSign,
+  Flag,
+  Menu,
+  Settings,
+  Target,
+  Ticket,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import styles from "./page.module.css";
 
 const navItems = [
-  { label: "Dashboard", active: true },
-  { label: "Golf Teetime", group: "Golf" },
-  { label: "Golf Line Tập" },
-  { label: "Vé lẻ" },
-  { label: "Sổ quỹ" },
-  { label: "Lịch HLV" },
-  { label: "Hợp Đồng" },
-  { label: "Bảng Giá" },
-  { label: "Hoa hồng Sale" },
-  { label: "Báo cáo Doanh thu" },
-  { label: "Khách Hàng" },
-  { label: "Báo Cáo" },
-  { label: "Cài đặt" },
+  { label: "Dashboard", icon: BarChart3, active: true },
+  { label: "Golf Teetime", icon: Flag, group: "GOLF" },
+  { label: "Golf Line Tập", icon: Target },
+  { label: "Vé lẻ", icon: Ticket },
+  { label: "Sổ quỹ", icon: CreditCard },
+  { label: "Lịch HLV", icon: CalendarDays },
+  { label: "Hợp Đồng", icon: ClipboardList },
+  { label: "Bảng Giá", icon: DollarSign },
+  { label: "Hoa hồng Sale", icon: TrendingUp },
+  { label: "Báo cáo Doanh thu", icon: ChartNoAxesColumn },
+  { label: "Khách Hàng", icon: Users },
+  { label: "Báo Cáo", icon: BarChart3 },
+  { label: "Cài đặt", icon: Settings },
 ];
 
 const stats = [
@@ -21,37 +39,43 @@ const stats = [
     label: "Tổng Đặt Chỗ Hôm Nay",
     value: "50",
     trend: "+12%",
-    icon: "B",
+    Icon: Calendar,
+    tone: "blue",
   },
   {
     label: "Khách Hàng Hoạt Động",
     value: "1,234",
     trend: "+8%",
-    icon: "U",
+    Icon: Users,
+    tone: "green",
   },
   {
     label: "Doanh Thu Hôm Nay",
     value: "17.3M VNĐ",
     trend: "+23%",
-    icon: "D",
+    Icon: DollarSign,
+    tone: "amber",
   },
   {
     label: "Tỷ Lệ Sử Dụng",
     value: "78%",
     trend: "+5%",
-    icon: "R",
+    Icon: TrendingUp,
+    tone: "purple",
   },
 ];
 
 const facilities = [
   {
     name: "Golf Teetime",
+    Icon: Flag,
     booked: "32",
     available: "8",
     revenue: "12.5M VNĐ",
   },
   {
     name: "Golf Line Tập",
+    Icon: Target,
     booked: "18",
     available: "12",
     revenue: "4.8M VNĐ",
@@ -103,22 +127,24 @@ export default function Home() {
         <div className={styles.sidebarHeader}>
           <h1>Golf Manager</h1>
           <button type="button" aria-label="Thu gọn menu">
-            <span />
-            <span />
-            <span />
+            <Menu size={20} strokeWidth={2} />
           </button>
         </div>
 
         <nav className={styles.navigation} aria-label="Menu quản trị">
-          {navItems.map((item) => (
-            <div className={styles.navBlock} key={item.label}>
-              {item.group ? <p className={styles.navGroup}>{item.group}</p> : null}
-              <a className={item.active ? styles.activeNav : undefined} href="#">
-                <span className={styles.navIcon} />
-                {item.label}
-              </a>
-            </div>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <div className={styles.navBlock} key={item.label}>
+                {item.group ? <p className={styles.navGroup}>{item.group}</p> : null}
+                <a className={item.active ? styles.activeNav : undefined} href="#">
+                  <Icon size={20} strokeWidth={2} />
+                  {item.label}
+                </a>
+              </div>
+            );
+          })}
         </nav>
       </aside>
 
@@ -128,9 +154,9 @@ export default function Home() {
 
           <div className={styles.userTools}>
             <button className={styles.branchButton} type="button">
-              <span className={styles.branchIcon} />
+              <BriefcaseBusiness size={16} strokeWidth={1.8} />
               NextVision
-              <span className={styles.chevron} />
+              <ChevronDown size={16} strokeWidth={1.8} />
             </button>
             <span className={styles.role}>Admin</span>
             <span className={styles.avatar}>A</span>
@@ -144,47 +170,57 @@ export default function Home() {
           </div>
 
           <section className={styles.statsGrid} aria-label="Chỉ số tổng quan">
-            {stats.map((item) => (
-              <article className={styles.statCard} key={item.label}>
-                <div>
-                  <p>{item.label}</p>
-                  <strong>{item.value}</strong>
-                  <span>{item.trend}</span>
-                </div>
-                <span className={styles.statIcon}>{item.icon}</span>
-              </article>
-            ))}
+            {stats.map((item) => {
+              const Icon = item.Icon;
+
+              return (
+                <article className={styles.statCard} key={item.label}>
+                  <div>
+                    <p>{item.label}</p>
+                    <strong>{item.value}</strong>
+                    <span>{item.trend}</span>
+                  </div>
+                  <span className={`${styles.statIcon} ${styles[item.tone]}`}>
+                    <Icon size={24} strokeWidth={2} />
+                  </span>
+                </article>
+              );
+            })}
           </section>
 
-          <section className={styles.card}>
+          <section className={`${styles.card} ${styles.facilityCard}`}>
             <h3>Tổng Quan Cơ Sở</h3>
             <div className={styles.facilityGrid}>
-              {facilities.map((facility) => (
-                <article className={styles.facility} key={facility.name}>
-                  <div className={styles.facilityTitle}>
-                    <span className={styles.facilityIcon} />
-                    <h4>{facility.name}</h4>
-                  </div>
-                  <dl>
-                    <div>
-                      <dt>Đã đặt:</dt>
-                      <dd>{facility.booked}</dd>
+              {facilities.map((facility) => {
+                const Icon = facility.Icon;
+
+                return (
+                  <article className={styles.facility} key={facility.name}>
+                    <div className={styles.facilityTitle}>
+                      <Icon size={20} strokeWidth={2} />
+                      <h4>{facility.name}</h4>
                     </div>
-                    <div>
-                      <dt>Còn trống:</dt>
-                      <dd>{facility.available}</dd>
-                    </div>
-                    <div>
-                      <dt>Doanh thu:</dt>
-                      <dd>{facility.revenue}</dd>
-                    </div>
-                  </dl>
-                </article>
-              ))}
+                    <dl>
+                      <div>
+                        <dt>Đã đặt:</dt>
+                        <dd>{facility.booked}</dd>
+                      </div>
+                      <div>
+                        <dt>Còn trống:</dt>
+                        <dd className={styles.positive}>{facility.available}</dd>
+                      </div>
+                      <div>
+                        <dt>Doanh thu:</dt>
+                        <dd>{facility.revenue}</dd>
+                      </div>
+                    </dl>
+                  </article>
+                );
+              })}
             </div>
           </section>
 
-          <section className={styles.card}>
+          <section className={`${styles.card} ${styles.tableCard}`}>
             <h3>Đặt Chỗ Gần Đây</h3>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
