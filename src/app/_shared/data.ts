@@ -33,12 +33,22 @@ export const navItems: NavItem[] = [
   { key: "reports", label: "Báo cáo", Icon: FileBarChart },
 ];
 
-export const recentBookings: string[][] = [
-  ["BK001", "Nguyễn Văn A", "Golf Teetime", "14:00 - 16:00", "Đã Xác Nhận"],
-  ["BK002", "Trần Thị B", "Golf Teetime", "15:00 - 16:00", "Đã Xác Nhận"],
-  ["BK003", "Lê Văn C", "Golf Line Tập", "16:00 - 17:00", "Chờ Xác Nhận"],
-  ["BK004", "Phạm Văn D", "Golf Teetime", "09:00 - 11:00", "Đã Xác Nhận"],
-  ["BK005", "Hoàng Thị E", "Golf Line Tập", "10:00 - 11:00", "Chờ Xác Nhận"],
+export type Booking = {
+  code: string;
+  customerName: string;
+  customerCode: string;
+  facility: string;
+  date: string;
+  time: string;
+  status: string;
+};
+
+export const recentBookings: Booking[] = [
+  { code: "BK001", customerName: "Nguyễn Văn A", customerCode: "HV001", facility: "Golf Teetime", date: "07/04/2026", time: "14:00 - 16:00", status: "Đã Xác Nhận" },
+  { code: "BK002", customerName: "Trần Thị B", customerCode: "HV002", facility: "Golf Teetime", date: "07/04/2026", time: "15:00 - 16:00", status: "Đã Xác Nhận" },
+  { code: "BK003", customerName: "Lê Văn C", customerCode: "HV003", facility: "Golf Line Tập", date: "07/04/2026", time: "16:00 - 17:00", status: "Chờ Xác Nhận" },
+  { code: "BK004", customerName: "Phạm Văn D", customerCode: "HV004", facility: "Golf Teetime", date: "07/04/2026", time: "09:00 - 11:00", status: "Đã Xác Nhận" },
+  { code: "BK005", customerName: "Hoàng Thị E", customerCode: "HV005", facility: "Golf Line Tập", date: "07/04/2026", time: "10:00 - 11:00", status: "Chờ Xác Nhận" },
 ];
 
 export const customerRows: Customer[] = [

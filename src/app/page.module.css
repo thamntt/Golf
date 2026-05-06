@@ -422,10 +422,20 @@
 
 .facility {
   min-height: 144px;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
   border: 1px solid #d9dee7;
   border-radius: 8px;
   padding: 16px;
   background: #ffffff;
+}
+
+.facility:hover,
+.facility:focus-visible {
+  border-color: #0b63ff;
+  box-shadow: 0 6px 16px rgba(11, 99, 255, 0.12);
+  transform: translateY(-1px);
+  outline: none;
 }
 
 .facilityTitle {
@@ -469,6 +479,82 @@
 .facility .positive,
 .positive {
   color: #00a651;
+}
+
+.statCard div > span.trendUp {
+  color: #00a651;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statCard div > span.trendDown {
+  color: #e23131;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statCard div > span.trendNew {
+  color: #667085;
+  font-style: italic;
+}
+
+.bookingCode {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0b63ff;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.bookingCode:hover {
+  text-decoration: underline;
+}
+
+.bookingCustomer {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bookingCustomer strong {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bookingCustomer span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.bookingCustomer:hover strong {
+  color: #0b63ff;
+}
+
+.bookingTime {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bookingTime span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.bookingTime strong {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .tableWrap {

@@ -5,6 +5,7 @@ import { Download, Filter, Plus, Search, Upload } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import styles from "../page.module.css";
 import { recentBookings } from "./data";
+import type { ModuleKey } from "./types";
 
 export function Screen({ children, subtitle, title }: { children: ReactNode; subtitle: string; title: string }) {
   return (
@@ -58,7 +59,7 @@ export function Row({ label, positive, value }: { label: string; positive?: bool
   );
 }
 
-export function BookingTable() {
+export function BookingTable({ onOpen }: { onOpen?: (key: ModuleKey) => void }) {
   return (
     <div className={styles.tableWrap}>
       <table className={styles.table}>
@@ -72,13 +73,35 @@ export function BookingTable() {
           </tr>
         </thead>
         <tbody>
-          {recentBookings.map(([code, customer, facility, time, status]) => (
-            <tr key={code}>
-              <td className={styles.linkCell}>{code}</td>
-              <td>{customer}</td>
-              <td>{facility}</td>
-              <td>{time}</td>
-              <td><StatusBadge status={status} /></td>
+          {recentBookings.map((booking) => (
+            <tr key={booking.code}>
+              <td>
+                <button
+                  className={styles.bookingCode}
+                  onClick={() => alert(`Chi tiết booking ${booking.code}`)}
+                  type="button"
+                >
+                  {booking.code}
+                </button>
+              </td>
+              <td>
+                <button
+                  className={styles.bookingCustomer}
+                  onClick={() => onOpen?.("customers")}
+                  type="button"
+                >
+                  <strong>{booking.customerName}</strong>
+                  <span>{booking.customerCode}</span>
+                </button>
+              </td>
+              <td>{booking.facility}</td>
+              <td>
+                <div className={styles.bookingTime}>
+                  <span>{booking.date}</span>
+                  <strong>{booking.time}</strong>
+                </div>
+              </td>
+              <td><StatusBadge status={booking.status} /></td>
             </tr>
           ))}
         </tbody>
