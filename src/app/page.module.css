@@ -5668,3 +5668,773 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Zone management split (sidebar + content) ---- */
+.pricingMgmtSplit {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.branchSidebar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e2e6ee;
+  background: #f8fafc;
+  overflow-y: auto;
+}
+
+.branchSidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.branchSidebarHeader strong {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.branchSidebarHeader span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.branchItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 18px;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: #344054;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.branchItem:hover {
+  background: #ebf2ff;
+}
+
+.branchItem em {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475467;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.branchItemActive {
+  background: #ebf2ff;
+  border-left-color: #175cff;
+  color: #175cff;
+}
+
+.branchItemActive em {
+  background: #175cff;
+  color: #ffffff;
+}
+
+.branchSidebarFooter {
+  margin-top: auto;
+  padding: 12px 18px;
+  border-top: 1px solid #e2e6ee;
+}
+
+.branchSidebarFooter button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  background: transparent;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  justify-content: center;
+}
+
+.branchSidebarFooter button:hover {
+  border-color: #175cff;
+  color: #175cff;
+}
+
+.zoneMgmtContent {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.zoneMgmtContent .memberTableWrap {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Mini chips in table cells (devices, services) */
+.miniChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.miniChips span {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.miniChipMore {
+  background: #f1f5f9 !important;
+  color: #475467 !important;
+}
+
+.zoneCountBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ---- Zone form modal (wider with sections) ---- */
+.zoneFormModal {
+  width: min(720px, calc(100vw - 60px));
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32);
+}
+
+.zoneFormHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.zoneFormHeader h2 {
+  color: #101828;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.zoneFormHeader button {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.zoneFormBody {
+  flex: 1;
+  overflow: auto;
+  padding: 20px 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.zoneFormModal > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 14px 22px;
+  border-top: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.zoneFormModal > footer button {
+  min-height: 38px;
+  padding: 0 18px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.zoneFormModal > footer button.blueButton {
+  background: #175cff;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.zoneFormModal > footer button.blueButton:hover {
+  background: #1450e0;
+}
+
+/* ---- Check-in mode 3 radio cards ---- */
+.checkinModeBlock {
+  display: grid;
+  gap: 8px;
+}
+
+.checkinModeLabel {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.checkinModeLabel b {
+  color: #e60012;
+}
+
+.checkinModeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.checkinModeCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 2px solid #d9dee7;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 120ms ease;
+}
+
+.checkinModeCard:hover {
+  border-color: #94a3b8;
+}
+
+.checkinModeCardActive {
+  border-color: #175cff;
+  background: #ebf2ff;
+}
+
+.checkinModeRadio {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.checkinModeCardActive .checkinModeRadio {
+  border-color: #175cff;
+}
+
+.checkinModeRadio > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #175cff;
+}
+
+.checkinModeCard strong {
+  display: block;
+  color: #101828;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.checkinModeCardActive strong {
+  color: #175cff;
+}
+
+.checkinModeCard small {
+  display: block;
+  margin-top: 2px;
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* ---- Field with manage button ---- */
+.fieldWithManage {
+  display: grid;
+  gap: 6px;
+}
+
+.fieldWithManageLabel {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.fieldWithManageLabel b {
+  color: #e60012;
+}
+
+.fieldWithManageRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.fieldWithManageRow .chipMultiSelect {
+  flex: 1;
+  min-width: 0;
+}
+
+.fieldManageBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #175cff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.fieldManageBtn:hover {
+  background: #ebf2ff;
+  border-color: #175cff;
+}
+
+.fieldHint {
+  color: #667085;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.fieldHint strong {
+  color: #175cff;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ---- ChipMultiSelect (search dropdown) ---- */
+.chipMultiSelect {
+  position: relative;
+}
+
+.chipMultiSelectInput {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 10px 6px 12px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: #101828;
+  transition: border-color 120ms ease;
+}
+
+.chipMultiSelectInput:hover {
+  border-color: #94a3b8;
+}
+
+.chipMultiSelectInputOpen {
+  border-color: #175cff;
+  box-shadow: 0 0 0 3px rgba(23, 92, 255, 0.18);
+}
+
+.chipMultiSelectPlaceholder {
+  flex: 1;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.chipMultiSelectChips {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chipMultiSelectChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px 2px 10px;
+  border-radius: 999px;
+  background: #ebf2ff;
+  color: #175cff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chipMultiSelectChip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #175cff;
+  cursor: pointer;
+  padding: 0;
+}
+
+.chipMultiSelectChip button:hover {
+  background: rgba(23, 92, 255, 0.18);
+}
+
+.chipMultiSelectChevronOpen {
+  transform: rotate(180deg);
+}
+
+.chipMultiSelectPopover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  max-height: 320px;
+  border: 1px solid #d9dee7;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+}
+
+.chipMultiSelectSearchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e6ee;
+  color: #94a3b8;
+}
+
+.chipMultiSelectSearchRow input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: #101828;
+  outline: none;
+}
+
+.chipMultiSelectSearchRow button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.chipMultiSelectList {
+  flex: 1;
+  overflow: auto;
+  padding: 6px;
+}
+
+.chipMultiSelectOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  color: #344054;
+}
+
+.chipMultiSelectOption:hover {
+  background: #f1f5f9;
+}
+
+.chipMultiSelectOption:has(input:checked) {
+  background: #ebf2ff;
+  color: #175cff;
+  font-weight: 600;
+}
+
+.chipMultiSelectOption input {
+  cursor: pointer;
+}
+
+.chipMultiSelectEmpty {
+  margin: 0;
+  padding: 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.chipMultiSelectFooter {
+  padding: 8px 10px;
+  border-top: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.chipMultiSelectFooter button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #175cff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  justify-content: center;
+}
+
+.chipMultiSelectFooter button:hover {
+  background: #ebf2ff;
+}
+
+/* ---- Day quick-pills row (Timeslot form) ---- */
+.dayQuickPills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.dayQuickPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border: 1px solid #d9dee7;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dayQuickPill:hover {
+  border-color: #175cff;
+  color: #175cff;
+}
+
+.dayQuickPillActive {
+  background: #175cff;
+  border-color: #175cff;
+  color: #ffffff;
+}
+
+.dayQuickDivider {
+  width: 1px;
+  height: 20px;
+  background: #e2e6ee;
+}
+
+.dayCustomLabel {
+  color: #94a3b8;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* ---- Toggle Status modal (activate / deactivate package) ---- */
+.toggleStatusModal {
+  width: min(560px, calc(100vw - 60px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.toggleStatusActivating .toggleStatusHeader {
+  background: linear-gradient(180deg, #fef2f2, #fff7f7);
+  border-bottom: 1px solid #fee2e2;
+}
+
+.toggleStatusActivating .toggleStatusIcon {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.toggleStatusActivating .toggleStatusHeader h2 {
+  color: #991b1b;
+}
+
+.toggleStatusActivating .toggleStatusHeader p {
+  color: #b91c1c;
+}
+
+.toggleStatusPausing .toggleStatusHeader {
+  background: linear-gradient(180deg, #eff6ff, #f8faff);
+  border-bottom: 1px solid #bfdbfe;
+}
+
+.toggleStatusPausing .toggleStatusIcon {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.toggleStatusPausing .toggleStatusHeader h2 {
+  color: #1e3a8a;
+}
+
+.toggleStatusPausing .toggleStatusHeader p {
+  color: #1e40af;
+}
+
+.toggleStatusHeader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+}
+
+.toggleStatusIcon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.toggleStatusHeader h2 {
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.toggleStatusHeader p {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.toggleStatusBody {
+  padding: 18px 22px;
+  display: grid;
+  gap: 14px;
+}
+
+.toggleStatusBody p {
+  margin: 0;
+  color: #344054;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.toggleStatusBullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.toggleStatusBullets li {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475467;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.toggleStatusBullets li strong {
+  color: #101828;
+  font-weight: 700;
+}
+
+.toggleStatusInfoCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #d1fae5;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.toggleStatusWarnCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.toggleStatusWarnCard svg {
+  flex-shrink: 0;
+  color: #f59e0b;
+}
+
+@media (max-width: 700px) {
+  .pricingMgmtSplit {
+    grid-template-columns: 1fr;
+  }
+  .branchSidebar {
+    border-right: 0;
+    border-bottom: 1px solid #e2e6ee;
+  }
+  .checkinModeGrid {
+    grid-template-columns: 1fr;
+  }
+}

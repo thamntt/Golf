@@ -33,10 +33,39 @@ type Zone = {
   branch: string;
   area: string;
   capacity: number;
-  checkinMode: string;
-  devices: string;
+  checkinMode: "Kiểm soát cửa" | "Quay lễ tân" | "Cả hai";
+  devices: string[];
+  services: string[];
   status: "Hoạt động" | "Tạm ngưng";
 };
+
+const BRANCHES = ["NextVision", "Hà Nội Center", "Sài Gòn West"];
+
+const ALL_DEVICES = [
+  "FaceID-Cong01",
+  "FaceID-Cong02",
+  "FaceID-CongVIP",
+  "Bay-Reader-1",
+  "Bay-Reader-2",
+  "Bay-Reader-3",
+  "Cong-San9-Main",
+  "Cong-San18-East",
+  "Cong-San18-West",
+  "RFID-Reception",
+];
+
+const ALL_SERVICES = [
+  "Driving Range Practice",
+  "Putting Practice",
+  "Indoor Simulator",
+  "Teetime 9 Hố",
+  "Teetime 18 Hố",
+  "Lesson 1-1",
+  "Lesson Group",
+  "Tournament",
+  "Caddie Service",
+  "Equipment Rental",
+];
 
 type TimeSlot = {
   id: string;
@@ -44,11 +73,29 @@ type TimeSlot = {
   startTime: string;
   endTime: string;
   duration: string;
-  days: string;
+  days: string[]; // ["T2","T3","T4","T5","T6"] etc
   branches: string;
+  zones: string[]; // zone codes
   color: string;
   status: "Hoạt động" | "Tạm ngưng";
 };
+
+const DAY_PILLS: Array<{ id: string; label: string; full: string }> = [
+  { id: "T2", label: "T2", full: "Thứ 2" },
+  { id: "T3", label: "T3", full: "Thứ 3" },
+  { id: "T4", label: "T4", full: "Thứ 4" },
+  { id: "T5", label: "T5", full: "Thứ 5" },
+  { id: "T6", label: "T6", full: "Thứ 6" },
+  { id: "T7", label: "T7", full: "Thứ 7" },
+  { id: "CN", label: "CN", full: "Chủ nhật" },
+];
+
+function formatDays(days: string[]): string {
+  if (days.length === 7) return "Tất cả ngày";
+  if (days.length === 5 && ["T2", "T3", "T4", "T5", "T6"].every((d) => days.includes(d))) return "Thứ 2 - Thứ 6";
+  if (days.length === 2 && days.includes("T7") && days.includes("CN")) return "Thứ 7 - Chủ nhật";
+  return days.map((d) => DAY_PILLS.find((p) => p.id === d)?.full ?? d).join(", ");
+}
 
 type ContractPackage = {
   code: string;
@@ -76,19 +123,21 @@ type SingleTicket = {
 };
 
 const INITIAL_ZONES: Zone[] = [
-  { code: "ZONE-DR-01", name: "Khu Driving Range chính", zoneType: "Driving Range", branch: "NextVision", area: "1.200 m²", capacity: 50, checkinMode: "Cả hai", devices: "Cổng 01 (FaceID)", status: "Hoạt động" },
-  { code: "ZONE-PG-01", name: "Putting Green A", zoneType: "Putting Green", branch: "NextVision", area: "250 m²", capacity: 12, checkinMode: "Quay lễ tân", devices: "—", status: "Hoạt động" },
-  { code: "ZONE-BI-01", name: "Bay Indoor 1", zoneType: "Bay Indoor", branch: "NextVision", area: "80 m²", capacity: 4, checkinMode: "Kiểm soát cửa", devices: "FaceID-Bay1", status: "Hoạt động" },
-  { code: "ZONE-S9-01", name: "Sân 9 lỗ A", zoneType: "Sân 9 lỗ", branch: "NextVision", area: "18.000 m²", capacity: 36, checkinMode: "Cả hai", devices: "Cổng sân 9", status: "Hoạt động" },
-  { code: "ZONE-PG-02", name: "Putting Green B (đang nâng cấp)", zoneType: "Putting Green", branch: "NextVision", area: "200 m²", capacity: 10, checkinMode: "Quay lễ tân", devices: "—", status: "Tạm ngưng" },
+  { code: "ZONE-DR-01", name: "Khu Driving Range chính", zoneType: "Driving Range", branch: "NextVision", area: "1.200 m²", capacity: 50, checkinMode: "Cả hai", devices: ["FaceID-Cong01"], services: ["Driving Range Practice", "Lesson 1-1"], status: "Hoạt động" },
+  { code: "ZONE-PG-01", name: "Putting Green A", zoneType: "Putting Green", branch: "NextVision", area: "250 m²", capacity: 12, checkinMode: "Quay lễ tân", devices: [], services: ["Putting Practice"], status: "Hoạt động" },
+  { code: "ZONE-BI-01", name: "Bay Indoor 1", zoneType: "Bay Indoor", branch: "NextVision", area: "80 m²", capacity: 4, checkinMode: "Kiểm soát cửa", devices: ["Bay-Reader-1"], services: ["Indoor Simulator", "Lesson 1-1"], status: "Hoạt động" },
+  { code: "ZONE-S9-01", name: "Sân 9 lỗ A", zoneType: "Sân 9 lỗ", branch: "NextVision", area: "18.000 m²", capacity: 36, checkinMode: "Cả hai", devices: ["Cong-San9-Main"], services: ["Teetime 9 Hố", "Caddie Service"], status: "Hoạt động" },
+  { code: "ZONE-PG-02", name: "Putting Green B (đang nâng cấp)", zoneType: "Putting Green", branch: "NextVision", area: "200 m²", capacity: 10, checkinMode: "Quay lễ tân", devices: [], services: ["Putting Practice"], status: "Tạm ngưng" },
+  { code: "ZONE-DR-02", name: "Driving Range Hà Nội", zoneType: "Driving Range", branch: "Hà Nội Center", area: "950 m²", capacity: 40, checkinMode: "Kiểm soát cửa", devices: ["FaceID-Cong02"], services: ["Driving Range Practice"], status: "Hoạt động" },
+  { code: "ZONE-S18-01", name: "Sân 18 lỗ Sài Gòn", zoneType: "Sân 18 lỗ", branch: "Sài Gòn West", area: "65.000 m²", capacity: 72, checkinMode: "Cả hai", devices: ["Cong-San18-East", "Cong-San18-West"], services: ["Teetime 18 Hố", "Tournament", "Caddie Service"], status: "Hoạt động" },
 ];
 
 const INITIAL_TIMESLOTS: TimeSlot[] = [
-  { id: "TS-01", name: "Sáng sớm ngày thường", startTime: "06:00", endTime: "09:00", duration: "3 giờ", days: "Thứ 2 - Thứ 6", branches: "NextVision", color: "blue", status: "Hoạt động" },
-  { id: "TS-02", name: "Buổi trưa", startTime: "11:00", endTime: "14:00", duration: "3 giờ", days: "Tất cả ngày", branches: "NextVision", color: "amber", status: "Hoạt động" },
-  { id: "TS-03", name: "Giờ cao điểm chiều", startTime: "17:00", endTime: "20:00", duration: "3 giờ", days: "Thứ 2 - Thứ 6", branches: "NextVision", color: "red", status: "Hoạt động" },
-  { id: "TS-04", name: "Cuối tuần cả ngày", startTime: "06:00", endTime: "21:30", duration: "15 giờ 30 phút", days: "Thứ 7 - Chủ nhật", branches: "NextVision", color: "purple", status: "Hoạt động" },
-  { id: "TS-05", name: "Tối khuya", startTime: "20:00", endTime: "23:00", duration: "3 giờ", days: "Tất cả ngày", branches: "NextVision", color: "gray", status: "Tạm ngưng" },
+  { id: "TS-01", name: "Sáng sớm ngày thường", startTime: "06:00", endTime: "09:00", duration: "3 giờ", days: ["T2", "T3", "T4", "T5", "T6"], branches: "NextVision", zones: ["ZONE-DR-01", "ZONE-PG-01"], color: "blue", status: "Hoạt động" },
+  { id: "TS-02", name: "Buổi trưa", startTime: "11:00", endTime: "14:00", duration: "3 giờ", days: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"], branches: "NextVision", zones: ["ZONE-DR-01", "ZONE-BI-01"], color: "amber", status: "Hoạt động" },
+  { id: "TS-03", name: "Giờ cao điểm chiều", startTime: "17:00", endTime: "20:00", duration: "3 giờ", days: ["T2", "T3", "T4", "T5", "T6"], branches: "NextVision", zones: ["ZONE-DR-01", "ZONE-S9-01"], color: "red", status: "Hoạt động" },
+  { id: "TS-04", name: "Cuối tuần cả ngày", startTime: "06:00", endTime: "21:30", duration: "15 giờ 30 phút", days: ["T7", "CN"], branches: "NextVision", zones: ["ZONE-DR-01", "ZONE-PG-01", "ZONE-BI-01", "ZONE-S9-01"], color: "purple", status: "Hoạt động" },
+  { id: "TS-05", name: "Tối khuya", startTime: "20:00", endTime: "23:00", duration: "3 giờ", days: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"], branches: "NextVision", zones: ["ZONE-BI-01"], color: "gray", status: "Tạm ngưng" },
 ];
 
 const INITIAL_PACKAGES: ContractPackage[] = [
@@ -127,6 +176,7 @@ export default function PricingScreen() {
   const [editingPackage, setEditingPackage] = useState<ContractPackage | null>(null);
   const [editingTicket, setEditingTicket] = useState<SingleTicket | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ kind: "package" | "ticket"; code: string; name: string } | null>(null);
+  const [togglePackageTarget, setTogglePackageTarget] = useState<ContractPackage | null>(null);
 
   const [query, setQuery] = useState("");
   const [serviceFilter, setServiceFilter] = useState("Tất cả");
@@ -319,7 +369,10 @@ export default function PricingScreen() {
             packages={filteredPackages}
             onDelete={(p) => setDeleteTarget({ kind: "package", code: p.code, name: p.name })}
             onEdit={openEditPackage}
-            onToggleStatus={togglePackageStatus}
+            onToggleStatus={(code) => {
+              const pkg = packages.find((p) => p.code === code);
+              if (pkg) setTogglePackageTarget(pkg);
+            }}
           />
         ) : (
           <TicketGrid
@@ -344,6 +397,7 @@ export default function PricingScreen() {
           onClose={() => setTimeslotModalOpen(false)}
           onUpdate={setTimeslots}
           timeslots={timeslots}
+          zones={zones}
         />
       ) : null}
 
@@ -375,6 +429,17 @@ export default function PricingScreen() {
             if (deleteTarget.kind === "package") handleDeletePackage(deleteTarget.code);
             else handleDeleteTicket(deleteTarget.code);
             setDeleteTarget(null);
+          }}
+        />
+      ) : null}
+
+      {togglePackageTarget ? (
+        <TogglePackageStatusModal
+          pkg={togglePackageTarget}
+          onCancel={() => setTogglePackageTarget(null)}
+          onConfirm={() => {
+            togglePackageStatus(togglePackageTarget.code);
+            setTogglePackageTarget(null);
           }}
         />
       ) : null}
@@ -428,7 +493,8 @@ function PackageTable({
               <th>Tên Gói</th>
               <th>Loại DV</th>
               <th>Cơ Sở</th>
-              <th>Số Buổi / Thời Hạn</th>
+              <th>Số Buổi</th>
+              <th>Thời Hạn</th>
               <th>Giá Gói</th>
               <th>Trạng Thái</th>
               <th>Sử Dụng</th>
@@ -438,7 +504,7 @@ function PackageTable({
           <tbody>
             {packages.length === 0 ? (
               <tr>
-                <td className={styles.emptyTableCell} colSpan={9}>
+                <td className={styles.emptyTableCell} colSpan={10}>
                   Không có bảng giá phù hợp với bộ lọc.
                 </td>
               </tr>
@@ -452,7 +518,8 @@ function PackageTable({
                   </td>
                   <td><span className={styles.servicePill}>{p.serviceType}</span></td>
                   <td><span className={styles.branchPill}>{p.branch}</span></td>
-                  <td><strong>{p.sessions}</strong><div className={styles.cellMuted}>/ {p.duration}</div></td>
+                  <td><strong>{p.sessions}</strong></td>
+                  <td>{p.duration}</td>
                   <td className={styles.priceCell}>{p.price}</td>
                   <td><StatusBadge status={p.status} /></td>
                   <td>
@@ -585,10 +652,18 @@ function ZoneManagementModal({
   const [editing, setEditing] = useState<Zone | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [activeBranch, setActiveBranch] = useState<string>("all");
 
-  const filtered = zones.filter((z) =>
-    !search || `${z.code} ${z.name}`.toLowerCase().includes(search.toLowerCase())
-  );
+  const branchCounts = BRANCHES.reduce<Record<string, number>>((acc, b) => {
+    acc[b] = zones.filter((z) => z.branch === b).length;
+    return acc;
+  }, {});
+
+  const filtered = zones.filter((z) => {
+    if (activeBranch !== "all" && z.branch !== activeBranch) return false;
+    if (search && !`${z.code} ${z.name}`.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
 
   const submit = (zone: Zone) => {
     const exists = zones.find((z) => z.code === zone.code);
@@ -614,64 +689,127 @@ function ZoneManagementModal({
           <button onClick={onClose} type="button"><X size={22} /></button>
         </header>
 
-        <div className={styles.pricingMgmtToolbar}>
-          <div className={styles.pricingSearch}>
-            <Search size={18} />
-            <input onChange={(e) => setSearch(e.target.value)} placeholder="Tìm theo mã, tên khu vực..." value={search} />
-          </div>
-          <button
-            className={styles.pricingPrimaryBtn}
-            onClick={() => { setEditing(null); setFormOpen(true); }}
-            type="button"
-          >
-            <Plus size={16} /> Thêm khu vực
-          </button>
-        </div>
+        <div className={styles.pricingMgmtSplit}>
+          <aside className={styles.branchSidebar}>
+            <div className={styles.branchSidebarHeader}>
+              <strong>Chi nhánh</strong>
+              <span>{zones.length} khu vực</span>
+            </div>
+            <button
+              className={`${styles.branchItem} ${activeBranch === "all" ? styles.branchItemActive : ""}`}
+              onClick={() => setActiveBranch("all")}
+              type="button"
+            >
+              <span>Tất cả chi nhánh</span>
+              <em>{zones.length}</em>
+            </button>
+            {BRANCHES.map((b) => (
+              <button
+                className={`${styles.branchItem} ${activeBranch === b ? styles.branchItemActive : ""}`}
+                key={b}
+                onClick={() => setActiveBranch(b)}
+                type="button"
+              >
+                <span>{b}</span>
+                <em>{branchCounts[b] ?? 0}</em>
+              </button>
+            ))}
+            <div className={styles.branchSidebarFooter}>
+              <button onClick={() => alert("Mở Module 12 → Tab Quản lý Chi nhánh")} type="button">
+                <Settings size={14} /> Quản lý chi nhánh
+              </button>
+            </div>
+          </aside>
 
-        <div className={styles.memberTableWrap}>
-          <table className={styles.memberTable}>
-            <thead>
-              <tr>
-                <th>KHU VỰC</th>
-                <th>LOẠI</th>
-                <th>DIỆN TÍCH / SỨC CHỨA</th>
-                <th>CHECK-IN</th>
-                <th>THIẾT BỊ</th>
-                <th>TRẠNG THÁI</th>
-                <th>THAO TÁC</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((z) => (
-                <tr key={z.code}>
-                  <td>
-                    <strong>{z.name}</strong>
-                    <div className={styles.cellMuted}>{z.code}</div>
-                  </td>
-                  <td><span className={styles.zoneTypeBadge}>{z.zoneType}</span></td>
-                  <td><strong>{z.area}</strong><div className={styles.cellMuted}>{z.capacity} người</div></td>
-                  <td><span className={styles.checkinPill}>{z.checkinMode}</span></td>
-                  <td>{z.devices}</td>
-                  <td><StatusBadge status={z.status} /></td>
-                  <td>
-                    <div className={styles.tableActions}>
-                      <button onClick={() => { setEditing(z); setFormOpen(true); }} title="Sửa" type="button"><Pencil size={15} /></button>
-                      <button className={styles.tableActionDanger} onClick={() => removeZone(z.code)} title="Xóa" type="button"><Trash2 size={15} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className={styles.pricingMgmtFooter}>
-          <span>Hiển thị {filtered.length} / {zones.length} khu vực</span>
-          <span>{zones.filter((z) => z.status === "Hoạt động").length} đang hoạt động</span>
+          <div className={styles.zoneMgmtContent}>
+            <div className={styles.pricingMgmtToolbar}>
+              <div className={styles.pricingSearch}>
+                <Search size={18} />
+                <input onChange={(e) => setSearch(e.target.value)} placeholder="Tìm theo mã, tên khu vực..." value={search} />
+              </div>
+              <button
+                className={styles.pricingPrimaryBtn}
+                onClick={() => { setEditing(null); setFormOpen(true); }}
+                type="button"
+              >
+                <Plus size={16} /> Thêm khu vực
+              </button>
+            </div>
+
+            <div className={styles.memberTableWrap}>
+              <table className={styles.memberTable}>
+                <thead>
+                  <tr>
+                    <th>KHU VỰC</th>
+                    <th>LOẠI</th>
+                    <th>DIỆN TÍCH / SỨC CHỨA</th>
+                    <th>CHECK-IN</th>
+                    <th>THIẾT BỊ</th>
+                    <th>DỊCH VỤ</th>
+                    <th>TRẠNG THÁI</th>
+                    <th>THAO TÁC</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td className={styles.emptyTableCell} colSpan={8}>
+                        Chi nhánh {activeBranch === "all" ? "" : activeBranch} chưa có khu vực phù hợp.
+                      </td>
+                    </tr>
+                  ) : (
+                    filtered.map((z) => (
+                      <tr key={z.code}>
+                        <td>
+                          <strong>{z.name}</strong>
+                          <div className={styles.cellMuted}>{z.code}</div>
+                        </td>
+                        <td><span className={styles.zoneTypeBadge}>{z.zoneType}</span></td>
+                        <td><strong>{z.area}</strong><div className={styles.cellMuted}>{z.capacity} người</div></td>
+                        <td><span className={styles.checkinPill}>{z.checkinMode}</span></td>
+                        <td>
+                          {z.devices.length === 0 ? (
+                            <span className={styles.cellMuted}>—</span>
+                          ) : (
+                            <div className={styles.miniChips}>
+                              {z.devices.map((d) => <span key={d}>{d}</span>)}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          {z.services.length === 0 ? (
+                            <span className={styles.cellMuted}>—</span>
+                          ) : (
+                            <div className={styles.miniChips}>
+                              {z.services.slice(0, 2).map((s) => <span key={s}>{s}</span>)}
+                              {z.services.length > 2 ? <span className={styles.miniChipMore}>+{z.services.length - 2}</span> : null}
+                            </div>
+                          )}
+                        </td>
+                        <td><StatusBadge status={z.status} /></td>
+                        <td>
+                          <div className={styles.tableActions}>
+                            <button onClick={() => { setEditing(z); setFormOpen(true); }} title="Sửa" type="button"><Pencil size={15} /></button>
+                            <button className={styles.tableActionDanger} onClick={() => removeZone(z.code)} title="Xóa" type="button"><Trash2 size={15} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className={styles.pricingMgmtFooter}>
+              <span>Hiển thị {filtered.length} / {zones.length} khu vực {activeBranch !== "all" ? `(lọc theo ${activeBranch})` : ""}</span>
+              <span>{filtered.filter((z) => z.status === "Hoạt động").length} đang hoạt động</span>
+            </div>
+          </div>
         </div>
       </section>
 
       {formOpen ? (
         <ZoneFormModal
+          defaultBranch={activeBranch === "all" ? undefined : activeBranch}
           existing={editing}
           onClose={() => { setFormOpen(false); setEditing(null); }}
           onSubmit={submit}
@@ -682,55 +820,134 @@ function ZoneManagementModal({
 }
 
 function ZoneFormModal({
+  defaultBranch,
   existing,
   onClose,
   onSubmit,
 }: {
+  defaultBranch?: string;
   existing: Zone | null;
   onClose: () => void;
   onSubmit: (zone: Zone) => void;
 }) {
   const isEdit = !!existing;
+  const [checkinMode, setCheckinMode] = useState<Zone["checkinMode"]>(existing?.checkinMode ?? "Quay lễ tân");
+  const [devices, setDevices] = useState<string[]>(existing?.devices ?? []);
+  const [services, setServices] = useState<string[]>(existing?.services ?? []);
   const [error, setError] = useState("");
+
+  const showDevicesField = checkinMode === "Kiểm soát cửa" || checkinMode === "Cả hai";
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const name = String(data.get("name") ?? "").trim();
     if (!name) { setError("Tên khu vực bắt buộc"); return; }
+    if (showDevicesField && devices.length === 0) {
+      setError("Phải chọn ≥1 thiết bị khi Phương thức Check-in = Kiểm soát cửa / Cả hai");
+      return;
+    }
 
     onSubmit({
       code: existing?.code ?? `ZONE-${(data.get("zoneType") as string ?? "X").substring(0, 2).toUpperCase()}-${String(Date.now()).slice(-3)}`,
       name,
       zoneType: (data.get("zoneType") as ZoneType) ?? "Driving Range",
-      branch: String(data.get("branch") ?? "NextVision"),
+      branch: String(data.get("branch") ?? defaultBranch ?? "NextVision"),
       area: String(data.get("area") ?? "0 m²"),
       capacity: Number(data.get("capacity") ?? 0),
-      checkinMode: String(data.get("checkinMode") ?? "Quay lễ tân"),
-      devices: String(data.get("devices") ?? "—") || "—",
+      checkinMode,
+      devices: showDevicesField ? devices : [],
+      services,
       status: existing?.status ?? "Hoạt động",
     });
   };
 
   return (
     <div className={styles.nestedOverlay}>
-      <form className={styles.smallModal} onSubmit={handleSubmit} style={{ width: 560 }}>
-        <header>
+      <form className={styles.zoneFormModal} onSubmit={handleSubmit}>
+        <header className={styles.zoneFormHeader}>
           <h2>{isEdit ? "Chỉnh sửa khu vực" : "Thêm khu vực mới"}</h2>
           <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
-        <div className={styles.smallModalBody}>
+        <div className={styles.zoneFormBody}>
           {error ? <p className={styles.formError}>{error}</p> : null}
-          <FormField label="Mã khu vực" name="code" value={existing?.code ?? "ZONE-XX-AUTO"} />
-          <FormField defaultValue={existing?.name} label="Tên khu vực" name="name" placeholder="VD: Khu Driving Range chính" required />
-          <SelectField defaultValue={existing?.zoneType} label="Loại khu vực" name="zoneType" options={["Driving Range", "Putting Green", "Bay Indoor", "Sân 9 lỗ", "Sân 18 lỗ"]} />
-          <SelectField defaultValue={existing?.branch} label="Chi nhánh" name="branch" options={["NextVision", "Hà Nội Center", "Sài Gòn West"]} />
+
           <div className={styles.formGrid}>
+            <FormField label="Mã khu vực" name="code" value={existing?.code ?? "ZONE-XX-AUTO"} />
+            <SelectField defaultValue={existing?.zoneType} label="Loại khu vực" name="zoneType" options={["Driving Range", "Putting Green", "Bay Indoor", "Sân 9 lỗ", "Sân 18 lỗ"]} />
+          </div>
+
+          <FormField defaultValue={existing?.name} label="Tên khu vực" name="name" placeholder="VD: Khu Driving Range chính" required />
+
+          <div className={styles.formGrid}>
+            <SelectField defaultValue={existing?.branch ?? defaultBranch} label="Chi nhánh" name="branch" options={BRANCHES} />
             <FormField defaultValue={existing?.area} label="Diện tích (m²)" name="area" placeholder="VD: 1.200 m²" />
             <FormField defaultValue={existing?.capacity ? String(existing.capacity) : ""} label="Sức chứa (người)" name="capacity" placeholder="VD: 50" type="number" />
           </div>
-          <SelectField defaultValue={existing?.checkinMode} label="Phương thức Check-in" name="checkinMode" options={["Kiểm soát cửa", "Quay lễ tân", "Cả hai"]} />
-          <FormField defaultValue={existing?.devices} label="Thiết bị kiểm soát cửa" name="devices" placeholder="VD: Cổng 01 (FaceID), Bay-Reader-2" />
+
+          <div className={styles.checkinModeBlock}>
+            <span className={styles.checkinModeLabel}>Phương thức Check-in <b>*</b></span>
+            <div className={styles.checkinModeGrid}>
+              {(["Kiểm soát cửa", "Quay lễ tân", "Cả hai"] as const).map((mode) => (
+                <button
+                  className={`${styles.checkinModeCard} ${checkinMode === mode ? styles.checkinModeCardActive : ""}`}
+                  key={mode}
+                  onClick={() => setCheckinMode(mode)}
+                  type="button"
+                >
+                  <span className={styles.checkinModeRadio}>
+                    {checkinMode === mode ? <span /> : null}
+                  </span>
+                  <div>
+                    <strong>{mode}</strong>
+                    <small>
+                      {mode === "Kiểm soát cửa"
+                        ? "FaceID/RFID quét vào tự động"
+                        : mode === "Quay lễ tân"
+                          ? "Lễ tân thao tác thủ công"
+                          : "FaceID + Lễ tân backup"}
+                    </small>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {showDevicesField ? (
+            <div className={styles.fieldWithManage}>
+              <span className={styles.fieldWithManageLabel}>Thiết bị kiểm soát cửa <b>*</b></span>
+              <div className={styles.fieldWithManageRow}>
+                <ChipMultiSelect
+                  emptyText="Chưa cấu hình thiết bị nào"
+                  manageLabel="Quản lý thiết bị (Module 12)"
+                  onChange={setDevices}
+                  onManage={() => alert("Mở Module 12 → Tab Thiết bị")}
+                  options={ALL_DEVICES}
+                  placeholder="Chọn thiết bị kiểm soát..."
+                  selected={devices}
+                />
+                <button
+                  className={styles.fieldManageBtn}
+                  onClick={() => alert("Mở Module 12 → Tab Thiết bị")}
+                  type="button"
+                >
+                  <Settings size={14} /> Quản lý
+                </button>
+              </div>
+              <small className={styles.fieldHint}>Bắt buộc khi Check-in = Kiểm soát cửa / Cả hai</small>
+            </div>
+          ) : null}
+
+          <div className={styles.fieldWithManage}>
+            <span className={styles.fieldWithManageLabel}>Dịch vụ cung cấp</span>
+            <ChipMultiSelect
+              onChange={setServices}
+              options={ALL_SERVICES}
+              placeholder="Chọn dịch vụ KV này cung cấp..."
+              selected={services}
+            />
+          </div>
+
           <FormField area label="Ghi chú" name="note" placeholder="Mô tả thêm về khu vực..." />
         </div>
         <footer>
@@ -742,14 +959,117 @@ function ZoneFormModal({
   );
 }
 
+function ChipMultiSelect({
+  emptyText,
+  manageLabel,
+  onChange,
+  onManage,
+  options,
+  placeholder,
+  selected,
+}: {
+  emptyText?: string;
+  manageLabel?: string;
+  onChange: (next: string[]) => void;
+  onManage?: () => void;
+  options: string[];
+  placeholder: string;
+  selected: string[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const toggleItem = (item: string) => {
+    onChange(selected.includes(item) ? selected.filter((i) => i !== item) : [...selected, item]);
+  };
+
+  const filtered = options.filter((o) => !search || o.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div className={styles.chipMultiSelect}>
+      <button
+        className={`${styles.chipMultiSelectInput} ${open ? styles.chipMultiSelectInputOpen : ""}`}
+        onClick={() => setOpen((v) => !v)}
+        type="button"
+      >
+        {selected.length === 0 ? (
+          <span className={styles.chipMultiSelectPlaceholder}>{placeholder}</span>
+        ) : (
+          <div className={styles.chipMultiSelectChips}>
+            {selected.map((s) => (
+              <span className={styles.chipMultiSelectChip} key={s}>
+                {s}
+                <button
+                  aria-label={`Bỏ ${s}`}
+                  onClick={(event) => { event.stopPropagation(); toggleItem(s); }}
+                  type="button"
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <ChevronDown size={16} className={open ? styles.chipMultiSelectChevronOpen : ""} />
+      </button>
+
+      {open ? (
+        <>
+          <button
+            aria-label="Đóng dropdown"
+            className={styles.popoverBackdrop}
+            onClick={() => setOpen(false)}
+            type="button"
+          />
+          <div className={styles.chipMultiSelectPopover}>
+            <div className={styles.chipMultiSelectSearchRow}>
+              <Search size={14} />
+              <input
+                autoFocus
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Tìm..."
+                value={search}
+              />
+              {search ? (
+                <button onClick={() => setSearch("")} type="button"><X size={12} /></button>
+              ) : null}
+            </div>
+            <div className={styles.chipMultiSelectList}>
+              {filtered.length === 0 ? (
+                <p className={styles.chipMultiSelectEmpty}>{emptyText ?? "Không có mục nào"}</p>
+              ) : (
+                filtered.map((o) => (
+                  <label className={styles.chipMultiSelectOption} key={o}>
+                    <input checked={selected.includes(o)} onChange={() => toggleItem(o)} type="checkbox" />
+                    <span>{o}</span>
+                  </label>
+                ))
+              )}
+            </div>
+            {manageLabel && onManage ? (
+              <div className={styles.chipMultiSelectFooter}>
+                <button onClick={() => { onManage(); setOpen(false); }} type="button">
+                  <Settings size={14} /> {manageLabel}
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 /* ---------------- Timeslot Management ---------------- */
 
 function TimeslotManagementModal({
   timeslots,
+  zones,
   onClose,
   onUpdate,
 }: {
   timeslots: TimeSlot[];
+  zones: Zone[];
   onClose: () => void;
   onUpdate: (slots: TimeSlot[]) => void;
 }) {
@@ -799,6 +1119,7 @@ function TimeslotManagementModal({
                 <th>GIỜ</th>
                 <th>THỜI LƯỢNG</th>
                 <th>NGÀY</th>
+                <th>KHU VỰC ÁP DỤNG</th>
                 <th>CHI NHÁNH</th>
                 <th>TRẠNG THÁI</th>
                 <th>THAO TÁC</th>
@@ -814,7 +1135,14 @@ function TimeslotManagementModal({
                   </td>
                   <td><strong>{s.startTime} – {s.endTime}</strong></td>
                   <td>{s.duration}</td>
-                  <td>{s.days}</td>
+                  <td>{formatDays(s.days)}</td>
+                  <td>
+                    {s.zones.length === 0 ? (
+                      <span className={styles.cellMuted}>Độc lập (BR-M9-14)</span>
+                    ) : (
+                      <span className={styles.zoneCountBadge}>{s.zones.length} khu vực</span>
+                    )}
+                  </td>
                   <td>{s.branches}</td>
                   <td><StatusBadge status={s.status} /></td>
                   <td>
@@ -835,6 +1163,7 @@ function TimeslotManagementModal({
           existing={editing}
           onClose={() => { setFormOpen(false); setEditing(null); }}
           onSubmit={submit}
+          zones={zones}
         />
       ) : null}
     </div>
@@ -845,14 +1174,41 @@ function TimeslotFormModal({
   existing,
   onClose,
   onSubmit,
+  zones,
 }: {
   existing: TimeSlot | null;
   onClose: () => void;
   onSubmit: (slot: TimeSlot) => void;
+  zones: Zone[];
 }) {
   const isEdit = !!existing;
   const [color, setColor] = useState(existing?.color ?? "blue");
+  const [days, setDays] = useState<string[]>(existing?.days ?? ["T2", "T3", "T4", "T5", "T6"]);
+  const [selectedZones, setSelectedZones] = useState<string[]>(existing?.zones ?? []);
   const [error, setError] = useState("");
+
+  const toggleDay = (id: string) =>
+    setDays((current) => current.includes(id) ? current.filter((d) => d !== id) : [...current, id]);
+
+  const setQuickPreset = (preset: "weekday" | "weekend" | "all") => {
+    if (preset === "weekday") setDays(["T2", "T3", "T4", "T5", "T6"]);
+    else if (preset === "weekend") setDays(["T7", "CN"]);
+    else setDays(["T2", "T3", "T4", "T5", "T6", "T7", "CN"]);
+  };
+
+  const isWeekdayPreset = days.length === 5 && ["T2", "T3", "T4", "T5", "T6"].every((d) => days.includes(d));
+  const isWeekendPreset = days.length === 2 && days.includes("T7") && days.includes("CN");
+  const isAllPreset = days.length === 7;
+
+  const zoneOptions = zones.map((z) => `${z.code} — ${z.name}`);
+  const zoneSelectedFormatted = selectedZones.map((code) => {
+    const found = zones.find((z) => z.code === code);
+    return found ? `${found.code} — ${found.name}` : code;
+  });
+
+  const handleZoneChange = (next: string[]) => {
+    setSelectedZones(next.map((label) => label.split(" — ")[0]));
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -862,6 +1218,7 @@ function TimeslotFormModal({
     const end = String(data.get("endTime") ?? "");
     if (!name) { setError("Tên khung giờ bắt buộc"); return; }
     if (start >= end) { setError("Giờ kết thúc phải > Giờ bắt đầu (BR-M9-20)"); return; }
+    if (days.length === 0) { setError("Phải chọn ≥1 ngày áp dụng"); return; }
 
     const [sh, sm] = start.split(":").map(Number);
     const [eh, em] = end.split(":").map(Number);
@@ -874,8 +1231,9 @@ function TimeslotFormModal({
       startTime: start,
       endTime: end,
       duration,
-      days: String(data.get("days") ?? "Tất cả ngày"),
+      days,
       branches: String(data.get("branches") ?? "NextVision"),
+      zones: selectedZones,
       color,
       status: existing?.status ?? "Hoạt động",
     });
@@ -885,20 +1243,73 @@ function TimeslotFormModal({
 
   return (
     <div className={styles.nestedOverlay}>
-      <form className={styles.smallModal} onSubmit={handleSubmit} style={{ width: 560 }}>
-        <header>
+      <form className={styles.zoneFormModal} onSubmit={handleSubmit}>
+        <header className={styles.zoneFormHeader}>
           <h2>{isEdit ? "Chỉnh sửa khung giờ" : "Thêm khung giờ mới"}</h2>
           <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
-        <div className={styles.smallModalBody}>
+        <div className={styles.zoneFormBody}>
           {error ? <p className={styles.formError}>{error}</p> : null}
+
           <FormField defaultValue={existing?.name} label="Tên khung giờ" name="name" placeholder="VD: Sáng sớm thứ 2-6" required />
+
           <div className={styles.formGrid}>
             <FormField defaultValue={existing?.startTime ?? "06:00"} label="Giờ bắt đầu" name="startTime" type="time" />
             <FormField defaultValue={existing?.endTime ?? "09:00"} label="Giờ kết thúc" name="endTime" type="time" />
           </div>
-          <SelectField defaultValue={existing?.days} label="Ngày áp dụng" name="days" options={["Tất cả ngày", "Thứ 2 - Thứ 6", "Thứ 7 - Chủ nhật"]} />
+
+          <div className={styles.fieldWithManage}>
+            <span className={styles.fieldWithManageLabel}>Khu vực áp dụng</span>
+            <ChipMultiSelect
+              emptyText="Chưa có khu vực — thêm trong Quản lý Khu vực"
+              onChange={handleZoneChange}
+              options={zoneOptions}
+              placeholder="Chọn khu vực áp dụng (có thể bỏ trống — KG độc lập theo BR-M9-14)..."
+              selected={zoneSelectedFormatted}
+            />
+            <small className={styles.fieldHint}>BR-M9-14: Khung giờ có thể tồn tại không cần gán Khu vực cụ thể</small>
+          </div>
+
+          <div className={styles.fieldWithManage}>
+            <span className={styles.fieldWithManageLabel}>Ngày áp dụng <b>*</b></span>
+            <div className={styles.dayQuickPills}>
+              <button
+                className={`${styles.dayQuickPill} ${isWeekdayPreset ? styles.dayQuickPillActive : ""}`}
+                onClick={() => setQuickPreset("weekday")}
+                type="button"
+              >
+                T2 - T6
+              </button>
+              <button
+                className={`${styles.dayQuickPill} ${isWeekendPreset ? styles.dayQuickPillActive : ""}`}
+                onClick={() => setQuickPreset("weekend")}
+                type="button"
+              >
+                T7 - CN
+              </button>
+              <button
+                className={`${styles.dayQuickPill} ${isAllPreset ? styles.dayQuickPillActive : ""}`}
+                onClick={() => setQuickPreset("all")}
+                type="button"
+              >
+                Tất cả
+              </button>
+              <span className={styles.dayQuickDivider} />
+              <span className={styles.dayCustomLabel}>Hoặc chọn ngày cụ thể:</span>
+            </div>
+            <div className={styles.dayPills}>
+              {DAY_PILLS.map((d) => (
+                <label className={styles.dayPill} key={d.id} title={d.full}>
+                  <input checked={days.includes(d.id)} onChange={() => toggleDay(d.id)} type="checkbox" />
+                  <span>{d.label}</span>
+                </label>
+              ))}
+            </div>
+            <small className={styles.fieldHint}>Đang chọn: <strong>{formatDays(days)}</strong></small>
+          </div>
+
           <FormField defaultValue={existing?.branches} label="Chi nhánh áp dụng" name="branches" placeholder="VD: NextVision" />
+
           <div className={styles.colorPickerLabel}>
             <span>Màu hiển thị</span>
             <div className={styles.colorPicker}>
@@ -913,6 +1324,7 @@ function TimeslotFormModal({
               ))}
             </div>
           </div>
+
           <FormField area label="Ghi chú" placeholder="Mô tả ngắn..." />
         </div>
         <footer>
@@ -1274,6 +1686,80 @@ function TierFormCell({
 }
 
 /* ---------------- Delete Modal ---------------- */
+
+function TogglePackageStatusModal({
+  pkg,
+  onCancel,
+  onConfirm,
+}: {
+  pkg: ContractPackage;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const isActivating = pkg.status === "Tạm ngưng";
+
+  return (
+    <div className={styles.modalOverlay}>
+      <section className={`${styles.toggleStatusModal} ${isActivating ? styles.toggleStatusActivating : styles.toggleStatusPausing}`}>
+        <header className={styles.toggleStatusHeader}>
+          <div className={styles.toggleStatusIcon}>
+            {isActivating ? <AlertCircle size={26} /> : <Power size={26} />}
+          </div>
+          <div>
+            <h2>{isActivating ? "Bật kích hoạt bảng giá" : "Hủy kích hoạt bảng giá"}</h2>
+            <p>{pkg.code} — {pkg.name}</p>
+          </div>
+          <button className={styles.deleteClose} onClick={onCancel} type="button"><X size={20} /></button>
+        </header>
+
+        <div className={styles.toggleStatusBody}>
+          {isActivating ? (
+            <>
+              <p>
+                Bạn có chắc muốn <strong>bật kích hoạt</strong> bảng giá này? Sau khi kích hoạt:
+              </p>
+              <ul className={styles.toggleStatusBullets}>
+                <li>✓ Bảng giá sẽ xuất hiện trong form bán Hợp đồng (Module 03)</li>
+                <li>✓ Sale có thể chọn bảng giá này khi ký HĐ mới</li>
+                <li>✓ Trạng thái <strong>Tạm ngưng</strong> sẽ chuyển thành <strong>Hoạt động</strong></li>
+              </ul>
+              <div className={styles.toggleStatusInfoCard}>
+                <span>Đã có {pkg.usage} HĐ dùng bảng giá này — không bị ảnh hưởng khi đổi trạng thái.</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <p>
+                Bạn có chắc muốn <strong>hủy kích hoạt</strong> bảng giá này? Khi tạm ngưng:
+              </p>
+              <ul className={styles.toggleStatusBullets}>
+                <li>✗ Bảng giá <strong>không còn hiển thị</strong> trong form bán Hợp đồng (Module 03)</li>
+                <li>✓ {pkg.usage} HĐ đang dùng bảng giá <strong>không bị ảnh hưởng</strong></li>
+                <li>✓ Có thể bật lại bất kỳ lúc nào</li>
+              </ul>
+              <div className={styles.toggleStatusWarnCard}>
+                <AlertCircle size={16} />
+                <span>Sale + Lễ tân sẽ không bán được gói này cho HĐ mới sau khi tạm ngưng.</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        <footer className={styles.deleteFooter}>
+          <button onClick={onCancel} type="button">Hủy bỏ</button>
+          <button
+            className={isActivating ? styles.dangerButton : styles.blueButton}
+            onClick={onConfirm}
+            type="button"
+          >
+            {isActivating ? <Power size={16} /> : <Power size={16} />}
+            {isActivating ? "Kích hoạt" : "Hủy kích hoạt"}
+          </button>
+        </footer>
+      </section>
+    </div>
+  );
+}
 
 function DeletePricingModal({
   code,
