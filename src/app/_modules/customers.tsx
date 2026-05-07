@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import {
+  AlertTriangle,
   Calendar,
   ChevronDown,
   ChevronLeft,
@@ -9,8 +10,10 @@ import {
   DollarSign,
   Download,
   Edit,
+  Eye,
   Filter,
   Mail,
+  Pencil,
   Phone,
   Plus,
   Search,
@@ -73,12 +76,24 @@ const ALL_COLUMNS: { id: string; label: string }[] = [
   { id: "createdDate", label: "Ngày tạo" },
   { id: "creator", label: "Người tạo" },
   { id: "debt", label: "Công nợ" },
+  { id: "actions", label: "Hành động" },
 ];
+
+function ddmmyyyyToISO(input: string | undefined): string {
+  if (!input || input === "---") return "";
+  const parts = input.split("/");
+  if (parts.length !== 3) return "";
+  const [d, m, y] = parts;
+  return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
 
 export default function CustomersScreen() {
   const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailTab, setDetailTab] = useState("Thông tin cơ bản");
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [nestedModal, setNestedModal] = useState<"group" | "source" | "companion" | null>(null);
   const [rows, setRows] = useState(customerRows);
   const [query, setQuery] = useState("");
@@ -119,6 +134,35 @@ export default function CustomersScreen() {
     setRows((current) => [customer, ...current]);
     setQuickFilter("Tất cả");
     setAdvFilter(DEFAULT_ADV_FILTER);
+  };
+
+  const openDetail = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setDetailTab("Thông tin cơ bản");
+    setDetailOpen(true);
+  };
+
+  const openEdit = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setEditOpen(true);
+  };
+
+  const openDelete = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setDeleteOpen(true);
+  };
+
+  const handleUpdateCustomer = (updated: Customer) => {
+    setRows((current) => current.map((c) => (c.code === updated.code ? updated : c)));
+    setEditOpen(false);
+    setSelectedCustomer(null);
+  };
+
+  const handleDeleteCustomer = () => {
+    if (!selectedCustomer) return;
+    setRows((current) => current.filter((c) => c.code !== selectedCustomer.code));
+    setDeleteOpen(false);
+    setSelectedCustomer(null);
   };
 
   const activeAdvCount = (Object.keys(advFilter) as Array<keyof AdvFilter>).filter(
@@ -315,10 +359,7 @@ export default function CustomersScreen() {
                       <td>
                         <button
                           className={styles.memberCode}
-                          onClick={() => {
-                            setDetailTab("Thông tin cơ bản");
-                            setDetailOpen(true);
-                          }}
+                          onClick={() => openDetail(customer)}
                           type="button"
                         >
                           {customer.code}
@@ -349,6 +390,37 @@ export default function CustomersScreen() {
                     {isVisible("createdDate") ? <td className={styles.dateGreen}>{customer.createdDate}</td> : null}
                     {isVisible("creator") ? <td>{customer.creator}</td> : null}
                     {isVisible("debt") ? <td>{customer.debt}</td> : null}
+                    {isVisible("actions") ? (
+                      <td>
+                        <div className={styles.tableActions}>
+                          <button
+                            aria-label={`Xem chi tiết ${customer.code}`}
+                            onClick={() => openDetail(customer)}
+                            title="Xem chi tiết"
+                            type="button"
+                          >
+                            <Eye size={15} />
+                          </button>
+                          <button
+                            aria-label={`Chỉnh sửa ${customer.code}`}
+                            onClick={() => openEdit(customer)}
+                            title="Chỉnh sửa"
+                            type="button"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          <button
+                            aria-label={`Xóa ${customer.code}`}
+                            className={styles.tableActionDanger}
+                            onClick={() => openDelete(customer)}
+                            title="Xóa khách hàng"
+                            type="button"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    ) : null}
                   </tr>
                 ))}
                 {filteredRows.length === 0 ? (
@@ -374,14 +446,42 @@ export default function CustomersScreen() {
       </section>
 
       {addOpen ? (
-        <AddCustomerModal
+        <CustomerFormModal
+          mode="create"
           nestedModal={nestedModal}
-          onCreate={handleCreateCustomer}
           onClose={() => {
             setAddOpen(false);
             setNestedModal(null);
           }}
           onOpenNested={setNestedModal}
+          onSubmit={handleCreateCustomer}
+        />
+      ) : null}
+
+      {editOpen && selectedCustomer ? (
+        <CustomerFormModal
+          initialCustomer={selectedCustomer}
+          key={selectedCustomer.code}
+          mode="edit"
+          nestedModal={nestedModal}
+          onClose={() => {
+            setEditOpen(false);
+            setNestedModal(null);
+            setSelectedCustomer(null);
+          }}
+          onOpenNested={setNestedModal}
+          onSubmit={handleUpdateCustomer}
+        />
+      ) : null}
+
+      {deleteOpen && selectedCustomer ? (
+        <DeleteCustomerModal
+          customer={selectedCustomer}
+          onCancel={() => {
+            setDeleteOpen(false);
+            setSelectedCustomer(null);
+          }}
+          onConfirm={handleDeleteCustomer}
         />
       ) : null}
 
@@ -392,25 +492,35 @@ export default function CustomersScreen() {
       {detailOpen ? (
         <CustomerDetailModal
           activeTab={detailTab}
+          customer={selectedCustomer}
           onChangeTab={setDetailTab}
-          onClose={() => setDetailOpen(false)}
+          onClose={() => {
+            setDetailOpen(false);
+            setSelectedCustomer(null);
+          }}
         />
       ) : null}
     </>
   );
 }
 
-function AddCustomerModal({
+function CustomerFormModal({
+  initialCustomer,
+  mode,
   nestedModal,
-  onCreate,
   onClose,
   onOpenNested,
+  onSubmit,
 }: {
+  initialCustomer?: Customer;
+  mode: "create" | "edit";
   nestedModal: "group" | "source" | "companion" | null;
-  onCreate: (customer: Customer) => void;
   onClose: () => void;
   onOpenNested: (modal: "group" | "source" | "companion") => void;
+  onSubmit: (customer: Customer) => void;
 }) {
+  const isEdit = mode === "edit";
+  const initial = initialCustomer;
   const [error, setError] = useState("");
   const [showExtra, setShowExtra] = useState(true);
   const [customFields, setCustomFields] = useState<Array<{ id: string; label: string }>>([]);
@@ -438,31 +548,56 @@ function AddCustomerModal({
       return;
     }
 
-    onCreate({
-      birth: String(data.get("birth") ?? "---") || "---",
-      cards: ["green"],
-      code: "HV" + String(customerRows.length + 1).padStart(3, "0"),
-      createdDate: "7/4/2026",
-      creator: "Admin",
-      debt: "0 VND",
-      email: String(data.get("email") ?? ""),
-      endDate: "---",
-      gender: String(data.get("gender") ?? "Nam") || "Nam",
-      name,
-      phone,
-      registerDate: "---",
-      status: "Chưa đăng ký",
-    });
+    const birthInput = String(data.get("birth") ?? "");
+    const formattedBirth = birthInput
+      ? (() => {
+          const [y, m, d] = birthInput.split("-");
+          return d && m && y ? `${Number(d)}/${Number(m)}/${y}` : birthInput;
+        })()
+      : initial?.birth ?? "---";
+
+    if (isEdit && initial) {
+      onSubmit({
+        ...initial,
+        birth: formattedBirth || "---",
+        email: String(data.get("email") ?? initial.email),
+        gender: String(data.get("gender") ?? initial.gender) || initial.gender,
+        name,
+        phone,
+      });
+    } else {
+      onSubmit({
+        birth: formattedBirth || "---",
+        cards: ["green"],
+        code: "HV" + String(customerRows.length + 1).padStart(3, "0"),
+        createdDate: "7/4/2026",
+        creator: "Admin",
+        debt: "0 VND",
+        email: String(data.get("email") ?? ""),
+        endDate: "---",
+        gender: String(data.get("gender") ?? "Nam") || "Nam",
+        name,
+        phone,
+        registerDate: "---",
+        status: "Chưa đăng ký",
+      });
+    }
     onClose();
   };
+
+  const headerTitle = isEdit ? "Chỉnh sửa hội viên" : "Thêm mới khách hàng";
+  const headerSubtitle = isEdit
+    ? `Cập nhật thông tin hội viên ${initial?.name ?? ""} (${initial?.code ?? ""})`
+    : "Điền thông tin hội viên mới vào form bên dưới";
+  const submitLabel = isEdit ? "Cập nhật" : "Thêm hội viên";
 
   return (
     <div className={styles.modalOverlay}>
       <form className={`${styles.modalShell} ${nestedModal ? styles.dimmedModal : ""}`} onSubmit={handleSubmit}>
         <header className={styles.modalHeader}>
           <div>
-            <h2>Thêm mới khách hàng</h2>
-            <p>Điền thông tin hội viên mới vào form bên dưới</p>
+            <h2>{headerTitle}</h2>
+            <p>{headerSubtitle}</p>
           </div>
           <button onClick={onClose} type="button"><X size={22} /></button>
         </header>
@@ -471,13 +606,46 @@ function AddCustomerModal({
           {error ? <p className={styles.formError}>{error}</p> : null}
           <h3>Thông tin khách hàng</h3>
           <div className={styles.formGrid}>
-            <FormField action="Tự động" label="Mã hội viên" name="code" value="HV1001" />
-            <FormField action="Tự động" label="Mã sinh trắc học" name="biometricCode" value="12345678" />
-            <FormField required label="Họ và tên" name="name" placeholder="Nhập họ và tên" />
-            <FormField required label="Số điện thoại" name="phone" placeholder="Nhập số điện thoại" />
-            <FormField label="Email" name="email" placeholder="Nhập email" />
-            <FormField label="Ngày sinh" name="birth" type="date" />
+            <FormField
+              action={isEdit ? undefined : "Tự động"}
+              label="Mã hội viên"
+              name="code"
+              value={initial?.code ?? "HV1001"}
+            />
+            <FormField
+              action={isEdit ? undefined : "Tự động"}
+              label="Mã sinh trắc học"
+              name="biometricCode"
+              value="12345678"
+            />
+            <FormField
+              defaultValue={initial?.name}
+              label="Họ và tên"
+              name="name"
+              placeholder="Nhập họ và tên"
+              required
+            />
+            <FormField
+              defaultValue={initial?.phone}
+              label="Số điện thoại"
+              name="phone"
+              placeholder="Nhập số điện thoại"
+              required
+            />
+            <FormField
+              defaultValue={initial?.email}
+              label="Email"
+              name="email"
+              placeholder="Nhập email"
+            />
+            <FormField
+              defaultValue={ddmmyyyyToISO(initial?.birth)}
+              label="Ngày sinh"
+              name="birth"
+              type="date"
+            />
             <SelectField
+              defaultValue={initial?.creator}
               label="Nhân viên phụ trách"
               name="assignedSale"
               options={["Tự chọn Sale phụ trách", "Admin", "Nguyễn Văn Thành", "Lê Thị Mai", "Trần Minh Hoàng"]}
@@ -561,7 +729,12 @@ function AddCustomerModal({
             <>
               <div className={styles.formGrid}>
                 <FormField label="Số CMND/CCCD" placeholder="Nhập số CMND/CCCD" />
-                <FormField label="Giới tính" name="gender" placeholder="Nam / Nữ" />
+                <FormField
+                  defaultValue={initial?.gender}
+                  label="Giới tính"
+                  name="gender"
+                  placeholder="Nam / Nữ"
+                />
                 <FormField
                   action="Thêm"
                   label="Người đi cùng"
@@ -581,7 +754,7 @@ function AddCustomerModal({
 
         <footer className={styles.modalFooter}>
           <button onClick={onClose} type="button">Hủy bỏ</button>
-          <button className={styles.blueButton} type="submit">Thêm hội viên</button>
+          <button className={styles.blueButton} type="submit">{submitLabel}</button>
         </footer>
       </form>
     </div>
@@ -677,24 +850,29 @@ function AddCompanionModal({ onClose }: { onClose: () => void }) {
 
 function CustomerDetailModal({
   activeTab,
+  customer,
   onChangeTab,
   onClose,
 }: {
   activeTab: string;
+  customer: Customer | null;
   onChangeTab: (tab: string) => void;
   onClose: () => void;
 }) {
   const tabs = ["Thông tin cơ bản", "Hợp đồng", "Lịch sử giao dịch", "Lịch sử checkin", "Kết quả tập luyện", "Inbody", "Meal Plan", "Trợ giảng TA", "Profile"];
+  const displayName = customer?.name ?? "Nguyễn Văn A";
+  const displayCode = customer?.code ?? "HV001";
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <div className={styles.modalOverlay}>
       <section className={styles.detailModal}>
         <header className={styles.detailHeader}>
           <div className={styles.detailIdentity}>
-            <span>N</span>
+            <span>{initial}</span>
             <div>
-              <h2>Nguyễn Văn A</h2>
-              <p>Mã hội viên: HV001</p>
+              <h2>{displayName}</h2>
+              <p>Mã hội viên: {displayCode}</p>
             </div>
           </div>
           <div>
@@ -717,7 +895,7 @@ function CustomerDetailModal({
         </nav>
 
         <div className={styles.detailBody} key={activeTab}>
-          <CustomerDetailTab activeTab={activeTab} />
+          <CustomerDetailTab activeTab={activeTab} customer={customer} />
         </div>
 
         <footer className={styles.modalFooter}>
@@ -728,7 +906,7 @@ function CustomerDetailModal({
   );
 }
 
-function CustomerDetailTab({ activeTab }: { activeTab: string }) {
+function CustomerDetailTab({ activeTab, customer }: { activeTab: string; customer: Customer | null }) {
   if (activeTab === "Hợp đồng") {
     return <ContractsTab />;
   }
@@ -761,7 +939,7 @@ function CustomerDetailTab({ activeTab }: { activeTab: string }) {
     return <ProfilesTab />;
   }
 
-  return <BasicInfoTab />;
+  return <BasicInfoTab customer={customer} />;
 }
 
 function TrainingResultsTab() {
@@ -1530,7 +1708,7 @@ function EditTaModal({
   );
 }
 
-function BasicInfoTab() {
+function BasicInfoTab({ customer }: { customer: Customer | null }) {
   const [companionOpen, setCompanionOpen] = useState(false);
   const [companions, setCompanions] = useState([
     { name: "Nguyễn Văn B", relation: "Vợ/Chồng", phone: "0912345678", birth: "20/6/1992" },
@@ -1540,13 +1718,23 @@ function BasicInfoTab() {
   const removeCompanion = (index: number) =>
     setCompanions((current) => current.filter((_, i) => i !== index));
 
+  const c = customer;
+  const isExpired = c?.status === "Hết hạn";
+  const debtIsDanger = !!c?.debt && c.debt !== "0 VND";
+
   return (
     <>
       <section className={styles.detailCard}>
         <h3>Trạng thái & Thẻ</h3>
         <div className={styles.detailThree}>
-          <InfoBlock label="Trạng thái"><CustomerStatus status="Hết hạn" /></InfoBlock>
-          <InfoBlock label="Thẻ hội viên"><div className={styles.cardDots}><span className={styles.greenDot} /><span className={styles.redDot} /></div></InfoBlock>
+          <InfoBlock label="Trạng thái"><CustomerStatus status={c?.status ?? "Hết hạn"} /></InfoBlock>
+          <InfoBlock label="Thẻ hội viên">
+            <div className={styles.cardDots}>
+              {(c?.cards ?? ["green", "red"]).map((card, index) => (
+                <span className={styles[`${card}Dot`]} key={`${card}-${index}`} />
+              ))}
+            </div>
+          </InfoBlock>
           <InfoBlock label="Sinh trắc học"><BiometricBadges /></InfoBlock>
         </div>
       </section>
@@ -1554,31 +1742,36 @@ function BasicInfoTab() {
       <section className={styles.detailCard}>
         <h3>Thông tin cá nhân</h3>
         <div className={styles.infoGrid}>
-          <InfoLine icon={User} label="Họ và tên" value="Nguyễn Văn A" />
-          <InfoLine icon={Phone} label="Số điện thoại" value="0901234567" />
-          <InfoLine icon={Mail} label="Email" value="nguyenvana@gmail.com" />
-          <InfoLine icon={User} label="Giới tính" value="Nam" />
-          <InfoLine icon={Calendar} label="Ngày sinh" value="15/5/1990" />
+          <InfoLine icon={User} label="Họ và tên" value={c?.name ?? "Nguyễn Văn A"} />
+          <InfoLine icon={Phone} label="Số điện thoại" value={c?.phone ?? "0901234567"} />
+          <InfoLine icon={Mail} label="Email" value={c?.email ?? "nguyenvana@gmail.com"} />
+          <InfoLine icon={User} label="Giới tính" value={c?.gender ?? "Nam"} />
+          <InfoLine icon={Calendar} label="Ngày sinh" value={c?.birth ?? "15/5/1990"} />
         </div>
       </section>
 
       <div className={styles.detailTwo}>
         <section className={styles.detailCard}>
           <h3>Thông tin hợp đồng</h3>
-          <InfoLine icon={Calendar} label="Ngày đăng ký" value="15/1/2024" />
-          <InfoLine icon={Calendar} label="Ngày hết hạn" value="15/7/2024" danger />
+          <InfoLine icon={Calendar} label="Ngày đăng ký" value={c?.registerDate ?? "15/1/2024"} />
+          <InfoLine
+            danger={isExpired}
+            icon={Calendar}
+            label="Ngày hết hạn"
+            value={c?.endDate ?? "15/7/2024"}
+          />
         </section>
         <section className={styles.detailCard}>
           <h3>Tài chính</h3>
-          <InfoLine icon={DollarSign} label="Công nợ" value="1.500.000 VND" danger />
+          <InfoLine danger={debtIsDanger} icon={DollarSign} label="Công nợ" value={c?.debt ?? "1.500.000 VND"} />
         </section>
       </div>
 
       <section className={styles.detailCard}>
         <h3>Thông tin quản lý</h3>
         <div className={styles.mgmtGrid}>
-          <InfoBlock label="Ngày tạo">10/1/2024</InfoBlock>
-          <InfoBlock label="Người tạo">Admin</InfoBlock>
+          <InfoBlock label="Ngày tạo">{c?.createdDate ?? "10/1/2024"}</InfoBlock>
+          <InfoBlock label="Người tạo">{c?.creator ?? "Admin"}</InfoBlock>
           <InfoBlock label="Nhóm khách hàng"><span className={styles.mgmtMuted}>---</span></InfoBlock>
           <InfoBlock label="Nguồn khách hàng"><span className={styles.mgmtMuted}>---</span></InfoBlock>
         </div>
@@ -2556,5 +2749,125 @@ function UpperLabel({
       <span>{label}</span>
       {children}
     </label>
+  );
+}
+
+function DeleteCustomerModal({
+  customer,
+  onCancel,
+  onConfirm,
+}: {
+  customer: Customer;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const [confirmText, setConfirmText] = useState("");
+  const required = "XOA";
+  const canConfirm = confirmText.trim().toUpperCase() === required;
+
+  const cascadeItems = [
+    "Thông tin cá nhân + hồ sơ + ghi chú khách hàng",
+    "Hợp đồng + lịch sử giao dịch + công nợ",
+    "Booking Teetime, Line Tập, Lớp học, Lịch HLV",
+    "Kết quả tập luyện + scorecard + Profile golf",
+    "Inbody + Meal Plan + chỉ số cá nhân",
+    "Sinh trắc học (Face/Vân tay) + thẻ RFID",
+  ];
+
+  return (
+    <div className={styles.modalOverlay}>
+      <section className={styles.deleteModal}>
+        <header className={styles.deleteHeader}>
+          <div className={styles.deleteIcon}>
+            <AlertTriangle size={28} />
+          </div>
+          <div>
+            <h2>Xác nhận xóa khách hàng</h2>
+            <p>Thao tác này không thể hoàn tác</p>
+          </div>
+          <button aria-label="Đóng" className={styles.deleteClose} onClick={onCancel} type="button">
+            <X size={20} />
+          </button>
+        </header>
+
+        <div className={styles.deleteBody}>
+          <div className={styles.deleteWarning}>
+            <strong>⚠ XÓA VĨNH VIỄN khách hàng khỏi hệ thống.</strong>
+            <span>
+              Tất cả dữ liệu liên quan sẽ bị xóa và không thể khôi phục sau 30 ngày
+              (Module 12 Cài đặt → Thùng rác). Áp dụng theo <em>BR-M12-05</em>.
+            </span>
+          </div>
+
+          <section className={styles.deleteCustomerCard}>
+            <h3>Thông tin khách hàng sẽ bị xóa</h3>
+            <div className={styles.deleteCustomerGrid}>
+              <div>
+                <span>Mã hội viên</span>
+                <strong className={styles.memberCode}>{customer.code}</strong>
+              </div>
+              <div>
+                <span>Họ và tên</span>
+                <strong>{customer.name}</strong>
+              </div>
+              <div>
+                <span>Số điện thoại</span>
+                <strong>{customer.phone}</strong>
+              </div>
+              <div>
+                <span>Email</span>
+                <strong>{customer.email || "—"}</strong>
+              </div>
+              <div>
+                <span>Trạng thái</span>
+                <strong><CustomerStatus status={customer.status} /></strong>
+              </div>
+              <div>
+                <span>Công nợ</span>
+                <strong className={customer.debt && customer.debt !== "0 VND" ? styles.dateRed : undefined}>
+                  {customer.debt}
+                </strong>
+              </div>
+            </div>
+          </section>
+
+          <section className={styles.deleteCascade}>
+            <h3>Dữ liệu sẽ bị xóa theo (cascade)</h3>
+            <ul>
+              {cascadeItems.map((item) => (
+                <li key={item}><Trash2 size={14} /> {item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <div className={styles.deleteSoftNote}>
+            <strong>Cơ chế xóa:</strong> Soft Delete 30 ngày → vào Thùng rác (Module 12 Cài đặt).
+            Sau 30 ngày sẽ <em>xóa cứng</em> không thể khôi phục.
+          </div>
+
+          <label className={styles.deleteConfirmInput}>
+            <span>Để xác nhận, gõ <code>XOA</code> vào ô bên dưới:</span>
+            <input
+              autoFocus
+              onChange={(event) => setConfirmText(event.target.value)}
+              placeholder="Gõ XOA để bật nút xác nhận"
+              value={confirmText}
+            />
+          </label>
+        </div>
+
+        <footer className={styles.deleteFooter}>
+          <button onClick={onCancel} type="button">Hủy bỏ</button>
+          <button
+            className={styles.dangerButton}
+            disabled={!canConfirm}
+            onClick={onConfirm}
+            type="button"
+          >
+            <Trash2 size={16} /> Xác nhận xóa
+          </button>
+        </footer>
+      </section>
+    </div>
   );
 }

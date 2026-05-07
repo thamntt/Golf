@@ -243,6 +243,7 @@ export function InfoLine({ danger, icon: Icon, label, value }: { danger?: boolea
 
 export function SelectField({
   action,
+  defaultValue,
   label,
   name,
   onAction,
@@ -252,6 +253,7 @@ export function SelectField({
   onChange,
 }: {
   action?: string;
+  defaultValue?: string;
   label: string;
   name?: string;
   onAction?: () => void;
@@ -267,7 +269,7 @@ export function SelectField({
       <div className={styles.selectControl}>
         <select
           className={styles.selectInput}
-          defaultValue={isControlled ? undefined : options[0]}
+          defaultValue={isControlled ? undefined : (defaultValue ?? options[0])}
           name={name}
           onChange={onChange ? (event) => onChange(event.target.value) : undefined}
           required={required}
@@ -288,6 +290,7 @@ export function SelectField({
 export function FormField({
   action,
   area,
+  defaultValue,
   label,
   name,
   onAction,
@@ -298,6 +301,7 @@ export function FormField({
 }: {
   action?: string;
   area?: boolean;
+  defaultValue?: string;
   label: string;
   name?: string;
   onAction?: () => void;
@@ -311,10 +315,10 @@ export function FormField({
       <span>{label} {required ? <b>*</b> : null}</span>
       <div className={styles.inputWrap}>
         {area ? (
-          <textarea name={name} placeholder={placeholder} />
+          <textarea defaultValue={defaultValue} name={name} placeholder={placeholder} />
         ) : (
           <input
-            defaultValue={value}
+            defaultValue={defaultValue ?? value}
             name={name}
             placeholder={placeholder}
             readOnly={Boolean(value)}
