@@ -729,23 +729,6 @@ export default function ContractsScreen() {
         title="Hợp Đồng"
         subtitle="Quản lý vòng đời hợp đồng hội viên: ký mới · gia hạn · nâng cấp · bảo lưu · chuyển nhượng · chuyển đổi"
       >
-        <div className={styles.contractBanner}>
-          <div className={styles.contractBannerText}>
-            <FileSignature size={20} />
-            <div>
-              <strong>Tạo Hợp Đồng Mới Cho Khách Hàng</strong>
-              <span>Bắt đầu giao dịch — chọn KH có sẵn hoặc tạo mới, snapshot giá theo Bảng Giá</span>
-            </div>
-          </div>
-          <button
-            className={styles.contractBannerCta}
-            onClick={() => setActiveTab("list")}
-            type="button"
-          >
-            <PlusCircle size={16} /> Vào Tab Hợp Đồng
-          </button>
-        </div>
-
         <div className={styles.contractTabs}>
           <TabButton active={activeTab === "list"} icon={FileText} label="Hợp Đồng" count={contracts.length} onClick={() => setActiveTab("list")} />
           <TabButton active={activeTab === "renewal"} icon={RefreshCcw} label="Gia Hạn" count={renewals.length} onClick={() => setActiveTab("renewal")} />
@@ -755,15 +738,9 @@ export default function ContractsScreen() {
           <TabButton active={activeTab === "conversion"} icon={Layers} label="Chuyển Đổi HĐ" count={conversions.length} onClick={() => setActiveTab("conversion")} accent="blue" />
         </div>
 
-        <div className={styles.contractKpi}>
-          <KpiCard label="Tổng HĐ" value={String(stats.total)} tone="blue" icon={FileText} />
-          <KpiCard label="Đang Hoạt Động" value={String(stats.active)} tone="green" icon={CheckCircle2} />
-          <KpiCard label="Sắp Hết Hạn (≤30 ngày)" value={String(stats.soon)} tone="amber" icon={Clock} />
-          <KpiCard label="Đã Hết Hạn" value={String(stats.expired)} tone="red" icon={XCircle} />
-        </div>
-
         {activeTab === "list" ? (
           <ContractListTab
+            stats={stats}
             contracts={contracts}
             onChange={setContracts}
             onAddRenewal={(contract) => {
@@ -919,7 +896,10 @@ function KpiCard({
 // SECTION E — Tab "Hợp Đồng" (CRUD chính)
 // =====================================================================================
 
+type ContractListStats = { total: number; active: number; soon: number; expired: number };
+
 type ContractListProps = {
+  stats: ContractListStats;
   contracts: Contract[];
   onChange: (next: Contract[]) => void;
   onAddRenewal: (contract: Contract) => void;
@@ -949,6 +929,7 @@ type ContractListProps = {
 };
 
 function ContractListTab({
+  stats,
   contracts,
   onChange,
   onAddRenewal,
@@ -1033,6 +1014,13 @@ function ContractListTab({
 
   return (
     <>
+      <div className={styles.contractKpi}>
+        <KpiCard label="Tổng HĐ" value={String(stats.total)} tone="blue" icon={FileText} />
+        <KpiCard label="Đang Hoạt Động" value={String(stats.active)} tone="green" icon={CheckCircle2} />
+        <KpiCard label="Sắp Hết Hạn (≤30 ngày)" value={String(stats.soon)} tone="amber" icon={Clock} />
+        <KpiCard label="Đã Hết Hạn" value={String(stats.expired)} tone="red" icon={XCircle} />
+      </div>
+
       <div className={styles.contractListSearchRow}>
         <div className={styles.pricingSearch} style={{ flex: 1 }}>
           <Search size={18} />

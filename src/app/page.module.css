@@ -9325,3 +9325,2309 @@
 .contractFormSection.contractSectionOrange { border-top: 3px solid #ea580c; }
 .contractFormSection.contractSectionTeal { border-top: 3px solid #0d9488; }
 .contractFormSection.contractSectionIndigo { border-top: 3px solid #4f46e5; }
+
+/* ===================== PRO MODAL SYSTEM (modern form layout) ===================== */
+
+.proOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+  animation: proFadeIn 0.18s ease-out;
+}
+
+.proNestedOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+  animation: proFadeIn 0.15s ease-out;
+}
+
+@keyframes proFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.proModal {
+  background: #fff;
+  border-radius: 18px;
+  width: min(1140px, 96vw);
+  max-height: 92vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  box-shadow: 0 28px 64px -12px rgba(2, 6, 23, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  position: relative;
+  font-family: inherit;
+}
+
+.proModalSm {
+  width: min(820px, 96vw);
+}
+
+.proModal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--pro-accent, #2563eb) 0%, var(--pro-accent2, #6366f1) 50%, var(--pro-accent, #2563eb) 100%);
+  z-index: 5;
+}
+
+/* Themes */
+.proThemeBlue { --pro-accent: #2563eb; --pro-accent2: #6366f1; --pro-tint: #eff6ff; --pro-tint2: #e0e7ff; --pro-text: #1e3a8a; }
+.proThemeEmerald { --pro-accent: #059669; --pro-accent2: #14b8a6; --pro-tint: #ecfdf5; --pro-tint2: #d1fae5; --pro-text: #064e3b; }
+.proThemeAmber { --pro-accent: #d97706; --pro-accent2: #f59e0b; --pro-tint: #fffbeb; --pro-tint2: #fef3c7; --pro-text: #78350f; }
+.proThemePurple { --pro-accent: #9333ea; --pro-accent2: #a855f7; --pro-tint: #faf5ff; --pro-tint2: #f3e8ff; --pro-text: #581c87; }
+.proThemeIndigo { --pro-accent: #4f46e5; --pro-accent2: #6366f1; --pro-tint: #eef2ff; --pro-tint2: #e0e7ff; --pro-text: #312e81; }
+.proThemeRose { --pro-accent: #e11d48; --pro-accent2: #f43f5e; --pro-tint: #fff1f2; --pro-tint2: #ffe4e6; --pro-text: #881337; }
+
+/* Header */
+.proHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px 28px;
+  background: linear-gradient(135deg, var(--pro-tint) 0%, var(--pro-tint2) 100%);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.proHeaderIcon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--pro-accent) 0%, var(--pro-accent2) 100%);
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 16px -6px rgba(37, 99, 235, 0.4);
+}
+
+.proHeaderText {
+  flex: 1;
+  min-width: 0;
+}
+
+.proHeaderText h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--pro-text);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.proHeaderEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  background: var(--pro-accent);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.proHeaderText p {
+  margin: 0;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.proHeaderClose {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 10px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.proHeaderClose:hover {
+  background: #fff;
+  color: #0f172a;
+  transform: scale(1.05);
+}
+
+/* Body — 2 columns: form + summary */
+.proBody {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 0;
+  overflow-y: auto;
+  background: #fafbfc;
+}
+
+.proBodyNoSummary {
+  grid-template-columns: 1fr;
+}
+
+.proForm {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* Step nav (chips on top of form) */
+.proStepNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+.proStepChip,
+.proStepChipActive,
+.proStepChipDone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  justify-content: center;
+}
+
+.proStepChip:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.proStepChipDone {
+  color: var(--pro-accent);
+}
+
+.proStepChipDone .proStepNumber {
+  background: var(--pro-accent);
+  color: #fff;
+}
+
+.proStepChipActive {
+  background: linear-gradient(135deg, var(--pro-tint) 0%, var(--pro-tint2) 100%);
+  color: var(--pro-text);
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.proStepChipActive .proStepNumber {
+  background: var(--pro-accent);
+  color: #fff;
+}
+
+.proStepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Section card */
+.proSection {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.proSectionTitle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.proSectionIcon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pro-tint);
+  color: var(--pro-accent);
+  border-radius: 10px;
+}
+
+.proSectionTitleText {
+  flex: 1;
+}
+
+.proSectionTitleText h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.proSectionTitleText p {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Field grid */
+.proGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.proGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.proGridFull {
+  grid-column: 1 / -1;
+}
+
+.proField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.proLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.01em;
+}
+
+.proLabel b {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.proLabel small {
+  margin-left: auto;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.proInput {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13.5px;
+  color: #0f172a;
+  background: #fff;
+  transition: all 0.15s;
+  width: 100%;
+  min-width: 0;
+}
+
+.proInput:hover {
+  border-color: #cbd5e1;
+}
+
+.proInput:focus-visible {
+  outline: none;
+  border-color: var(--pro-accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.proInput[readonly],
+.proInput:read-only {
+  background: #f8fafc;
+  color: #475569;
+  cursor: default;
+}
+
+.proInput::placeholder {
+  color: #94a3b8;
+}
+
+textarea.proInput {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.proHelp {
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+/* Radio cards */
+.proRadioRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+.proRadioCard,
+.proRadioCardActive {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.15s;
+}
+
+.proRadioCard:hover {
+  border-color: var(--pro-accent);
+  background: var(--pro-tint);
+}
+
+.proRadioCardActive {
+  border-color: var(--pro-accent);
+  background: linear-gradient(135deg, var(--pro-tint) 0%, var(--pro-tint2) 100%);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.proRadioCard input,
+.proRadioCardActive input {
+  margin-top: 2px;
+  accent-color: var(--pro-accent);
+}
+
+.proRadioCard > div,
+.proRadioCardActive > div {
+  flex: 1;
+}
+
+.proRadioCard strong,
+.proRadioCardActive strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.proRadioCard small,
+.proRadioCardActive small {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Summary panel */
+.proSummary {
+  position: sticky;
+  top: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 24px 24px 24px 0;
+  background: transparent;
+  align-self: start;
+}
+
+.proSummaryCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.06);
+}
+
+.proSummaryHeader {
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--pro-accent) 0%, var(--pro-accent2) 100%);
+  color: #fff;
+}
+
+.proSummaryHeader h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.01em;
+}
+
+.proSummaryHeader p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.proSummaryBody {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.proSummaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #e2e8f0;
+  color: #475569;
+}
+
+.proSummaryRow:last-of-type {
+  border-bottom: none;
+}
+
+.proSummaryRow strong {
+  color: #0f172a;
+  font-weight: 600;
+  text-align: right;
+}
+
+.proSummaryDiscount strong {
+  color: #dc2626;
+}
+
+.proSummaryHl strong {
+  color: var(--pro-accent);
+}
+
+.proSummaryGrand {
+  margin-top: 4px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--pro-tint) 0%, var(--pro-tint2) 100%);
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 800;
+}
+
+.proSummaryGrand span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pro-text);
+}
+
+.proSummaryGrand strong {
+  font-size: 18px;
+  color: var(--pro-accent);
+  letter-spacing: -0.01em;
+}
+
+.proSummaryHint {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: var(--pro-tint);
+  border: 1px solid var(--pro-tint2);
+  border-radius: 10px;
+  font-size: 11.5px;
+  color: var(--pro-text);
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.proSummaryHint svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.proSummaryEmpty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Footer */
+.proFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 28px;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.proFooterMeta {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.proFooterMeta strong {
+  color: var(--pro-accent);
+  font-weight: 700;
+}
+
+.proFooterActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.proBtnGhost {
+  padding: 10px 18px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.proBtnGhost:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.proBtnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, var(--pro-accent) 0%, var(--pro-accent2) 100%);
+  border: none;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.4);
+}
+
+.proBtnPrimary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -2px rgba(37, 99, 235, 0.5);
+}
+
+.proBtnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Error banner */
+.proError {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.proError svg {
+  flex-shrink: 0;
+}
+
+/* Info banner */
+.proInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--pro-tint);
+  border: 1px solid var(--pro-tint2);
+  border-radius: 10px;
+  color: var(--pro-text);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.proInfo svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--pro-accent);
+}
+
+/* List rows (search HD/KH inside form) */
+.proSearchList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.proSearchRow,
+.proSearchRowActive {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12.5px;
+  transition: all 0.12s;
+  text-align: left;
+}
+
+.proSearchRow:hover {
+  background: var(--pro-tint);
+  border-color: var(--pro-tint2);
+}
+
+.proSearchRowActive {
+  background: var(--pro-tint);
+  border-color: var(--pro-accent);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.proSearchRow input,
+.proSearchRowActive input {
+  accent-color: var(--pro-accent);
+}
+
+.proSearchRow > div,
+.proSearchRowActive > div {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.proSearchRow strong,
+.proSearchRowActive strong {
+  font-size: 12.5px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.proSearchRow small,
+.proSearchRowActive small {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Compare cards (upgrade/conversion) */
+.proCompare {
+  display: grid;
+  grid-template-columns: 1fr 32px 1fr;
+  gap: 12px;
+  align-items: stretch;
+  grid-column: 1 / -1;
+}
+
+.proCompareCard {
+  padding: 16px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.proCompareCardOld {
+  background: #fafbfc;
+}
+
+.proCompareCardNew {
+  background: linear-gradient(135deg, var(--pro-tint) 0%, var(--pro-tint2) 100%);
+  border-color: var(--pro-tint2);
+}
+
+.proCompareCard h5 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.proCompareCardNew h5 {
+  color: var(--pro-text);
+}
+
+.proCompareCard strong {
+  display: block;
+  font-size: 15px;
+  color: #0f172a;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.proCompareCard div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+  color: #64748b;
+}
+
+.proCompareCard div span:last-child {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.proCompareArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pro-accent);
+}
+
+/* Payment list */
+.proPaymentList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
+.proPaymentRow {
+  display: grid;
+  grid-template-columns: 200px 1fr 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.proPaymentRow .proInput {
+  padding: 9px 12px;
+}
+
+.proIconBtn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.proIconBtn:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.proIconBtn:disabled {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.proAddRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  background: transparent;
+  border: 1px dashed var(--pro-accent);
+  border-radius: 10px;
+  color: var(--pro-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  align-self: flex-start;
+  transition: all 0.15s;
+}
+
+.proAddRow:hover {
+  background: var(--pro-tint);
+}
+
+/* Totals card (in form, before footer) */
+.proTotals {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  grid-column: 1 / -1;
+}
+
+.proTotals > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #475569;
+  padding: 4px 0;
+}
+
+.proTotals > div strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.proTotalsGrand {
+  border-top: 2px solid #e2e8f0;
+  margin-top: 4px;
+  padding-top: 12px !important;
+  font-weight: 700;
+  align-items: baseline;
+}
+
+.proTotalsGrand span {
+  font-size: 14px;
+  color: #0f172a !important;
+}
+
+.proTotalsGrand strong {
+  font-size: 20px !important;
+  color: var(--pro-accent) !important;
+  letter-spacing: -0.01em;
+}
+
+/* Discount input pair */
+.proDiscount {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 6px;
+}
+
+/* Checkbox / toggle line */
+.proCheckLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.proCheckLine input {
+  accent-color: var(--pro-accent);
+  width: 16px;
+  height: 16px;
+}
+
+/* Attachments */
+.proAttachments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
+.proAttachmentItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: #1e293b;
+}
+
+.proAttachmentItem span {
+  flex: 1;
+}
+
+.proAttachmentItem button {
+  background: transparent;
+  border: none;
+  color: #b91c1c;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.proDropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px;
+  background: var(--pro-tint);
+  border: 2px dashed var(--pro-tint2);
+  border-radius: 12px;
+  color: var(--pro-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.15s;
+  grid-column: 1 / -1;
+}
+
+.proDropzone:hover {
+  background: var(--pro-tint2);
+  border-color: var(--pro-accent);
+}
+
+.proDropzone svg {
+  color: var(--pro-accent);
+}
+
+.proDropzone strong {
+  font-size: 13.5px;
+  color: var(--pro-text);
+}
+
+.proDropzone small {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Member card (group ticket-like) */
+.proMemberCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.proMemberHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.proMemberHead .proSectionIcon {
+  width: 30px;
+  height: 30px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.proMemberHead h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .proBody {
+    grid-template-columns: 1fr;
+  }
+  .proSummary {
+    position: relative;
+    padding: 0 24px 16px;
+  }
+  .proGrid,
+  .proGrid3 {
+    grid-template-columns: 1fr;
+  }
+  .proPaymentRow {
+    grid-template-columns: 1fr 1fr 36px;
+  }
+  .proCompare {
+    grid-template-columns: 1fr;
+  }
+  .proCompareArrow {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 700px) {
+  .proHeader {
+    padding: 16px 18px;
+  }
+  .proForm {
+    padding: 16px 18px;
+  }
+  .proFooter {
+    padding: 12px 18px;
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .proFooterActions {
+    width: 100%;
+  }
+  .proFooterActions button {
+    flex: 1;
+  }
+}
+
+/* ===================== MODERN OVERHAUL FOR CONTRACT/RENEWAL/UPGRADE/SUSPENSION/TRANSFER/CONVERSION FORMS ===================== */
+/* Override các class cũ để form modal có UI hiện đại, đẹp, chuyên nghiệp */
+
+.modalOverlay {
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 24px !important;
+  animation: proFadeIn 0.18s ease-out;
+}
+
+.contractFormModal {
+  background: #fff !important;
+  border-radius: 18px !important;
+  width: min(1180px, 96vw) !important;
+  max-height: 92vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 28px 64px -12px rgba(2, 6, 23, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.06) !important;
+  overflow: hidden !important;
+  position: relative;
+  animation: proFadeIn 0.2s ease-out;
+}
+
+.contractFormModal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb 0%, #6366f1 50%, #8b5cf6 100%);
+  z-index: 5;
+}
+
+/* Header banner — thay gradient xanh lá → glass header với icon circle gradient */
+.contractFormBanner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 22px 28px !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 60%, #f5f3ff 100%) !important;
+  color: #0f172a !important;
+  border-radius: 18px 18px 0 0 !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+  position: relative;
+}
+
+.contractFormBanner h2 {
+  position: relative;
+  margin: 0 !important;
+  font-size: 19px !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Icon circle decoration trước title */
+.contractFormBanner h2::before {
+  content: "";
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
+  flex-shrink: 0;
+  box-shadow: 0 8px 16px -6px rgba(37, 99, 235, 0.45);
+  background-image:
+    linear-gradient(135deg, #2563eb 0%, #6366f1 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3C/svg%3E");
+  background-size: cover, 22px 22px;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-blend-mode: normal, screen;
+}
+
+.contractFormBanner button {
+  width: 36px !important;
+  height: 36px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  color: #475569 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s !important;
+}
+
+.contractFormBanner button:hover {
+  background: #fff !important;
+  color: #0f172a !important;
+  transform: scale(1.05);
+}
+
+/* Section nav — modern chips, sticky */
+.contractSectionNav {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  padding: 12px 28px !important;
+  background: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+.contractSectionTab,
+.contractSectionTabActive {
+  padding: 9px 16px !important;
+  border-radius: 10px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  gap: 8px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #64748b !important;
+  transition: all 0.15s !important;
+}
+
+.contractSectionTab:hover {
+  background: #fff !important;
+  color: #1e293b !important;
+}
+
+.contractSectionTabActive {
+  background: #fff !important;
+  color: #2563eb !important;
+  border-color: rgba(37, 99, 235, 0.25) !important;
+  box-shadow: 0 2px 6px -2px rgba(37, 99, 235, 0.2), 0 0 0 1px rgba(37, 99, 235, 0.08);
+}
+
+.contractSectionNumber {
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  background: #e2e8f0;
+  color: #475569;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+}
+
+.contractSectionTabActive .contractSectionNumber {
+  background: linear-gradient(135deg, #2563eb 0%, #6366f1 100%) !important;
+  color: #fff !important;
+}
+
+/* Body */
+.contractFormBody {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 24px 28px !important;
+  background: #fafbfc;
+}
+
+/* Section card — card với rounded + soft shadow */
+.contractFormSection {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  margin-bottom: 16px;
+}
+
+/* Bỏ border-top color cũ — thay bằng colored icon circle */
+.contractFormSection.contractSectionBlue,
+.contractFormSection.contractSectionGreen,
+.contractFormSection.contractSectionPurple,
+.contractFormSection.contractSectionOrange,
+.contractFormSection.contractSectionTeal,
+.contractFormSection.contractSectionIndigo {
+  border-top-width: 1px !important;
+  border-top-color: #e2e8f0 !important;
+}
+
+/* Section header — không full-width gradient nữa, dùng colored circle icon + bigger title */
+.contractSectionHeader {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 0 0 18px !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  background: transparent !important;
+  letter-spacing: -0.005em;
+}
+
+.contractSectionHeader::before {
+  content: "";
+  width: 4px;
+  height: 24px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2563eb 0%, #6366f1 100%);
+  flex-shrink: 0;
+}
+
+.contractSectionBlue .contractSectionHeader::before { background: linear-gradient(180deg, #2563eb 0%, #6366f1 100%); }
+.contractSectionGreen .contractSectionHeader::before { background: linear-gradient(180deg, #059669 0%, #14b8a6 100%); }
+.contractSectionPurple .contractSectionHeader::before { background: linear-gradient(180deg, #9333ea 0%, #a855f7 100%); }
+.contractSectionOrange .contractSectionHeader::before { background: linear-gradient(180deg, #d97706 0%, #f59e0b 100%); }
+.contractSectionTeal .contractSectionHeader::before { background: linear-gradient(180deg, #0d9488 0%, #14b8a6 100%); }
+.contractSectionIndigo .contractSectionHeader::before { background: linear-gradient(180deg, #4f46e5 0%, #6366f1 100%); }
+
+.contractSectionHeader svg {
+  color: #2563eb;
+}
+
+.contractSectionGreen .contractSectionHeader svg { color: #059669; }
+.contractSectionPurple .contractSectionHeader svg { color: #9333ea; }
+.contractSectionOrange .contractSectionHeader svg { color: #d97706; }
+.contractSectionTeal .contractSectionHeader svg { color: #0d9488; }
+.contractSectionIndigo .contractSectionHeader svg { color: #4f46e5; }
+
+/* Inputs — bigger radius, modern focus ring */
+.contractGrid2 {
+  gap: 14px 18px !important;
+}
+
+.contractGrid2 label,
+.contractFormSection > label {
+  gap: 6px !important;
+  font-size: 12.5px !important;
+}
+
+.contractGrid2 label > span,
+.contractFormSection > label > span {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+  letter-spacing: 0.01em;
+}
+
+.contractGrid2 input,
+.contractGrid2 textarea,
+.contractGrid2 select,
+.contractFormSection > label > input,
+.contractFormSection > label > textarea,
+.contractFormSection > label > select,
+.contractFormSection input[type="text"],
+.contractFormSection input[type="number"],
+.contractFormSection input[type="email"],
+.contractFormSection input[type="date"] {
+  padding: 10px 13px !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  font-size: 13.5px !important;
+  background: #fff !important;
+  color: #0f172a !important;
+  transition: all 0.15s !important;
+}
+
+.contractGrid2 input:hover,
+.contractGrid2 textarea:hover,
+.contractGrid2 select:hover {
+  border-color: #cbd5e1 !important;
+}
+
+.contractGrid2 input:focus-visible,
+.contractGrid2 textarea:focus-visible,
+.contractGrid2 select:focus-visible,
+.contractFormSection > label > input:focus-visible,
+.contractFormSection > label > select:focus-visible {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+}
+
+.contractGrid2 input:read-only,
+.contractGrid2 input[readonly] {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  cursor: default;
+}
+
+/* Add / Auto button — outline modern */
+.contractAutoBtn,
+.contractAddBtn {
+  padding: 9px 14px !important;
+  background: #fff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #2563eb !important;
+  cursor: pointer !important;
+  transition: all 0.15s !important;
+}
+
+.contractAutoBtn:hover,
+.contractAddBtn:hover {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+  color: #1d4ed8 !important;
+}
+
+.contractToggleAdvanced {
+  margin-top: 14px;
+  background: transparent !important;
+  border: 1px dashed #cbd5e1 !important;
+  border-radius: 10px !important;
+  padding: 10px 16px !important;
+  font: inherit !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: #2563eb !important;
+  cursor: pointer !important;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.contractToggleAdvanced:hover {
+  background: #eff6ff !important;
+  border-color: #2563eb !important;
+}
+
+.contractCheckboxLine {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 14px !important;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 12.5px !important;
+  color: #334155 !important;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.contractCheckboxLine:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.contractCheckboxLine input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #2563eb;
+  margin: 0;
+}
+
+/* Footer */
+.contractFormFooter {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 16px 28px !important;
+  background: #fff !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+.contractFormFooter span {
+  font-size: 12.5px !important;
+  color: #64748b !important;
+}
+
+.contractFormFooter span strong {
+  color: #2563eb !important;
+  font-weight: 700 !important;
+}
+
+.contractFormFooter > div {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+/* Outline + green button trong footer */
+.contractFormFooter .outlineButton {
+  padding: 10px 20px !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  cursor: pointer !important;
+  transition: all 0.15s !important;
+}
+
+.contractFormFooter .outlineButton:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+.contractFormFooter .greenButton {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 24px !important;
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  transition: all 0.15s !important;
+  box-shadow: 0 4px 12px -2px rgba(22, 163, 74, 0.4) !important;
+}
+
+.contractFormFooter .greenButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -2px rgba(22, 163, 74, 0.5) !important;
+}
+
+/* Customer card / preview cards */
+.contractCustomerCard {
+  padding: 14px 16px !important;
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%) !important;
+  border: 1px solid #dbeafe !important;
+  border-radius: 12px !important;
+  gap: 6px !important;
+}
+
+.contractCustomerCard strong {
+  font-size: 14px !important;
+  color: #1e40af !important;
+  margin-bottom: 4px;
+}
+
+.contractCustomerCode {
+  background: #fff !important;
+  color: #1e40af !important;
+  padding: 2px 10px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  display: inline-block;
+  margin-left: 6px;
+}
+
+/* Radio cards (loại bảo lưu, KH mới/cũ, ...) */
+.contractRadioRow {
+  gap: 10px !important;
+  margin-bottom: 16px !important;
+}
+
+.contractRadio,
+.contractRadioActive {
+  padding: 14px 18px !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  gap: 10px !important;
+  flex: 1 !important;
+  cursor: pointer;
+  transition: all 0.15s !important;
+}
+
+.contractRadio:hover {
+  border-color: #93c5fd !important;
+  background: #f8fafc !important;
+}
+
+.contractRadioActive {
+  border-color: #2563eb !important;
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%) !important;
+  color: #1e40af !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.contractRadio input[type="radio"],
+.contractRadioActive input[type="radio"] {
+  accent-color: #2563eb;
+}
+
+/* Totals card */
+.contractTotalsCard {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 14px 18px !important;
+  margin-top: 16px !important;
+}
+
+.contractTotalsCard > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.contractTotalsCard strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.contractTotalRow {
+  border-top: 2px solid #e2e8f0 !important;
+  margin-top: 4px !important;
+  padding-top: 12px !important;
+  align-items: baseline;
+}
+
+.contractTotalRow span {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+}
+
+.contractTotalRow strong {
+  font-size: 20px !important;
+  color: #2563eb !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Side panel (renewal/upgrade summary) */
+.contractRenewalLayout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.contractSidePanel {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.06);
+}
+
+.contractSidePanel h4 {
+  margin: 0 !important;
+  padding: 14px 18px !important;
+  background: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+}
+
+.contractSidePanelRow {
+  padding: 8px 18px !important;
+  font-size: 12.5px !important;
+}
+
+.contractSidePanelTotal {
+  margin: 0 !important;
+  padding: 14px 18px !important;
+  border-top: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+  font-size: 14px !important;
+}
+
+.contractSidePanelTotal strong {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em;
+}
+
+/* Theme variants for side panel */
+.transferPurplePanel h4 {
+  background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+}
+
+.transferPurplePanel .contractSidePanelTotal {
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+}
+
+/* Search list (HD/KH list trong renewal/upgrade) */
+.contractContractList {
+  border-radius: 12px !important;
+  border-color: #e2e8f0 !important;
+  background: #f8fafc !important;
+  padding: 6px;
+  max-height: 240px !important;
+}
+
+.contractContractRow {
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  margin-bottom: 4px;
+  background: #fff;
+  border: 1px solid transparent !important;
+  border-bottom: 1px solid transparent !important;
+  cursor: pointer;
+  transition: all 0.12s !important;
+}
+
+.contractContractRow:hover {
+  background: #eff6ff !important;
+  border-color: #dbeafe !important;
+}
+
+.contractContractRowSelected {
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%) !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Upgrade compare cards */
+.contractUpgradeCompare {
+  gap: 14px !important;
+}
+
+.contractUpgradeOld,
+.contractUpgradeNew {
+  padding: 16px 18px !important;
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.contractUpgradeOld {
+  background: #fafbfc !important;
+}
+
+.contractUpgradeNew {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+  border-color: #86efac !important;
+}
+
+.contractUpgradeBlock h5 {
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: #94a3b8 !important;
+  font-weight: 700 !important;
+  margin: 0 0 6px !important;
+}
+
+.contractUpgradeNew h5 {
+  color: #15803d !important;
+}
+
+.contractUpgradeBlock strong {
+  font-size: 15px !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  margin-bottom: 10px !important;
+  display: block;
+}
+
+.contractUpgradeBlock div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+  color: #64748b;
+}
+
+.contractUpgradeBlock div span:last-child {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.contractUpgradeArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
+}
+
+/* Suspension matrix */
+.contractSuspensionMatrix > div {
+  padding: 14px !important;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+  border-color: #bae6fd !important;
+  border-radius: 12px !important;
+}
+
+.contractSuspensionMatrix span {
+  font-size: 11px !important;
+  color: #0369a1 !important;
+}
+
+.contractSuspensionMatrix strong {
+  font-size: 22px !important;
+  color: #075985 !important;
+  font-weight: 800;
+}
+
+.contractSuspensionContractCard {
+  padding: 12px 14px !important;
+  border-radius: 10px !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #fff !important;
+  cursor: pointer;
+  transition: all 0.15s !important;
+}
+
+.contractSuspensionContractCard:hover {
+  border-color: #93c5fd !important;
+  background: #eff6ff !important;
+}
+
+.contractSuspensionSelected {
+  border-color: #2563eb !important;
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%) !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+}
+
+/* Conversion 3-col form */
+.conversionForm3Col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.conversionFormCol {
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 18px 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.conversionFormCol h4 {
+  margin: 0 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.conversionFormCol h4::before {
+  content: "";
+  width: 4px;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2563eb 0%, #6366f1 100%);
+}
+
+.conversionFormCol h4 svg {
+  color: #2563eb;
+}
+
+/* Form error banner */
+.formError {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px 16px !important;
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+  border-radius: 10px !important;
+  color: #b91c1c !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  margin-bottom: 16px;
+}
+
+/* Info banner */
+.contractInfoBanner {
+  padding: 12px 16px !important;
+  background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%) !important;
+  border: 1px solid #bfdbfe !important;
+  border-radius: 10px !important;
+  color: #1e40af !important;
+  font-size: 12.5px !important;
+  margin-top: 16px !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.contractInfoBanner svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Discount input */
+.contractDiscountInput {
+  display: grid !important;
+  grid-template-columns: 1fr 80px !important;
+  gap: 6px !important;
+}
+
+.contractDiscountInput input,
+.contractDiscountInput select {
+  padding: 10px 13px !important;
+  border-radius: 10px !important;
+}
+
+/* Payment list */
+.contractPaymentList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contractPaymentRow {
+  display: grid;
+  grid-template-columns: 200px 1fr 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.contractPaymentRow input,
+.contractPaymentRow select {
+  padding: 9px 12px !important;
+  border-radius: 10px !important;
+}
+
+.contractRowRemove {
+  width: 36px !important;
+  height: 36px !important;
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+  border-radius: 10px !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.contractRowRemove:hover:not(:disabled) {
+  background: #fee2e2 !important;
+}
+
+.contractRowRemove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contractLinkBtn {
+  align-self: flex-start;
+  padding: 9px 14px !important;
+  border-radius: 10px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: #2563eb !important;
+  background: transparent !important;
+  border: 1px dashed #93c5fd !important;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.contractLinkBtn:hover {
+  background: #eff6ff !important;
+  border-color: #2563eb !important;
+}
+
+/* Payment summary */
+.contractPaymentSummary {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border-radius: 12px !important;
+  padding: 14px 18px !important;
+  margin-top: 14px !important;
+}
+
+.contractPaymentSummary > div {
+  padding: 5px 0;
+  font-size: 13px;
+}
+
+.contractDebtRow {
+  border-top: 1px solid #fecaca;
+  padding-top: 10px !important;
+  margin-top: 4px;
+}
+
+.contractDebtRow strong {
+  color: #b91c1c !important;
+  font-weight: 800 !important;
+}
+
+.contractZeroRow {
+  border-top: 1px solid #bbf7d0;
+  padding-top: 10px !important;
+  margin-top: 4px;
+}
+
+.contractZeroRow strong {
+  color: #16a34a !important;
+  font-weight: 800 !important;
+}
+
+/* Attachments / Dropzone */
+.contractAttachments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.contractAttachmentItem {
+  padding: 10px 14px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  font-size: 12.5px !important;
+}
+
+.contractUploadBtn,
+.contractDropzone {
+  padding: 24px !important;
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%) !important;
+  border: 2px dashed #93c5fd !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #1e40af !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center !important;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s !important;
+}
+
+.contractUploadBtn:hover,
+.contractDropzone:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%) !important;
+  border-color: #2563eb !important;
+}
+
+/* Form Section explicit padding for nested */
+.contractFormSection > h3 {
+  margin: 0 0 18px !important;
+}
+
+/* Sub-modal nested overlay — backdrop nhẹ hơn */
+.nestedOverlay {
+  background: rgba(15, 23, 42, 0.4) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Small modal in nested — modern */
+.smallModal {
+  background: #fff !important;
+  border-radius: 16px !important;
+  width: min(560px, 96vw) !important;
+  box-shadow: 0 28px 64px -12px rgba(2, 6, 23, 0.4) !important;
+  overflow: hidden;
+  animation: proFadeIn 0.18s ease-out;
+}
+
+.smallModal header {
+  padding: 18px 22px !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.smallModal header h2 {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.smallModal header button {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.smallModal footer {
+  padding: 14px 22px !important;
+  background: #fafbfc !important;
+  border-top: 1px solid #e2e8f0 !important;
+  gap: 8px !important;
+}
+
+.smallModal footer button {
+  padding: 9px 18px !important;
+  border-radius: 10px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+}
+
+.smallModal footer .blueButton {
+  background: linear-gradient(135deg, #2563eb 0%, #6366f1 100%) !important;
+  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.4) !important;
+}
+
+.smallModal footer .greenButton {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%) !important;
+  box-shadow: 0 4px 12px -2px rgba(22, 163, 74, 0.4) !important;
+}
+
+/* SmallModalBody inputs */
+.smallModalBody {
+  padding: 20px 22px !important;
+}
+
+.smallModalBody label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.smallModalBody label > span {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+}
+
+.smallModalBody input,
+.smallModalBody textarea,
+.smallModalBody select {
+  padding: 10px 13px !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  font: inherit !important;
+  font-size: 13.5px !important;
+  background: #fff !important;
+  color: #0f172a !important;
+  transition: all 0.15s;
+}
+
+.smallModalBody input:focus-visible,
+.smallModalBody textarea:focus-visible,
+.smallModalBody select:focus-visible {
+  outline: none;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Detail modal */
+.detailModal {
+  background: #fff !important;
+  border-radius: 18px !important;
+  width: min(1080px, 96vw) !important;
+  max-height: 92vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 28px 64px -12px rgba(2, 6, 23, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.06) !important;
+  overflow: hidden !important;
+  position: relative;
+  animation: proFadeIn 0.2s ease-out;
+}
+
+.detailModal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb 0%, #6366f1 50%, #8b5cf6 100%);
+  z-index: 5;
+}
+
+.detailHeader {
+  padding: 22px 28px !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 60%, #f5f3ff 100%) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+  border-radius: 18px 18px 0 0 !important;
+}
+
+.detailHeader h2 {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.01em;
+}
+
+.detailHeader p {
+  font-size: 13px !important;
+  color: #475569 !important;
+  margin-top: 2px !important;
+}
+
+.detailIdentity > span {
+  background: linear-gradient(135deg, #2563eb 0%, #6366f1 100%) !important;
+  color: #fff !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  box-shadow: 0 8px 16px -6px rgba(37, 99, 235, 0.4);
+}
+
+.detailHeader > div:last-child {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.detailHeader > div:last-child button:last-child {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detailTabs {
+  padding: 8px 28px !important;
+  background: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  gap: 4px !important;
+}
+
+.detailTabs button {
+  padding: 10px 16px !important;
+  border-radius: 10px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+.activeDetailTab {
+  background: #fff !important;
+  color: #2563eb !important;
+  box-shadow: 0 2px 6px -2px rgba(37, 99, 235, 0.2) !important;
+}
+
+.detailBody {
+  padding: 24px 28px !important;
+  background: #fafbfc !important;
+}
+
+.detailCard {
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 22px 24px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  margin-bottom: 16px;
+}
+
+.detailCard h3 {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 0 0 14px !important;
+  letter-spacing: -0.005em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detailCard h3::before {
+  content: "";
+  width: 4px;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2563eb 0%, #6366f1 100%);
+  flex-shrink: 0;
+}
+
+/* Responsive form modal */
+@media (max-width: 1100px) {
+  .contractRenewalLayout {
+    grid-template-columns: 1fr;
+  }
+  .conversionForm3Col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .contractGrid2 {
+    grid-template-columns: 1fr !important;
+  }
+  .contractRadioRow {
+    flex-direction: column;
+  }
+  .contractFormFooter {
+    flex-direction: column-reverse;
+    align-items: stretch !important;
+  }
+  .contractFormFooter > div {
+    width: 100%;
+  }
+  .contractFormFooter > div button {
+    flex: 1;
+  }
+}
