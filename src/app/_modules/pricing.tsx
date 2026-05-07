@@ -7,7 +7,6 @@ import {
   ChevronDown,
   Download,
   Edit,
-  Eye,
   Filter,
   MapPin,
   Pencil,
@@ -2106,28 +2105,6 @@ function SingleTicketFormModal({
         </div>
       </section>
     </div>
-  );
-}
-
-function TierFormCell({
-  defaultValue,
-  label,
-  name,
-  placeholder,
-  tone,
-}: {
-  defaultValue?: string;
-  label: string;
-  name: string;
-  placeholder: string;
-  tone: string;
-}) {
-  return (
-    <label className={`${styles.tierFormCell} ${styles[`tier_${tone}`]}`}>
-      <span>{label}</span>
-      <input defaultValue={defaultValue} name={name} placeholder={placeholder} type="number" />
-      <em>VNĐ</em>
-    </label>
   );
 }
 
