@@ -716,7 +716,7 @@ function CustomerDetailModal({
           ))}
         </nav>
 
-        <div className={styles.detailBody}>
+        <div className={styles.detailBody} key={activeTab}>
           <CustomerDetailTab activeTab={activeTab} />
         </div>
 
