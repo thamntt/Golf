@@ -47,8 +47,6 @@ import { Screen } from "../_shared/components";
 
 const BRANCHES = ["NextVision", "Hà Nội Center", "Sài Gòn West"];
 
-const SERVICE_TYPES = ["Member - Golf", "Practice", "Combo", "Trial"] as const;
-
 const PACKAGE_LIBRARY: PackageOption[] = [
   { code: "P001", name: "Gói Cơ Bản Golf", serviceType: "Member - Golf", sessions: 8, durationMonths: 1, price: 2_000_000 },
   { code: "P002", name: "Gói Cao Cấp Golf", serviceType: "Member - Golf", sessions: 24, durationMonths: 3, price: 5_500_000 },
@@ -60,8 +58,85 @@ const PACKAGE_LIBRARY: PackageOption[] = [
 ];
 
 const SALES_STAFF = ["Nguyễn Thị Lan", "Phạm Văn Đức", "Hoàng Mỹ Linh", "Trần Quốc Bảo", "Nguyễn Văn Thành"] as const;
-const PAYMENT_METHODS = ["Tiền mặt", "Chuyển khoản", "POS - Thẻ", "MoMo", "ZaloPay"] as const;
+const PAYMENT_METHODS = ["Tiền mặt", "Chuyển khoản", "Thẻ", "MoMo", "ZaloPay"] as const;
 const VAT_OPTIONS = ["0", "5", "8", "10"] as const;
+const PROVINCES = ["TP.HCM", "Hà Nội", "Đà Nẵng", "Bình Dương", "Đồng Nai", "Bà Rịa - Vũng Tàu"] as const;
+const WARDS_BY_PROVINCE: Record<string, string[]> = {
+  "TP.HCM": ["Phường Bến Nghé (Q.1)", "Phường Đa Kao (Q.1)", "Phường Tân Định (Q.1)", "Phường 1 (Q.3)", "Phường 12 (Q.10)", "Phường Phú Mỹ Hưng (Q.7)"],
+  "Hà Nội": ["Phường Tràng Tiền", "Phường Phan Chu Trinh", "Phường Lý Thái Tổ"],
+  "Đà Nẵng": ["Phường Hải Châu I", "Phường Thuận Phước"],
+  "Bình Dương": ["Phường Phú Lợi", "Phường Hiệp Thành"],
+  "Đồng Nai": ["Phường Hoà Bình", "Phường Trung Dũng"],
+  "Bà Rịa - Vũng Tàu": ["Phường 1 (TP.Vũng Tàu)", "Phường 7 (TP.Vũng Tàu)"],
+};
+
+type CustomerGroup = { id: string; name: string; description: string };
+type CustomerSource = { id: string; name: string; description: string };
+type ContractType = { id: string; name: string; description: string };
+type Trainer = { id: string; name: string; specialty: string };
+type Voucher = { code: string; name: string; type: "percent" | "amount"; value: number; minOrder?: number; expires: string };
+type BankAccount = { id: string; bank: string; name: string; number: string };
+type PosDevice = { id: string; name: string; bank: string };
+type CashFund = { id: string; name: string; branch: string };
+
+const INITIAL_GROUPS: CustomerGroup[] = [
+  { id: "G-VIP", name: "VIP", description: "Hội viên VIP - tổng chi tiêu ≥ 100M" },
+  { id: "G-PRE", name: "Premium", description: "Hội viên cao cấp" },
+  { id: "G-STD", name: "Standard", description: "Hội viên thường" },
+  { id: "G-WALK", name: "Khách vãng lai", description: "Walk-in, không HĐ dài hạn" },
+];
+
+const INITIAL_SOURCES: CustomerSource[] = [
+  { id: "S-WALK", name: "Walk-in", description: "Tự đến tại quầy" },
+  { id: "S-FB", name: "Facebook", description: "Quảng cáo Facebook" },
+  { id: "S-GG", name: "Google", description: "Quảng cáo Google Ads" },
+  { id: "S-REF", name: "Giới thiệu", description: "Hội viên giới thiệu" },
+  { id: "S-OTHER", name: "Chi nhánh khác", description: "Chuyển từ CN khác" },
+];
+
+const INITIAL_CONTRACT_TYPES: ContractType[] = [
+  { id: "CT-MEMBER", name: "Hội viên Member", description: "Hợp đồng dài hạn cho hội viên chính thức" },
+  { id: "CT-TRIAL", name: "Trial / Dùng thử", description: "Hợp đồng dùng thử ngắn hạn" },
+  { id: "CT-CORP", name: "Doanh nghiệp", description: "Hợp đồng B2B công ty" },
+  { id: "CT-FAMILY", name: "Gia đình", description: "Combo gia đình ≥2 người" },
+  { id: "CT-EVENT", name: "Sự kiện", description: "HĐ phục vụ giải đấu / event" },
+];
+
+const SERVICE_TYPE_OPTIONS = ["Member - Golf tập thành viên", "Practice", "Combo", "Trial"] as const;
+
+const INITIAL_TRAINERS: Trainer[] = [
+  { id: "TR-001", name: "HLV Trần Văn An", specialty: "Swing cơ bản" },
+  { id: "TR-002", name: "HLV Đỗ Hồng Quân", specialty: "Putting & Short Game" },
+  { id: "TR-003", name: "HLV Nguyễn Mai", specialty: "Driver, Long Iron" },
+  { id: "TR-004", name: "HLV Phạm Hùng", specialty: "Course Management" },
+];
+
+const INITIAL_VOUCHERS: Voucher[] = [
+  { code: "DISCOUNT20", name: "Giảm giá 20%", type: "percent", value: 20, minOrder: 1_000_000, expires: "31/12/2026" },
+  { code: "WELCOME500K", name: "Giảm 500.000đ cho HV mới", type: "amount", value: 500_000, minOrder: 3_000_000, expires: "30/06/2026" },
+  { code: "VIP10", name: "VIP giảm 10% mọi gói", type: "percent", value: 10, expires: "31/12/2026" },
+  { code: "SUMMER2M", name: "Khuyến mãi hè 2M", type: "amount", value: 2_000_000, minOrder: 10_000_000, expires: "31/08/2026" },
+];
+
+const INITIAL_BANK_ACCOUNTS: BankAccount[] = [
+  { id: "BANK-VCB", bank: "Vietcombank", name: "TK chính", number: "0071000123456" },
+  { id: "BANK-TCB", bank: "Techcombank", name: "TK phụ", number: "1903567890" },
+  { id: "BANK-MB", bank: "MB Bank", name: "TK chi nhánh HN", number: "0019999988" },
+];
+
+const INITIAL_POS_DEVICES: PosDevice[] = [
+  { id: "POS-Q1", name: "POS Quầy 1", bank: "Vietcombank" },
+  { id: "POS-Q2", name: "POS Quầy 2", bank: "Techcombank" },
+  { id: "POS-VIP", name: "POS VIP Lounge", bank: "MB Bank" },
+];
+
+const INITIAL_CASH_FUNDS: CashFund[] = [
+  { id: "CASH-FRONT", name: "Quỹ tiền mặt tại quầy", branch: "NextVision" },
+  { id: "CASH-VIP", name: "Quỹ tiền mặt VIP", branch: "NextVision" },
+  { id: "CASH-HN", name: "Quỹ tiền mặt CN Hà Nội", branch: "Hà Nội Center" },
+];
+
+const RECEIPT_CATEGORIES = ["Thu hợp đồng mới", "Thu công nợ", "Khách đặt cọc", "Thu thẻ thành viên", "Phiếu thu khác"] as const;
 
 type PackageOption = {
   code: string;
@@ -72,8 +147,16 @@ type PackageOption = {
   price: number;
 };
 
+type Companion = {
+  id: string;
+  name: string;
+  relation: string;
+  phone?: string;
+};
+
 type CustomerLite = {
   code: string;
+  bioCode?: string;
   name: string;
   phone: string;
   email: string;
@@ -82,33 +165,72 @@ type CustomerLite = {
   gender: "Nam" | "Nữ";
   address: string;
   cccdVerified: boolean;
+  groupId?: string;
+  sourceId?: string;
+  card?: string;
+  contactName?: string;
+  contactPhone?: string;
+  province?: string;
+  ward?: string;
+  street?: string;
+  note?: string;
+  companions?: Companion[];
 };
 
-type Payment = { method: string; amount: number };
+type Payment = {
+  method: "Tiền mặt" | "Chuyển khoản" | "Thẻ" | "MoMo" | "ZaloPay";
+  amount: number;
+  accountId?: string; // FK đến BANK_ACCOUNTS / POS_DEVICES / CASH_FUNDS
+  txRef?: string;     // Mã giao dịch xác nhận (bắt buộc với CK + POS)
+};
+
+type SalesAllocation = { staff: string; percent: number };
+
+type VatLine = { rate: number; amount: number };
+
+type CommissionMode = "preset" | "custom" | "none";
 
 type ContractStatus = "active" | "suspended" | "expired" | "closed" | "converted";
 
 type Contract = {
   id: string;
   customerCode: string;
-  packageCode: string;
+  contractTypeId?: string;       // Loại hợp đồng (Member-Standard / VIP / Trial...)
+  serviceTypeId?: string;        // Loại dịch vụ (Member-Golf, Practice, Combo...)
+  packageCode: string;           // = "Tên dịch vụ" (gói cụ thể)
   signedDate: string;
   startDate: string;
   endDate: string;
   branch: string;
   signer: string;
+  signStatus?: "Chưa ký" | "Đã ký";
+  signNote?: string;
+  trainerId?: string;            // Nhân viên PT/HLV
+  activeNow?: boolean;
   totalSessions: number;
   remainingSessions: number;
   basePrice: number;
   discountAmount: number;
+  voucherCode?: string;          // KM/Voucher đang áp dụng
   vatPercent: number;
+  vatLines?: VatLine[];          // multi-VAT (BR-M9-10)
   totalAmount: number;
   paid: number;
   payments: Payment[];
+  receiptId?: string;            // Số phiếu thu auto
+  receiptDate?: string;
+  receiptCashier?: string;
+  receiptCategory?: string;      // Loại thu chi (Công nợ / Phiếu thu khác / Thu Thẻ / Khách đặt cọc)
+  receiptNote?: string;
+  paymentDeadlineDays?: number;  // Thời hạn TT (ngày)
+  customerCash?: number;         // Khách đưa
+  changeAmount?: number;         // Tiền thừa
   status: ContractStatus;
-  saleStaff: string;
+  saleStaff: string;             // Sale chính (legacy)
+  saleAllocations?: SalesAllocation[]; // Phân bổ % cho nhiều NV Sale (tổng=100%)
   creator: string;
   attachments: string[];
+  customFields?: Array<{ label: string; value: string }>;
   note: string;
   history: TimelineEntry[];
   renewalCount: number;
@@ -116,6 +238,9 @@ type Contract = {
   hasUpgraded: boolean;
   hasTransferred: boolean;
   hasConverted: boolean;
+  commissionMode?: CommissionMode;
+  commissionPercent?: number;
+  commissionAmount?: number;
 };
 
 type TimelineEntry = { date: string; actor: string; action: string; detail?: string };
@@ -233,13 +358,47 @@ type ContractTab = "list" | "renewal" | "upgrade" | "suspension" | "transfer" | 
 // =====================================================================================
 
 const CUSTOMERS: CustomerLite[] = [
-  { code: "HV001", name: "Nguyễn Văn A", phone: "0901234567", email: "nguyenvana@gmail.com", cccd: "079098001234", birthDate: "15/05/1990", gender: "Nam", address: "12 Lê Lợi, Q.1, TP.HCM", cccdVerified: true },
-  { code: "HV002", name: "Trần Thị B", phone: "0902345678", email: "tranthib@gmail.com", cccd: "079098002345", birthDate: "20/08/1995", gender: "Nữ", address: "45 Pasteur, Q.3, TP.HCM", cccdVerified: true },
-  { code: "HV003", name: "Lê Văn C", phone: "0923456789", email: "levanc@gmail.com", cccd: "079098003456", birthDate: "10/12/1988", gender: "Nam", address: "78 Nguyễn Trãi, Q.5, TP.HCM", cccdVerified: false },
-  { code: "HV004", name: "Phạm Thị D", phone: "0934567890", email: "phamthid@gmail.com", cccd: "079098004567", birthDate: "25/03/1992", gender: "Nữ", address: "100 Lý Thường Kiệt, Q.10, TP.HCM", cccdVerified: true },
-  { code: "HV005", name: "Huỳnh Xuân Long", phone: "0910070932", email: "longhx@gmail.com", cccd: "079098005678", birthDate: "06/08/1975", gender: "Nam", address: "210 Trần Hưng Đạo, Q.5, TP.HCM", cccdVerified: true },
-  { code: "HV007", name: "Vũ Hồng Nhất", phone: "0510086770", email: "nhatvh@gmail.com", cccd: "079098007890", birthDate: "08/08/1977", gender: "Nam", address: "55 Nam Kỳ Khởi Nghĩa, Q.1, TP.HCM", cccdVerified: true },
-  { code: "HV012", name: "Đỗ Mai Hương", phone: "0345678901", email: "huongdm@gmail.com", cccd: "079098012345", birthDate: "11/02/1993", gender: "Nữ", address: "8 Cách Mạng Tháng 8, Q.3, TP.HCM", cccdVerified: true },
+  {
+    code: "HV001", bioCode: "81630772", name: "Nguyễn Văn A", phone: "0901234567", email: "nguyenvana@gmail.com",
+    cccd: "079098001234", birthDate: "15/05/1990", gender: "Nam", address: "12 Lê Lợi, Q.1, TP.HCM", cccdVerified: true,
+    groupId: "G-VIP", sourceId: "S-FB", card: "RFID-00012", contactName: "Nguyễn Thị Mai", contactPhone: "0903111222",
+    province: "TP.HCM", ward: "Phường Bến Nghé (Q.1)", street: "12 Lê Lợi",
+    note: "Khách VIP, ưu tiên book sớm. Sinh nhật T5.",
+    companions: [{ id: "NDC-001", name: "Nguyễn Văn Bin", relation: "Con trai", phone: "" }],
+  },
+  {
+    code: "HV002", bioCode: "81630773", name: "Trần Thị B", phone: "0902345678", email: "tranthib@gmail.com",
+    cccd: "079098002345", birthDate: "20/08/1995", gender: "Nữ", address: "45 Pasteur, Q.3, TP.HCM", cccdVerified: true,
+    groupId: "G-PRE", sourceId: "S-GG", card: "", contactName: "", contactPhone: "",
+    province: "TP.HCM", ward: "Phường 1 (Q.3)", street: "45 Pasteur",
+  },
+  {
+    code: "HV003", bioCode: "81630774", name: "Lê Văn C", phone: "0923456789", email: "levanc@gmail.com",
+    cccd: "079098003456", birthDate: "10/12/1988", gender: "Nam", address: "78 Nguyễn Trãi, Q.5, TP.HCM", cccdVerified: false,
+    groupId: "G-STD", sourceId: "S-WALK", province: "TP.HCM", ward: "Phường 12 (Q.10)",
+  },
+  {
+    code: "HV004", bioCode: "81630775", name: "Phạm Thị D", phone: "0934567890", email: "phamthid@gmail.com",
+    cccd: "079098004567", birthDate: "25/03/1992", gender: "Nữ", address: "100 Lý Thường Kiệt, Q.10, TP.HCM", cccdVerified: true,
+    groupId: "G-PRE", sourceId: "S-REF", province: "TP.HCM", ward: "Phường 12 (Q.10)",
+  },
+  {
+    code: "HV005", bioCode: "81630776", name: "Huỳnh Xuân Long", phone: "0910070932", email: "longhx@gmail.com",
+    cccd: "079098005678", birthDate: "06/08/1975", gender: "Nam", address: "210 Trần Hưng Đạo, Q.5, TP.HCM", cccdVerified: true,
+    groupId: "G-VIP", sourceId: "S-REF", card: "RFID-00045",
+    province: "TP.HCM", ward: "Phường 12 (Q.10)", street: "210 Trần Hưng Đạo",
+    note: "Hội viên VIP - tặng caddie",
+  },
+  {
+    code: "HV007", bioCode: "81630777", name: "Vũ Hồng Nhất", phone: "0510086770", email: "nhatvh@gmail.com",
+    cccd: "079098007890", birthDate: "08/08/1977", gender: "Nam", address: "55 Nam Kỳ Khởi Nghĩa, Q.1, TP.HCM", cccdVerified: true,
+    groupId: "G-STD", sourceId: "S-WALK", province: "TP.HCM", ward: "Phường Đa Kao (Q.1)",
+  },
+  {
+    code: "HV012", bioCode: "81630778", name: "Đỗ Mai Hương", phone: "0345678901", email: "huongdm@gmail.com",
+    cccd: "079098012345", birthDate: "11/02/1993", gender: "Nữ", address: "8 Cách Mạng Tháng 8, Q.3, TP.HCM", cccdVerified: true,
+    groupId: "G-PRE", sourceId: "S-FB", province: "TP.HCM", ward: "Phường 1 (Q.3)",
+  },
 ];
 
 const INITIAL_CONTRACTS: Contract[] = [
@@ -272,7 +431,7 @@ const INITIAL_CONTRACTS: Contract[] = [
     id: "CT003", customerCode: "HV003", packageCode: "P003", signedDate: "15/01/2026", startDate: "20/01/2026", endDate: "20/07/2026",
     branch: "NextVision", signer: "Lê Văn C", totalSessions: 30, remainingSessions: 12,
     basePrice: 4_200_000, discountAmount: 100_000, vatPercent: 10, totalAmount: 4_510_000, paid: 4_510_000,
-    payments: [{ method: "POS - Thẻ", amount: 4_510_000 }],
+    payments: [{ method: "Thẻ", amount: 4_510_000, accountId: "POS-Q1" }],
     status: "active", saleStaff: "Hoàng Mỹ Linh", creator: "Admin", attachments: ["CCCD_LeVanC.jpg", "HD_LeVanC.pdf"], note: "",
     history: [
       { date: "15/01/2026 10:15", actor: "Hoàng Mỹ Linh", action: "Ký mới hợp đồng" },
@@ -494,11 +653,58 @@ export default function ContractsScreen() {
   const [transfers, setTransfers] = useState<Transfer[]>(INITIAL_TRANSFERS);
   const [conversions, setConversions] = useState<Conversion[]>(INITIAL_CONVERSIONS);
 
+  // Mutable lookup state
+  const [customersState, setCustomersState] = useState<CustomerLite[]>(CUSTOMERS);
+  const [packagesState] = useState<PackageOption[]>(PACKAGE_LIBRARY);
+  const [groups, setGroups] = useState<CustomerGroup[]>(INITIAL_GROUPS);
+  const [sources, setSources] = useState<CustomerSource[]>(INITIAL_SOURCES);
+  const [contractTypesState, setContractTypesState] = useState<ContractType[]>(INITIAL_CONTRACT_TYPES);
+  const [trainers, setTrainers] = useState<Trainer[]>(INITIAL_TRAINERS);
+  const [vouchersState, setVouchersState] = useState<Voucher[]>(INITIAL_VOUCHERS);
+  const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPE_OPTIONS]);
+  const [bankAccounts] = useState<BankAccount[]>(INITIAL_BANK_ACCOUNTS);
+  const [posDevices] = useState<PosDevice[]>(INITIAL_POS_DEVICES);
+  const [cashFunds] = useState<CashFund[]>(INITIAL_CASH_FUNDS);
+
   // Toast (simple)
   const [toast, setToast] = useState<string | null>(null);
   const flash = (msg: string) => {
     setToast(msg);
     window.setTimeout(() => setToast(null), 2400);
+  };
+
+  // Handlers cho sub-modal "+ Thêm" inline
+  const handleCreateGroup = (name: string, description: string) => {
+    const id = `G-${Date.now().toString(36).toUpperCase()}`;
+    setGroups((current) => [...current, { id, name, description }]);
+    flash(`Đã thêm nhóm KH "${name}"`);
+  };
+  const handleCreateSource = (name: string, description: string) => {
+    const id = `S-${Date.now().toString(36).toUpperCase()}`;
+    setSources((current) => [...current, { id, name, description }]);
+    flash(`Đã thêm nguồn KH "${name}"`);
+  };
+  const handleCreateContractType = (name: string, description: string) => {
+    const id = `CT-${Date.now().toString(36).toUpperCase()}`;
+    setContractTypesState((current) => [...current, { id, name, description }]);
+    flash(`Đã thêm loại HĐ "${name}"`);
+  };
+  const handleCreateServiceType = (name: string) => {
+    setServiceTypes((current) => current.includes(name) ? current : [...current, name]);
+    flash(`Đã thêm loại dịch vụ "${name}"`);
+  };
+  const handleCreateTrainer = (name: string, specialty: string) => {
+    const id = `TR-${Date.now().toString(36).toUpperCase()}`;
+    setTrainers((current) => [...current, { id, name, specialty }]);
+    flash(`Đã thêm HLV "${name}"`);
+  };
+  const handleCreateVoucher = (v: Voucher) => {
+    setVouchersState((current) => [...current, v]);
+    flash(`Đã tạo voucher ${v.code}`);
+  };
+  const handleCreateCustomer = (c: CustomerLite) => {
+    setCustomersState((current) => [...current, c]);
+    flash(`Đã tạo KH ${c.code} · ${c.name}`);
   };
 
   const stats = useMemo(() => {
@@ -581,6 +787,24 @@ export default function ContractsScreen() {
               flash(`Mở Tab Chuyển Đổi cho ${contract.id}`);
             }}
             flash={flash}
+            customers={customersState}
+            packages={packagesState}
+            groups={groups}
+            sources={sources}
+            contractTypes={contractTypesState}
+            trainers={trainers}
+            vouchers={vouchersState}
+            serviceTypes={serviceTypes}
+            bankAccounts={bankAccounts}
+            posDevices={posDevices}
+            cashFunds={cashFunds}
+            onCreateGroup={handleCreateGroup}
+            onCreateSource={handleCreateSource}
+            onCreateContractType={handleCreateContractType}
+            onCreateServiceType={handleCreateServiceType}
+            onCreateTrainer={handleCreateTrainer}
+            onCreateVoucher={handleCreateVoucher}
+            onCreateCustomer={handleCreateCustomer}
           />
         ) : null}
 
@@ -704,6 +928,24 @@ type ContractListProps = {
   onAddTransfer: (contract: Contract) => void;
   onAddConversion: (contract: Contract) => void;
   flash: (msg: string) => void;
+  customers: CustomerLite[];
+  packages: PackageOption[];
+  groups: CustomerGroup[];
+  sources: CustomerSource[];
+  contractTypes: ContractType[];
+  trainers: Trainer[];
+  vouchers: Voucher[];
+  serviceTypes: string[];
+  bankAccounts: BankAccount[];
+  posDevices: PosDevice[];
+  cashFunds: CashFund[];
+  onCreateGroup: (name: string, description: string) => void;
+  onCreateSource: (name: string, description: string) => void;
+  onCreateContractType: (name: string, description: string) => void;
+  onCreateServiceType: (name: string) => void;
+  onCreateTrainer: (name: string, specialty: string) => void;
+  onCreateVoucher: (v: Voucher) => void;
+  onCreateCustomer: (c: CustomerLite) => void;
 };
 
 function ContractListTab({
@@ -715,9 +957,29 @@ function ContractListTab({
   onAddTransfer,
   onAddConversion,
   flash,
+  customers,
+  packages,
+  groups,
+  sources,
+  contractTypes,
+  trainers,
+  vouchers,
+  serviceTypes,
+  bankAccounts,
+  posDevices,
+  cashFunds,
+  onCreateGroup,
+  onCreateSource,
+  onCreateContractType,
+  onCreateServiceType,
+  onCreateTrainer,
+  onCreateVoucher,
+  onCreateCustomer,
 }: ContractListProps) {
   const [filter, setFilter] = useState<"all" | "active" | "suspended" | "expired">("all");
   const [query, setQuery] = useState("");
+  const [branchFilter, setBranchFilter] = useState<string>("Tất cả chi nhánh");
+  const [packageFilter, setPackageFilter] = useState<string>("Tất cả gói");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<Contract | null>(null);
@@ -730,6 +992,8 @@ function ContractListTab({
     if (filter === "active" && c.status !== "active") return false;
     if (filter === "suspended" && c.status !== "suspended") return false;
     if (filter === "expired" && c.status !== "expired") return false;
+    if (branchFilter !== "Tất cả chi nhánh" && c.branch !== branchFilter) return false;
+    if (packageFilter !== "Tất cả gói" && c.packageCode !== packageFilter) return false;
     if (query) {
       const target = `${c.id} ${c.customerCode} ${lookupCustomer(c.customerCode)?.name ?? ""} ${lookupCustomer(c.customerCode)?.phone ?? ""}`.toLowerCase();
       if (!target.includes(query.toLowerCase())) return false;
@@ -769,15 +1033,25 @@ function ContractListTab({
 
   return (
     <>
-      <div className={styles.contractToolbar}>
-        <div className={styles.pricingSearch}>
+      <div className={styles.contractListSearchRow}>
+        <div className={styles.pricingSearch} style={{ flex: 1 }}>
           <Search size={18} />
           <input
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Tìm kiếm theo Mã HĐ, Mã KH, Tên KH, SĐT..."
+            placeholder="Tìm kiếm theo tên, mã hợp đồng..."
             value={query}
           />
         </div>
+        <select className={styles.selectInput} onChange={(e) => setBranchFilter(e.target.value)} value={branchFilter}>
+          {["Tất cả chi nhánh", ...BRANCHES].map((b) => <option key={b}>{b}</option>)}
+        </select>
+        <select className={styles.selectInput} onChange={(e) => setPackageFilter(e.target.value)} value={packageFilter}>
+          <option>Tất cả gói</option>
+          {PACKAGE_LIBRARY.map((p) => <option key={p.code} value={p.code}>{p.name}</option>)}
+        </select>
+      </div>
+
+      <div className={styles.contractListChipRow}>
         <div className={styles.contractFilterChips}>
           {[
             { key: "all", label: "Tất Cả" },
@@ -795,71 +1069,81 @@ function ContractListTab({
             </button>
           ))}
         </div>
-        <button className={styles.iconButton} onClick={() => flash("Bộ lọc nâng cao đang được phát triển")} title="Lọc nâng cao" type="button">
-          <Filter size={16} />
-        </button>
-        <button className={styles.greenButton} onClick={openCreate} type="button">
-          <PlusCircle size={16} /> Tạo Hợp Đồng Mới
-        </button>
+        <div className={styles.contractListActions}>
+          <button className={styles.iconButton} onClick={() => flash("Đang xuất danh sách HĐ ra Excel...")} title="Xuất Excel" type="button">
+            <Filter size={16} />
+          </button>
+          <button className={styles.greenButton} onClick={openCreate} type="button">
+            <PlusCircle size={16} /> Thêm Mới Hợp Đồng
+          </button>
+        </div>
       </div>
 
       <section className={styles.memberTableCard}>
         <div className={styles.memberTableWrap}>
-          <table className={styles.memberTable}>
+          <table className={`${styles.memberTable} ${styles.contractListTable}`}>
             <thead>
               <tr>
+                <th>STT</th>
                 <th>Mã HĐ</th>
-                <th>Mã HV / Tên KH</th>
-                <th>SĐT</th>
-                <th>Gói dịch vụ</th>
-                <th>Số buổi</th>
-                <th>Tổng tiền / Còn nợ</th>
-                <th>Ngày BĐ — KT</th>
-                <th>Trạng thái</th>
-                <th>NV Sale</th>
+                <th>Mã HV</th>
+                <th>Tên học viên</th>
+                <th>Số điện thoại</th>
+                <th>Gói tập</th>
+                <th>Đơn vị</th>
+                <th>Số lượng</th>
+                <th>Giá kỳ</th>
+                <th>Tổng TT</th>
+                <th>Đã TT</th>
+                <th>Còn nợ</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Người tạo</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td className={styles.emptyTableCell} colSpan={10}>Không có hợp đồng nào khớp bộ lọc</td>
+                  <td className={styles.emptyTableCell} colSpan={16}>Không có hợp đồng nào khớp bộ lọc</td>
                 </tr>
               ) : null}
-              {filtered.map((c) => {
+              {filtered.map((c, index) => {
                 const customer = lookupCustomer(c.customerCode);
                 const pkg = lookupPackage(c.packageCode);
                 const debt = c.totalAmount - c.paid;
+                const unit = pkg ? (pkg.durationMonths >= 1 ? "tháng" : pkg.sessions > 0 ? "buổi" : "lượt") : "—";
+                const quantity = pkg ? (pkg.durationMonths >= 1 ? `${Math.round(pkg.durationMonths)} tháng` : `${pkg.sessions} buổi`) : "—";
+                const periodPrice = pkg ? Math.round(pkg.price / Math.max(1, Math.round(pkg.durationMonths || 1))) : 0;
                 return (
                   <tr key={c.id}>
+                    <td className={styles.contractRowIndex}>{index + 1}</td>
                     <td>
                       <button className={styles.memberCode} onClick={() => setDetailContract(c)} type="button">
                         {c.id}
                       </button>
                     </td>
+                    <td><span className={styles.contractCustomerCodeCell}>{c.customerCode}</span></td>
                     <td className={styles.memberName}>
                       <strong>{customer?.name ?? c.customerCode}</strong>
-                      <small>{c.customerCode}</small>
                     </td>
                     <td>{customer?.phone ?? "—"}</td>
                     <td>{pkg?.name ?? c.packageCode}</td>
-                    <td className={styles.contractSessions}>
-                      <strong>{c.remainingSessions}</strong>/<span>{c.totalSessions}</span>
+                    <td className={styles.cellMuted}>{unit}</td>
+                    <td>{quantity}</td>
+                    <td className={pkg && pkg.durationMonths >= 1 ? styles.contractMoneyCellAmount : styles.cellMuted}>
+                      {pkg && pkg.durationMonths >= 1 ? formatCurrency(periodPrice) : "N/A"}
                     </td>
+                    <td><strong className={styles.contractTotalCell}>{formatCurrency(c.totalAmount)}</strong></td>
+                    <td><strong className={styles.contractPaidCell}>{formatCurrency(c.paid)}</strong></td>
                     <td>
-                      <div className={styles.contractMoneyCell}>
-                        <strong>{formatCurrency(c.totalAmount)}</strong>
-                        {debt > 0 ? <em className={styles.dangerText}>Nợ {formatCurrency(debt)}</em> : <em className={styles.contractPaid}>Đã thu đủ</em>}
-                      </div>
+                      <strong className={debt > 0 ? styles.contractDebtCell : styles.contractZeroCell}>
+                        {formatCurrency(Math.max(0, debt))}
+                      </strong>
                     </td>
-                    <td>
-                      <div className={styles.contractDates}>
-                        <span>{c.startDate}</span>
-                        <span>→ {c.endDate}</span>
-                      </div>
-                    </td>
-                    <td><ContractStatusBadge status={c.status} /></td>
-                    <td>{c.saleStaff}</td>
+                    <td>{c.startDate}</td>
+                    <td>{c.endDate}</td>
+                    <td className={styles.cellTruncate} title={c.creator}>{c.creator}</td>
                     <td>
                       <div className={styles.contractRowActions}>
                         <button onClick={() => setDetailContract(c)} title="Xem" type="button"><Eye size={14} /></button>
@@ -904,6 +1188,7 @@ function ContractListTab({
         </div>
         <footer className={styles.contractTableFooter}>
           <span>Hiển thị {filtered.length} / {contracts.length} hợp đồng</span>
+          <span>Trạng thái: <ContractStatusBadge status="active" /></span>
         </footer>
       </section>
 
@@ -913,6 +1198,24 @@ function ContractListTab({
           onClose={() => { setFormOpen(false); setEditingContract(null); }}
           onSubmit={handleSubmit}
           existingIds={contracts.map((c) => c.id)}
+          customers={customers}
+          packages={packages}
+          groups={groups}
+          sources={sources}
+          contractTypes={contractTypes}
+          trainers={trainers}
+          vouchers={vouchers}
+          serviceTypes={serviceTypes}
+          bankAccounts={bankAccounts}
+          posDevices={posDevices}
+          cashFunds={cashFunds}
+          onCreateGroup={onCreateGroup}
+          onCreateSource={onCreateSource}
+          onCreateContractType={onCreateContractType}
+          onCreateServiceType={onCreateServiceType}
+          onCreateTrainer={onCreateTrainer}
+          onCreateVoucher={onCreateVoucher}
+          onCreateCustomer={onCreateCustomer}
         />
       ) : null}
 
@@ -1034,54 +1337,176 @@ function ContractFormModal({
   initial,
   onClose,
   onSubmit,
+  groups,
+  sources,
+  contractTypes,
+  trainers,
+  vouchers,
+  bankAccounts,
+  posDevices,
+  cashFunds,
+  customers,
+  packages,
+  onCreateGroup,
+  onCreateSource,
+  onCreateContractType,
+  onCreateServiceType,
+  onCreateTrainer,
+  onCreateVoucher,
+  onCreateCustomer,
+  serviceTypes,
 }: {
   existingIds: string[];
   initial: Contract | null;
   onClose: () => void;
   onSubmit: (contract: Contract) => void;
+  groups: CustomerGroup[];
+  sources: CustomerSource[];
+  contractTypes: ContractType[];
+  trainers: Trainer[];
+  vouchers: Voucher[];
+  bankAccounts: BankAccount[];
+  posDevices: PosDevice[];
+  cashFunds: CashFund[];
+  customers: CustomerLite[];
+  packages: PackageOption[];
+  serviceTypes: string[];
+  onCreateGroup: (name: string, description: string) => void;
+  onCreateSource: (name: string, description: string) => void;
+  onCreateContractType: (name: string, description: string) => void;
+  onCreateServiceType: (name: string) => void;
+  onCreateTrainer: (name: string, specialty: string) => void;
+  onCreateVoucher: (v: Voucher) => void;
+  onCreateCustomer: (c: CustomerLite) => void;
 }) {
   const today = todayString();
-  const [customerMode, setCustomerMode] = useState<"existing" | "new">(initial ? "existing" : "existing");
-  const [customerCode, setCustomerCode] = useState<string>(initial?.customerCode ?? CUSTOMERS[0]?.code ?? "");
-  const [newCustomer, setNewCustomer] = useState({
-    name: "", phone: "", email: "", cccd: "", birthDate: "", gender: "Nam" as "Nam" | "Nữ", address: "",
-  });
-  const [packageCode, setPackageCode] = useState<string>(initial?.packageCode ?? PACKAGE_LIBRARY[0].code);
-  const initialPackage = lookupPackage(packageCode);
-  const [signedDate, setSignedDate] = useState<string>(initial?.signedDate ?? today);
+  const isEdit = Boolean(initial);
+
+  // ---- Section 1: Khách hàng ----
+  const initialCustomer = initial ? customers.find((c) => c.code === initial.customerCode) : undefined;
+  const [customerMode, setCustomerMode] = useState<"existing" | "new">(isEdit ? "existing" : "existing");
+  const [customerCode, setCustomerCode] = useState<string>(initial?.customerCode ?? customers[0]?.code ?? "");
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(true);
+  const [memberCode, setMemberCode] = useState<string>(initialCustomer?.code ?? customerCode);
+  const [bioCode, setBioCode] = useState<string>(initialCustomer?.bioCode ?? "");
+  const [custName, setCustName] = useState<string>(initialCustomer?.name ?? "");
+  const [custPhone, setCustPhone] = useState<string>(initialCustomer?.phone ?? "");
+  const [custEmail, setCustEmail] = useState<string>(initialCustomer?.email ?? "");
+  const [custBirth, setCustBirth] = useState<string>(initialCustomer?.birthDate ?? "");
+  const [custCard, setCustCard] = useState<string>(initialCustomer?.card ?? "");
+  const [custGroup, setCustGroup] = useState<string>(initialCustomer?.groupId ?? "");
+  const [custSource, setCustSource] = useState<string>(initialCustomer?.sourceId ?? "");
+  const [custCccd, setCustCccd] = useState<string>(initialCustomer?.cccd ?? "");
+  const [custGender, setCustGender] = useState<"Nam" | "Nữ">(initialCustomer?.gender ?? "Nam");
+  const [custContactName, setCustContactName] = useState<string>(initialCustomer?.contactName ?? "");
+  const [custContactPhone, setCustContactPhone] = useState<string>(initialCustomer?.contactPhone ?? "");
+  const [custProvince, setCustProvince] = useState<string>(initialCustomer?.province ?? "");
+  const [custWard, setCustWard] = useState<string>(initialCustomer?.ward ?? "");
+  const [custStreet, setCustStreet] = useState<string>(initialCustomer?.street ?? "");
+  const [custNote, setCustNote] = useState<string>(initialCustomer?.note ?? "");
+  const [companions, setCompanions] = useState<Companion[]>(initialCustomer?.companions ?? []);
+  const [customFields, setCustomFields] = useState<Array<{ label: string; value: string }>>(initial?.customFields ?? []);
+
+  // Sub-modal state
+  const [groupModalOpen, setGroupModalOpen] = useState(false);
+  const [sourceModalOpen, setSourceModalOpen] = useState(false);
+  const [companionModalOpen, setCompanionModalOpen] = useState(false);
+  const [contractTypeModalOpen, setContractTypeModalOpen] = useState(false);
+  const [serviceTypeModalOpen, setServiceTypeModalOpen] = useState(false);
+  const [trainerModalOpen, setTrainerModalOpen] = useState(false);
+  const [voucherModalOpen, setVoucherModalOpen] = useState(false);
+  const [customFieldModalOpen, setCustomFieldModalOpen] = useState(false);
+
+  // ---- Section 2: Dịch vụ ----
+  const [branch, setBranch] = useState<string>(initial?.branch ?? BRANCHES[0]);
+  const [contractDate, setContractDate] = useState<string>(initial?.signedDate ?? today);
+  const [contractTypeId, setContractTypeId] = useState<string>(initial?.contractTypeId ?? contractTypes[0]?.id ?? "");
+  const [serviceTypeName, setServiceTypeName] = useState<string>(initial?.serviceTypeId ?? serviceTypes[0] ?? "");
+  const [packageCode, setPackageCode] = useState<string>(initial?.packageCode ?? packages[0].code);
+  const initialPackage = packages.find((p) => p.code === packageCode);
   const [startDate, setStartDate] = useState<string>(initial?.startDate ?? today);
   const [endDate, setEndDate] = useState<string>(
     initial?.endDate ?? (initialPackage ? addMonthsToDate(today, Math.max(1, Math.round(initialPackage.durationMonths))) : today)
   );
-  const [branch, setBranch] = useState<string>(initial?.branch ?? BRANCHES[0]);
+  const [trainerId, setTrainerId] = useState<string>(initial?.trainerId ?? "");
+  const [salesAlloc, setSalesAlloc] = useState<SalesAllocation[]>(
+    initial?.saleAllocations ?? [{ staff: SALES_STAFF[0], percent: 100 }]
+  );
+  const [contractCode, setContractCode] = useState<string>(
+    () => initial?.id ?? `HD${Date.now().toString().slice(-12)}`
+  );
+  const [activeNow, setActiveNow] = useState<boolean>(initial?.activeNow ?? true);
+  const [commissionMode, setCommissionMode] = useState<CommissionMode>(initial?.commissionMode ?? "preset");
+  const [commissionPercent, setCommissionPercent] = useState<number>(initial?.commissionPercent ?? 10);
+
+  // ---- Section 3: Ký HĐ ----
+  const [signStatus, setSignStatus] = useState<"Chưa ký" | "Đã ký">(initial?.signStatus ?? "Chưa ký");
+  const [signDate, setSignDate] = useState<string>(initial?.signedDate ?? "");
   const [signer, setSigner] = useState<string>(initial?.signer ?? "");
-  const [basePrice, setBasePrice] = useState<number>(initial?.basePrice ?? PACKAGE_LIBRARY[0].price);
-  const [discountKind, setDiscountKind] = useState<"amount" | "percent">("amount");
-  const [discountValue, setDiscountValue] = useState<number>(initial?.discountAmount ?? 0);
-  const [vatPercent, setVatPercent] = useState<number>(initial?.vatPercent ?? 8);
-  const [payments, setPayments] = useState<Payment[]>(initial?.payments ?? [{ method: "Tiền mặt", amount: 0 }]);
-  const [allowDebt, setAllowDebt] = useState<boolean>(true);
-  const [saleStaff, setSaleStaff] = useState<string>(initial?.saleStaff ?? SALES_STAFF[0]);
+  const [signNote, setSignNote] = useState<string>(initial?.signNote ?? "");
+
+  // ---- Section 4: Thanh toán ----
+  const [voucherCode, setVoucherCode] = useState<string>(initial?.voucherCode ?? "");
+  const [discountKind, setDiscountKind] = useState<"amount" | "percent">("percent");
+  const [discountValue, setDiscountValue] = useState<number>(0);
+  const [vatLines, setVatLines] = useState<VatLine[]>(initial?.vatLines ?? [{ rate: 8, amount: 0 }]);
+  const [payments, setPayments] = useState<Payment[]>(
+    initial?.payments ?? [{ method: "Tiền mặt", amount: 0, accountId: cashFunds[0]?.id }]
+  );
+  const [paymentNote, setPaymentNote] = useState<string>("");
+
+  // ---- Section 5: Phiếu thu ----
+  const [customerCash, setCustomerCash] = useState<number>(initial?.customerCash ?? 0);
+  const [receiptId, setReceiptId] = useState<string>(() => initial?.receiptId ?? `PT${Date.now().toString().slice(-12)}`);
+  const [receiptDate, setReceiptDate] = useState<string>(initial?.receiptDate ?? today);
+  const [receiptCashier, setReceiptCashier] = useState<string>(initial?.receiptCashier ?? SALES_STAFF[0]);
+  const [receiptCategory, setReceiptCategory] = useState<string>(initial?.receiptCategory ?? RECEIPT_CATEGORIES[0]);
+  const [paymentDeadline, setPaymentDeadline] = useState<number>(initial?.paymentDeadlineDays ?? 0);
+  const [receiptNote, setReceiptNote] = useState<string>(initial?.receiptNote ?? "");
+
+  // ---- Section 6: Đính kèm ----
   const [attachments, setAttachments] = useState<string[]>(initial?.attachments ?? []);
-  const [note, setNote] = useState<string>(initial?.note ?? "");
 
   const [activeSection, setActiveSection] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedPackage = lookupPackage(packageCode);
+  const selectedPackage = packages.find((p) => p.code === packageCode);
+  const basePrice = selectedPackage?.price ?? 0;
+  const months = selectedPackage ? Math.round(selectedPackage.durationMonths) : 0;
+  const sessions = selectedPackage?.sessions ?? 0;
 
-  const discountAmount = discountKind === "amount" ? discountValue : Math.round((basePrice * discountValue) / 100);
-  const totalAmount = calcTotalAmount(basePrice, discountAmount, vatPercent);
+  // Voucher discount calc
+  const selectedVoucher = vouchers.find((v) => v.code === voucherCode);
+  let voucherDiscount = 0;
+  if (selectedVoucher) {
+    if (!selectedVoucher.minOrder || basePrice >= selectedVoucher.minOrder) {
+      voucherDiscount = selectedVoucher.type === "percent"
+        ? Math.round((basePrice * selectedVoucher.value) / 100)
+        : selectedVoucher.value;
+    }
+  }
+
+  // Manual discount calc
+  const manualDiscount = discountKind === "amount" ? discountValue : Math.round((basePrice * discountValue) / 100);
+  const totalDiscount = voucherDiscount + manualDiscount;
+  const afterDiscount = Math.max(0, basePrice - totalDiscount);
+
+  // Multi-VAT
+  const vatTotal = vatLines.reduce((sum, line) => sum + Math.round((afterDiscount * line.rate) / 100), 0);
+  const totalAmount = afterDiscount + vatTotal;
+
   const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
   const debt = totalAmount - totalPaid;
+  const change = customerCash - totalPaid;
+
+  const totalSalesPercent = salesAlloc.reduce((s, x) => s + x.percent, 0);
 
   const onPickPackage = (code: string) => {
     setPackageCode(code);
-    const pkg = lookupPackage(code);
+    const pkg = packages.find((p) => p.code === code);
     if (pkg) {
-      setBasePrice(pkg.price);
-      const months = Math.max(1, Math.round(pkg.durationMonths));
-      setEndDate(addMonthsToDate(startDate, months));
+      const m = Math.max(1, Math.round(pkg.durationMonths));
+      setEndDate(addMonthsToDate(startDate, m));
     }
   };
 
@@ -1092,17 +1517,45 @@ function ContractFormModal({
     }
   };
 
-  const onSelectCustomer = (code: string) => {
+  const onSelectExisting = (code: string) => {
     setCustomerCode(code);
-    const c = lookupCustomer(code);
-    if (c) setSigner(c.name);
+    setMemberCode(code);
+    const c = customers.find((x) => x.code === code);
+    if (c) {
+      setBioCode(c.bioCode ?? "");
+      setCustName(c.name);
+      setCustPhone(c.phone);
+      setCustEmail(c.email);
+      setCustBirth(c.birthDate);
+      setCustCard(c.card ?? "");
+      setCustGroup(c.groupId ?? "");
+      setCustSource(c.sourceId ?? "");
+      setCustCccd(c.cccd);
+      setCustGender(c.gender);
+      setCustContactName(c.contactName ?? "");
+      setCustContactPhone(c.contactPhone ?? "");
+      setCustProvince(c.province ?? "");
+      setCustWard(c.ward ?? "");
+      setCustStreet(c.street ?? "");
+      setCustNote(c.note ?? "");
+      setCompanions(c.companions ?? []);
+      setSigner(c.name);
+    }
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const updatePayment = (index: number, partial: Partial<Payment>) => {
+    setPayments((items) => items.map((p, i) => (i === index ? { ...p, ...partial } : p)));
+  };
+
+  const updateSalesAlloc = (index: number, partial: Partial<SalesAllocation>) => {
+    setSalesAlloc((items) => items.map((s, i) => (i === index ? { ...s, ...partial } : s)));
+  };
+
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
-    if (customerMode === "new" && (!newCustomer.name.trim() || !newCustomer.phone.trim())) {
+    if (customerMode === "new" && (!custName.trim() || !custPhone.trim())) {
       setError("Vui lòng nhập họ tên và SĐT để tạo khách hàng mới");
       setActiveSection(1);
       return;
@@ -1113,52 +1566,80 @@ function ContractFormModal({
       return;
     }
     if (!signer.trim()) {
-      setError("Vui lòng nhập tên người ký");
+      setError("Vui lòng nhập tên người ký hợp đồng");
       setActiveSection(3);
       return;
     }
-    if (!allowDebt && totalPaid !== totalAmount) {
-      setError(`Tổng PTTT phải bằng Tổng tiền (${formatCurrency(totalAmount)}) nếu không cho công nợ — BR-M8-14`);
-      setActiveSection(5);
+    if (totalSalesPercent !== 100) {
+      setError(`Tổng tỷ lệ doanh số NV Sale phải = 100% (hiện ${totalSalesPercent}%)`);
+      setActiveSection(2);
       return;
     }
-    if (allowDebt && totalPaid > totalAmount) {
-      setError("Tổng PTTT vượt quá Tổng tiền — vui lòng kiểm tra lại");
-      setActiveSection(5);
-      return;
+    // Mã giao dịch bắt buộc cho CK + Thẻ
+    for (const p of payments) {
+      if ((p.method === "Chuyển khoản" || p.method === "Thẻ") && !p.txRef?.trim() && p.amount > 0) {
+        setError(`Vui lòng nhập mã giao dịch cho ${p.method}`);
+        setActiveSection(4);
+        return;
+      }
     }
 
     let finalCustomerCode = customerCode;
     if (customerMode === "new") {
-      const max = Math.max(0, ...CUSTOMERS.map((c) => Number.parseInt(c.code.replace("HV", ""), 10)).filter((n) => !Number.isNaN(n)));
-      finalCustomerCode = "HV" + String(max + 50).padStart(3, "0");
+      const max = Math.max(0, ...customers.map((c) => Number.parseInt(c.code.replace("HV", ""), 10)).filter((n) => !Number.isNaN(n)));
+      finalCustomerCode = "HV" + String(max + 1).padStart(3, "0");
+      onCreateCustomer({
+        code: finalCustomerCode, bioCode, name: custName, phone: custPhone, email: custEmail, cccd: custCccd,
+        birthDate: custBirth, gender: custGender, address: `${custStreet}, ${custWard}, ${custProvince}`,
+        cccdVerified: false, groupId: custGroup, sourceId: custSource, card: custCard,
+        contactName: custContactName, contactPhone: custContactPhone,
+        province: custProvince, ward: custWard, street: custStreet, note: custNote, companions,
+      });
     }
 
     const id = initial?.id ?? nextContractId(INITIAL_CONTRACTS.concat(existingIds.map((idStr) => ({ id: idStr } as Contract))));
     const newContract: Contract = {
       id,
       customerCode: finalCustomerCode,
+      contractTypeId,
+      serviceTypeId: serviceTypeName,
       packageCode,
-      signedDate,
+      signedDate: contractDate,
       startDate,
       endDate,
       branch,
       signer,
-      totalSessions: selectedPackage?.sessions ?? initial?.totalSessions ?? 0,
-      remainingSessions: initial?.remainingSessions ?? selectedPackage?.sessions ?? 0,
+      signStatus,
+      signNote,
+      trainerId,
+      activeNow,
+      totalSessions: sessions,
+      remainingSessions: initial?.remainingSessions ?? sessions,
       basePrice,
-      discountAmount,
-      vatPercent,
+      discountAmount: totalDiscount,
+      voucherCode: voucherCode || undefined,
+      vatPercent: vatLines[0]?.rate ?? 8,
+      vatLines,
       totalAmount,
       paid: totalPaid,
       payments,
+      receiptId,
+      receiptDate,
+      receiptCashier,
+      receiptCategory,
+      receiptNote,
+      paymentDeadlineDays: paymentDeadline,
+      customerCash,
+      changeAmount: Math.max(0, change),
       status: initial?.status ?? "active",
-      saleStaff,
-      creator: initial?.creator ?? saleStaff,
+      saleStaff: salesAlloc[0]?.staff ?? SALES_STAFF[0],
+      saleAllocations: salesAlloc,
+      creator: initial?.creator ?? salesAlloc[0]?.staff ?? SALES_STAFF[0],
       attachments,
-      note,
+      customFields,
+      note: paymentNote,
       history: initial?.history ?? [
-        { date: nowString(), actor: saleStaff, action: initial ? "Cập nhật hợp đồng" : "Ký mới hợp đồng" },
+        { date: nowString(), actor: salesAlloc[0]?.staff ?? "Sale", action: isEdit ? "Cập nhật hợp đồng" : "Ký mới hợp đồng" },
         { date: nowString(), actor: "Hệ thống", action: "Sinh phiếu thu (BR-M5-01)", detail: formatCurrency(totalPaid) },
       ],
       renewalCount: initial?.renewalCount ?? 0,
@@ -1166,38 +1647,34 @@ function ContractFormModal({
       hasUpgraded: initial?.hasUpgraded ?? false,
       hasTransferred: initial?.hasTransferred ?? false,
       hasConverted: initial?.hasConverted ?? false,
+      commissionMode,
+      commissionPercent: commissionMode === "custom" ? commissionPercent : undefined,
+      commissionAmount: commissionMode === "none" ? 0 : Math.round((basePrice * commissionPercent) / 100),
     };
     onSubmit(newContract);
-  };
-
-  const updatePayment = (index: number, partial: Partial<Payment>) => {
-    setPayments((items) => items.map((p, i) => (i === index ? { ...p, ...partial } : p)));
   };
 
   return (
     <div className={styles.modalOverlay} role="dialog" aria-modal="true">
       <form className={styles.contractFormModal} onSubmit={submit}>
-        <header className={styles.contractFormHeader}>
-          <div>
-            <h2>{initial ? `Chỉnh sửa hợp đồng ${initial.id}` : "Tạo hợp đồng mới"}</h2>
-            <p>6 section · Snapshot giá theo Bảng Giá (BR-M9-07) · Auto sinh phiếu thu (BR-M5-01)</p>
-          </div>
+        <header className={styles.contractFormBanner}>
+          <h2>{isEdit ? `Chỉnh sửa hợp đồng ${initial?.id}` : "Đăng ký hợp đồng mới"}</h2>
           <button onClick={onClose} title="Đóng" type="button"><X size={18} /></button>
         </header>
 
         <nav className={styles.contractSectionNav}>
           {[
-            { num: 1, label: "Khách hàng", icon: Users },
-            { num: 2, label: "Dịch vụ", icon: Layers },
-            { num: 3, label: "Ký HĐ", icon: FileSignature },
-            { num: 4, label: "Thanh toán", icon: Wallet },
-            { num: 5, label: "Phương thức TT", icon: HandCoins },
-            { num: 6, label: "Đính kèm", icon: ClipboardList },
+            { num: 1, label: "Thông tin khách hàng", icon: Users, color: "blue" },
+            { num: 2, label: "Thông tin dịch vụ", icon: Layers, color: "green" },
+            { num: 3, label: "Ký hợp đồng", icon: FileSignature, color: "purple" },
+            { num: 4, label: "Thanh toán", icon: Wallet, color: "orange" },
+            { num: 5, label: "Phiếu thu", icon: HandCoins, color: "teal" },
+            { num: 6, label: "Đính kèm", icon: ClipboardList, color: "indigo" },
           ].map((s) => {
             const Icon = s.icon;
             return (
               <button
-                className={activeSection === s.num ? styles.contractSectionTabActive : styles.contractSectionTab}
+                className={`${activeSection === s.num ? styles.contractSectionTabActive : styles.contractSectionTab} ${styles[`contractTab_${s.color}`] ?? ""}`}
                 key={s.num}
                 onClick={() => setActiveSection(s.num as typeof activeSection)}
                 type="button"
@@ -1213,252 +1690,716 @@ function ContractFormModal({
         <div className={styles.contractFormBody}>
           {error ? <div className={styles.formError}><AlertCircle size={14} /> {error}</div> : null}
 
-          {/* Section 1 — Khách hàng */}
+          {/* ============ Section 1: Khách hàng ============ */}
           {activeSection === 1 ? (
-            <section className={styles.contractFormSection}>
-              <h3><Users size={16} /> 1. Thông tin khách hàng</h3>
-              <div className={styles.contractRadioRow}>
-                <label className={customerMode === "existing" ? styles.contractRadioActive : styles.contractRadio}>
-                  <input
-                    checked={customerMode === "existing"}
-                    name="customer-mode"
-                    onChange={() => setCustomerMode("existing")}
-                    type="radio"
-                  /> Khách có sẵn (Module 01)
-                </label>
-                <label className={customerMode === "new" ? styles.contractRadioActive : styles.contractRadio}>
-                  <input
-                    checked={customerMode === "new"}
-                    name="customer-mode"
-                    onChange={() => setCustomerMode("new")}
-                    type="radio"
-                  /> Tạo khách hàng mới
-                </label>
-              </div>
+            <section className={`${styles.contractFormSection} ${styles.contractSectionBlue}`}>
+              <h3 className={styles.contractSectionHeader}><Users size={16} /> 1. Thông tin khách hàng</h3>
+
+              <label className={styles.contractCheckboxLine}>
+                <input checked={customerMode === "existing"} onChange={(e) => setCustomerMode(e.target.checked ? "existing" : "new")} type="checkbox" />
+                Chọn từ hội viên đã có
+              </label>
 
               {customerMode === "existing" ? (
-                <div className={styles.contractGrid2}>
-                  <label>
-                    <span>Tìm khách hàng <b>*</b></span>
-                    <select
-                      className={styles.selectInput}
-                      onChange={(e) => onSelectCustomer(e.target.value)}
-                      value={customerCode}
-                    >
-                      {CUSTOMERS.map((c) => (
-                        <option key={c.code} value={c.code}>{c.code} · {c.name} · {c.phone}</option>
-                      ))}
+                <label style={{ marginTop: 10, display: "block" }}>
+                  <span>Tìm hội viên</span>
+                  <select className={styles.selectInput} onChange={(e) => onSelectExisting(e.target.value)} value={customerCode}>
+                    {customers.map((c) => <option key={c.code} value={c.code}>{c.code} · {c.name} · {c.phone}</option>)}
+                  </select>
+                </label>
+              ) : null}
+
+              <div className={styles.contractGrid2} style={{ marginTop: 14 }}>
+                <label>
+                  <span>Mã hội viên</span>
+                  <div className={styles.inputWithBtn}>
+                    <input onChange={(e) => setMemberCode(e.target.value)} placeholder="HV001" value={memberCode} />
+                    <button className={styles.contractAutoBtn} onClick={() => setMemberCode(`HV${String(Math.floor(Math.random() * 9000) + 1000)}`)} type="button">Tự động</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Mã sinh trắc học</span>
+                  <div className={styles.inputWithBtn}>
+                    <input onChange={(e) => setBioCode(e.target.value)} placeholder="8 chữ số" value={bioCode} />
+                    <button className={styles.contractAutoBtn} onClick={() => setBioCode(String(Math.floor(Math.random() * 90_000_000) + 10_000_000))} type="button">Tự động</button>
+                  </div>
+                </label>
+                <label><span>Họ và tên <b>*</b></span><input onChange={(e) => setCustName(e.target.value)} placeholder="Nhập họ và tên" value={custName} /></label>
+                <label><span>Số điện thoại <b>*</b></span><input onChange={(e) => setCustPhone(e.target.value)} placeholder="0901234567" value={custPhone} /></label>
+                <label><span>Email</span><input onChange={(e) => setCustEmail(e.target.value)} placeholder="email@example.com" type="email" value={custEmail} /></label>
+                <label><span>Ngày sinh</span><input onChange={(e) => setCustBirth(e.target.value)} placeholder="dd/mm/yyyy" value={custBirth} /></label>
+                <label><span>Nhân viên phụ trách</span>
+                  <select className={styles.selectInput} onChange={(e) => setTrainerId(e.target.value)} value={trainerId}>
+                    <option value="">Chọn nhân viên</option>
+                    {trainers.map((t) => <option key={t.id} value={t.id}>{t.name} · {t.specialty}</option>)}
+                  </select>
+                </label>
+                <label><span>Thẻ khách hàng</span><input onChange={(e) => setCustCard(e.target.value)} placeholder="RFID-xxx" value={custCard} /></label>
+                <label>
+                  <span>Nhóm khách hàng</span>
+                  <div className={styles.inputWithBtn}>
+                    <select className={styles.selectInput} onChange={(e) => setCustGroup(e.target.value)} value={custGroup}>
+                      <option value="">Chọn nhóm</option>
+                      {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                    </select>
+                    <button className={styles.contractAddBtn} onClick={() => setGroupModalOpen(true)} type="button">+ Thêm nhóm</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Nguồn khách hàng</span>
+                  <div className={styles.inputWithBtn}>
+                    <select className={styles.selectInput} onChange={(e) => setCustSource(e.target.value)} value={custSource}>
+                      <option value="">Chọn nguồn</option>
+                      {sources.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                    <button className={styles.contractAddBtn} onClick={() => setSourceModalOpen(true)} type="button">+ Thêm nguồn</button>
+                  </div>
+                </label>
+              </div>
+
+              <button
+                className={styles.contractToggleAdvanced}
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                type="button"
+              >
+                {showAdvanced ? "← Ẩn bớt" : "▼ Xem thêm"}
+              </button>
+
+              {showAdvanced ? (
+                <div className={styles.contractGrid2} style={{ marginTop: 10 }}>
+                  <label><span>CMND/CCCD</span><input onChange={(e) => setCustCccd(e.target.value)} placeholder="079098xxxxx" value={custCccd} /></label>
+                  <label><span>Giới tính</span>
+                    <select className={styles.selectInput} onChange={(e) => setCustGender(e.target.value as "Nam" | "Nữ")} value={custGender}>
+                      <option>Nam</option><option>Nữ</option>
                     </select>
                   </label>
-                  <div className={styles.contractCustomerCard}>
-                    {(() => {
-                      const c = lookupCustomer(customerCode);
-                      if (!c) return <em>Chưa chọn khách hàng</em>;
-                      return (
-                        <>
-                          <strong>{c.name} · <span className={styles.contractCustomerCode}>{c.code}</span></strong>
-                          <span>SĐT: {c.phone} · {c.email}</span>
-                          <span>CCCD: {c.cccd} {c.cccdVerified ? <em className={styles.contractVerified}>✓ Verified</em> : <em className={styles.contractUnverified}>Chưa verified</em>}</span>
-                          <span>{c.gender} · {c.birthDate}</span>
-                          <span>{c.address}</span>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-              ) : (
-                <div className={styles.contractGrid2}>
-                  <label><span>Họ tên <b>*</b></span><input onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })} placeholder="Nhập họ và tên đầy đủ" value={newCustomer.name} /></label>
-                  <label><span>Số điện thoại <b>*</b></span><input onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })} placeholder="0901234567" value={newCustomer.phone} /></label>
-                  <label><span>Email</span><input onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} placeholder="email@example.com" type="email" value={newCustomer.email} /></label>
-                  <label><span>CCCD/CMND</span><input onChange={(e) => setNewCustomer({ ...newCustomer, cccd: e.target.value })} placeholder="079098xxxxx" value={newCustomer.cccd} /></label>
-                  <label><span>Ngày sinh</span><input onChange={(e) => setNewCustomer({ ...newCustomer, birthDate: e.target.value })} placeholder="dd/mm/yyyy" value={newCustomer.birthDate} /></label>
-                  <label><span>Giới tính</span><select className={styles.selectInput} onChange={(e) => setNewCustomer({ ...newCustomer, gender: e.target.value as "Nam" | "Nữ" })} value={newCustomer.gender}><option>Nam</option><option>Nữ</option></select></label>
-                  <label className={styles.fullField}><span>Địa chỉ</span><input onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })} placeholder="Số nhà, đường, quận/huyện, tỉnh/thành" value={newCustomer.address} /></label>
-                </div>
-              )}
-            </section>
-          ) : null}
+                  <label><span>Người liên hệ</span><input onChange={(e) => setCustContactName(e.target.value)} placeholder="Tên người liên hệ khẩn cấp" value={custContactName} /></label>
+                  <label><span>SĐT liên hệ</span><input onChange={(e) => setCustContactPhone(e.target.value)} placeholder="0901234567" value={custContactPhone} /></label>
 
-          {/* Section 2 — Dịch vụ */}
-          {activeSection === 2 ? (
-            <section className={styles.contractFormSection}>
-              <h3><Layers size={16} /> 2. Thông tin dịch vụ</h3>
-              <div className={styles.contractGrid2}>
-                <label>
-                  <span>Loại dịch vụ</span>
-                  <select className={styles.selectInput} disabled value={selectedPackage?.serviceType ?? ""}>
-                    {SERVICE_TYPES.map((s) => <option key={s}>{s}</option>)}
-                  </select>
-                </label>
-                <label>
-                  <span>Gói dịch vụ <b>*</b></span>
-                  <select className={styles.selectInput} onChange={(e) => onPickPackage(e.target.value)} value={packageCode}>
-                    {PACKAGE_LIBRARY.map((p) => (
-                      <option key={p.code} value={p.code}>{p.code} · {p.name} · {formatCurrency(p.price)}</option>
-                    ))}
-                  </select>
-                </label>
-                <label><span>Đơn giá (auto-fill)</span><input readOnly value={formatCurrency(basePrice)} /></label>
-                <label><span>Số buổi (auto-fill)</span><input readOnly value={selectedPackage?.sessions === 0 ? "Theo lượt" : `${selectedPackage?.sessions ?? 0} buổi`} /></label>
-                <label><span>Thời hạn (auto-fill)</span><input readOnly value={selectedPackage ? `${Math.round(selectedPackage.durationMonths)} tháng` : ""} /></label>
-                <label><span>Chi nhánh áp dụng</span><select className={styles.selectInput} onChange={(e) => setBranch(e.target.value)} value={branch}>{BRANCHES.map((b) => <option key={b}>{b}</option>)}</select></label>
-              </div>
-              <div className={styles.contractInfoBanner}>
-                <ShieldCheck size={16} /> Snapshot giá: tại thời điểm ký, mọi thay đổi bảng giá sau này KHÔNG ảnh hưởng HĐ này (BR-M9-07).
-              </div>
-            </section>
-          ) : null}
-
-          {/* Section 3 — Ký HĐ */}
-          {activeSection === 3 ? (
-            <section className={styles.contractFormSection}>
-              <h3><FileSignature size={16} /> 3. Thông tin ký hợp đồng</h3>
-              <div className={styles.contractGrid2}>
-                <label><span>Người ký <b>*</b></span><input onChange={(e) => setSigner(e.target.value)} placeholder="Người đại diện ký HĐ" value={signer} /></label>
-                <label><span>Ngày ký</span><input onChange={(e) => setSignedDate(e.target.value)} placeholder="dd/mm/yyyy" value={signedDate} /></label>
-                <label><span>Ngày bắt đầu</span><input onChange={(e) => onPickStartDate(e.target.value)} placeholder="dd/mm/yyyy" value={startDate} /></label>
-                <label><span>Ngày kết thúc</span><input onChange={(e) => setEndDate(e.target.value)} placeholder="dd/mm/yyyy" value={endDate} /></label>
-                <label><span>Chi nhánh ký</span><select className={styles.selectInput} onChange={(e) => setBranch(e.target.value)} value={branch}>{BRANCHES.map((b) => <option key={b}>{b}</option>)}</select></label>
-                <label><span>NV Sale phụ trách</span><select className={styles.selectInput} onChange={(e) => setSaleStaff(e.target.value)} value={saleStaff}>{SALES_STAFF.map((s) => <option key={s}>{s}</option>)}</select></label>
-              </div>
-            </section>
-          ) : null}
-
-          {/* Section 4 — Thanh toán */}
-          {activeSection === 4 ? (
-            <section className={styles.contractFormSection}>
-              <h3><Wallet size={16} /> 4. Tính toán thanh toán</h3>
-              <div className={styles.contractGrid2}>
-                <label><span>Giá gốc</span><input readOnly value={formatCurrency(basePrice)} /></label>
-                <div className={styles.contractDiscountRow}>
-                  <label><span>Giảm giá</span>
-                    <div className={styles.contractDiscountInput}>
-                      <input
-                        onChange={(e) => setDiscountValue(Number(e.target.value) || 0)}
-                        type="number"
-                        value={discountValue}
-                      />
-                      <select className={styles.selectInput} onChange={(e) => setDiscountKind(e.target.value as "amount" | "percent")} value={discountKind}>
-                        <option value="amount">VNĐ</option>
-                        <option value="percent">%</option>
-                      </select>
+                  <label className={styles.fullField}>
+                    <span>Người đi cùng (NDC)</span>
+                    <div className={styles.contractCompanionList}>
+                      {companions.map((c) => (
+                        <span key={c.id} className={styles.contractCompanionTag}>
+                          {c.name} ({c.relation})
+                          <button onClick={() => setCompanions(companions.filter((x) => x.id !== c.id))} type="button"><X size={12} /></button>
+                        </span>
+                      ))}
+                      <button className={styles.contractAddBtn} onClick={() => setCompanionModalOpen(true)} type="button">+ Thêm người đi cùng</button>
                     </div>
                   </label>
+
+                  <label><span>Tỉnh/Thành phố</span>
+                    <select className={styles.selectInput} onChange={(e) => { setCustProvince(e.target.value); setCustWard(""); }} value={custProvince}>
+                      <option value="">Chọn Tỉnh/Thành</option>
+                      {PROVINCES.map((p) => <option key={p}>{p}</option>)}
+                    </select>
+                  </label>
+                  <label><span>Phường/Xã</span>
+                    <select className={styles.selectInput} disabled={!custProvince} onChange={(e) => setCustWard(e.target.value)} value={custWard}>
+                      <option value="">Chọn Phường/Xã</option>
+                      {(WARDS_BY_PROVINCE[custProvince] ?? []).map((w) => <option key={w}>{w}</option>)}
+                    </select>
+                  </label>
+                  <label className={styles.fullField}><span>Thôn/Xóm/Số nhà</span><input onChange={(e) => setCustStreet(e.target.value)} placeholder="VD: 12 Lê Lợi" value={custStreet} /></label>
+                  <label className={styles.fullField}><span>Ghi chú bổ sung</span><textarea onChange={(e) => setCustNote(e.target.value)} placeholder="Sở thích, lưu ý..." rows={2} value={custNote} /></label>
+
+                  <div className={`${styles.contractCustomFields} ${styles.fullField}`}>
+                    <header>
+                      <strong>Trường tùy chỉnh ({customFields.length})</strong>
+                      <button className={styles.contractAddBtn} onClick={() => setCustomFieldModalOpen(true)} type="button">+ Thêm trường</button>
+                    </header>
+                    {customFields.length === 0 ? (
+                      <p className={styles.contractMutedNote}>Chưa có trường tùy chỉnh nào.</p>
+                    ) : (
+                      <ul className={styles.contractCustomFieldList}>
+                        {customFields.map((f, i) => (
+                          <li key={i}>
+                            <strong>{f.label}</strong>: <span>{f.value}</span>
+                            <button onClick={() => setCustomFields(customFields.filter((_, idx) => idx !== i))} type="button"><Trash2 size={12} /></button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
-                <label><span>Quy đổi giảm giá</span><input readOnly value={formatCurrency(discountAmount)} /></label>
-                <label>
-                  <span>VAT %</span>
-                  <select className={styles.selectInput} onChange={(e) => setVatPercent(Number(e.target.value))} value={vatPercent}>
-                    {VAT_OPTIONS.map((v) => <option key={v} value={v}>{v}%</option>)}
-                  </select>
-                </label>
-              </div>
-              <div className={styles.contractTotalsCard}>
-                <div><span>Đơn giá</span><strong>{formatCurrency(basePrice)}</strong></div>
-                <div><span>− Giảm giá</span><strong>− {formatCurrency(discountAmount)}</strong></div>
-                <div><span>+ VAT {vatPercent}%</span><strong>+ {formatCurrency(Math.round((basePrice - discountAmount) * vatPercent / 100))}</strong></div>
-                <div className={styles.contractTotalRow}><span>Tổng thanh toán (BR-M8-33)</span><strong>{formatCurrency(totalAmount)}</strong></div>
-              </div>
+              ) : null}
             </section>
           ) : null}
 
-          {/* Section 5 — Phương thức thanh toán */}
-          {activeSection === 5 ? (
-            <section className={styles.contractFormSection}>
-              <h3><HandCoins size={16} /> 5. Phương thức thanh toán</h3>
-              <div className={styles.contractPaymentList}>
-                {payments.map((p, index) => (
-                  <div className={styles.contractPaymentRow} key={index}>
-                    <select
-                      className={styles.selectInput}
-                      onChange={(e) => updatePayment(index, { method: e.target.value })}
-                      value={p.method}
-                    >
-                      {PAYMENT_METHODS.map((m) => <option key={m}>{m}</option>)}
+          {/* ============ Section 2: Dịch vụ ============ */}
+          {activeSection === 2 ? (
+            <section className={`${styles.contractFormSection} ${styles.contractSectionGreen}`}>
+              <h3 className={styles.contractSectionHeader}><Layers size={16} /> 2. Thông tin dịch vụ</h3>
+              <div className={styles.contractGrid2}>
+                <label><span>Chi nhánh <b>*</b></span>
+                  <select className={styles.selectInput} onChange={(e) => setBranch(e.target.value)} value={branch}>
+                    {BRANCHES.map((b) => <option key={b}>{b}</option>)}
+                  </select>
+                </label>
+                <label><span>Ngày hợp đồng <b>*</b></span><input onChange={(e) => setContractDate(e.target.value)} placeholder="dd/mm/yyyy" value={contractDate} /></label>
+                <label className={styles.fullField}>
+                  <span>Loại hợp đồng</span>
+                  <div className={styles.inputWithBtn}>
+                    <select className={styles.selectInput} onChange={(e) => setContractTypeId(e.target.value)} value={contractTypeId}>
+                      {contractTypes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
-                    <input
-                      onChange={(e) => updatePayment(index, { amount: Number(e.target.value) || 0 })}
-                      placeholder="Số tiền"
-                      type="number"
-                      value={p.amount}
-                    />
+                    <button className={styles.contractAddBtn} onClick={() => setContractTypeModalOpen(true)} type="button">+ Thêm loại HĐ</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Loại dịch vụ <b>*</b></span>
+                  <div className={styles.inputWithBtn}>
+                    <select className={styles.selectInput} onChange={(e) => setServiceTypeName(e.target.value)} value={serviceTypeName}>
+                      {serviceTypes.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                    <button className={styles.contractAddBtn} onClick={() => setServiceTypeModalOpen(true)} type="button">+ Thêm</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Tên dịch vụ <b>*</b></span>
+                  <select className={styles.selectInput} onChange={(e) => onPickPackage(e.target.value)} value={packageCode}>
+                    {packages.map((p) => <option key={p.code} value={p.code}>{p.name} · {formatCurrency(p.price)}</option>)}
+                  </select>
+                </label>
+                <label><span>Ngày bắt đầu <b>*</b></span><input onChange={(e) => onPickStartDate(e.target.value)} placeholder="dd/mm/yyyy" value={startDate} /></label>
+                <label><span>Ngày kết thúc</span><input onChange={(e) => setEndDate(e.target.value)} placeholder="dd/mm/yyyy" value={endDate} /></label>
+                <label><span>Số tháng</span><input readOnly value={`${months} tháng`} /></label>
+                <label><span>Số buổi</span><input readOnly value={`${sessions} buổi`} /></label>
+                <label><span>Số ngày</span><input readOnly value={`${diffDaysInclusive(startDate, endDate)} ngày`} /></label>
+                <label className={styles.fullField}>
+                  <span>Nhân viên PT (HLV)</span>
+                  <div className={styles.inputWithBtn}>
+                    <select className={styles.selectInput} onChange={(e) => setTrainerId(e.target.value)} value={trainerId}>
+                      <option value="">Chưa có nhân viên PT</option>
+                      {trainers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                    <button className={styles.contractAddBtn} onClick={() => setTrainerModalOpen(true)} type="button">+ Thêm HLV</button>
+                  </div>
+                </label>
+              </div>
+
+              {/* Multi-Sale với % tỷ lệ */}
+              <div className={styles.contractSubsection}>
+                <header className={styles.contractSubsectionHeader}>
+                  <strong>Nhân viên Sale</strong>
+                  <button className={styles.contractAddBtn} onClick={() => setSalesAlloc([...salesAlloc, { staff: SALES_STAFF[0], percent: 0 }])} type="button">+ Thêm NV</button>
+                </header>
+                <p className={styles.contractMutedNote}>Có thể thêm nhiều nhân viên Sale</p>
+                {salesAlloc.map((s, index) => (
+                  <div className={styles.contractSaleRow} key={index}>
+                    <span className={styles.contractSaleIndex}>{index + 1}</span>
+                    <div>
+                      <span className={styles.contractFieldLabel}>Nhân viên #{index + 1}</span>
+                      <select className={styles.selectInput} onChange={(e) => updateSalesAlloc(index, { staff: e.target.value })} value={s.staff}>
+                        {SALES_STAFF.map((x) => <option key={x}>{x}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <span className={styles.contractFieldLabel}>Tỷ lệ doanh số (%)</span>
+                      <input
+                        max={100}
+                        min={0}
+                        onChange={(e) => updateSalesAlloc(index, { percent: Math.min(100, Math.max(0, Number(e.target.value) || 0)) })}
+                        type="number"
+                        value={s.percent}
+                      />
+                    </div>
                     <button
                       className={styles.contractRowRemove}
-                      disabled={payments.length === 1}
-                      onClick={() => setPayments(payments.filter((_, i) => i !== index))}
-                      title="Xóa dòng"
+                      disabled={salesAlloc.length === 1}
+                      onClick={() => setSalesAlloc(salesAlloc.filter((_, i) => i !== index))}
                       type="button"
                     >
-                      <X size={14} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 ))}
-              </div>
-              <button
-                className={styles.contractLinkBtn}
-                onClick={() => setPayments([...payments, { method: "Tiền mặt", amount: 0 }])}
-                type="button"
-              >
-                + Thêm phương thức thanh toán
-              </button>
-
-              <div className={styles.contractPaymentSummary}>
-                <div><span>Tổng tiền</span><strong>{formatCurrency(totalAmount)}</strong></div>
-                <div><span>Đã thu</span><strong className={styles.contractPaid}>{formatCurrency(totalPaid)}</strong></div>
-                <div className={debt > 0 ? styles.contractDebtRow : styles.contractZeroRow}>
-                  <span>Còn nợ</span>
-                  <strong>{formatCurrency(Math.max(0, debt))}</strong>
+                <div className={`${styles.contractTotalsCard} ${totalSalesPercent === 100 ? styles.contractGreenCard : styles.contractWarnCard}`} style={{ marginTop: 8 }}>
+                  <div><span>% Tổng tỷ lệ</span><strong>{totalSalesPercent}%</strong></div>
+                  {totalSalesPercent !== 100 ? <div><span>Còn thiếu</span><strong>{100 - totalSalesPercent}%</strong></div> : null}
                 </div>
               </div>
 
-              <label className={styles.contractCheckboxLine}>
-                <input checked={allowDebt} onChange={(e) => setAllowDebt(e.target.checked)} type="checkbox" />
-                Cho phép tạo công nợ (Sum PTTT &lt; Tổng tiền — BR-M8-14)
+              <div className={styles.contractGrid2} style={{ marginTop: 14 }}>
+                <label className={styles.fullField}>
+                  <span>Mã hợp đồng</span>
+                  <div className={styles.inputWithBtn}>
+                    <input onChange={(e) => setContractCode(e.target.value)} value={contractCode} />
+                    <button className={styles.contractAutoBtn} onClick={() => setContractCode(`HD${Date.now().toString().slice(-12)}`)} type="button">Tự động</button>
+                  </div>
+                </label>
+              </div>
+
+              <label className={`${styles.contractActiveToggleRow} ${styles.fullField}`} style={{ marginTop: 14 }}>
+                <div>
+                  <strong>Kích hoạt ngay</strong>
+                  <small>Hợp đồng có hiệu lực ngay sau khi tạo</small>
+                </div>
+                <input checked={activeNow} onChange={(e) => setActiveNow(e.target.checked)} type="checkbox" />
+              </label>
+
+              {/* Hoa hồng nested */}
+              <div className={styles.contractCommissionBlock}>
+                <header><HandCoins size={14} /> <strong>Hoa hồng</strong></header>
+                <div className={styles.contractGrid2}>
+                  <label><span>Nhóm khách hàng</span>
+                    <select className={styles.selectInput} disabled value={custGroup || ""}>
+                      <option value="">Chưa chọn</option>
+                      {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                    </select>
+                  </label>
+                  <label><span>Loại dịch vụ</span><input readOnly value={serviceTypeName} /></label>
+                </div>
+                <div className={styles.contractRadioRow} style={{ marginTop: 10 }}>
+                  {(["preset", "custom", "none"] as const).map((m) => (
+                    <label className={commissionMode === m ? styles.contractRadioActive : styles.contractRadio} key={m}>
+                      <input checked={commissionMode === m} onChange={() => setCommissionMode(m)} type="radio" />
+                      {m === "preset" ? "Theo thiết lập" : m === "custom" ? "Theo tùy chỉnh" : "Không áp dụng"}
+                    </label>
+                  ))}
+                </div>
+                {commissionMode === "custom" ? (
+                  <div className={styles.contractGrid2} style={{ marginTop: 10 }}>
+                    <label><span>Giá trị hoa hồng (%)</span><input min={0} max={100} onChange={(e) => setCommissionPercent(Number(e.target.value) || 0)} type="number" value={commissionPercent} /></label>
+                  </div>
+                ) : null}
+                <div className={styles.contractCommissionPreview}>
+                  <span>Hoa hồng dự kiến</span>
+                  <strong>{formatCurrency(commissionMode === "none" ? 0 : Math.round((basePrice * commissionPercent) / 100))}</strong>
+                </div>
+                <p className={styles.contractMutedNote}>Hoa hồng sẽ được áp dụng khi tạo hợp đồng dựa trên cấu hình hoặc tùy chỉnh.</p>
+              </div>
+            </section>
+          ) : null}
+
+          {/* ============ Section 3: Ký HĐ ============ */}
+          {activeSection === 3 ? (
+            <section className={`${styles.contractFormSection} ${styles.contractSectionPurple}`}>
+              <h3 className={styles.contractSectionHeader}><FileSignature size={16} /> 3. Thông tin ký hợp đồng</h3>
+              <div className={styles.contractGrid2}>
+                <label><span>Trạng thái ký <b>*</b></span>
+                  <select className={styles.selectInput} onChange={(e) => setSignStatus(e.target.value as "Chưa ký" | "Đã ký")} value={signStatus}>
+                    <option>Chưa ký</option><option>Đã ký</option>
+                  </select>
+                </label>
+                <label><span>Ngày ký</span><input disabled={signStatus !== "Đã ký"} onChange={(e) => setSignDate(e.target.value)} placeholder="dd/mm/yyyy" value={signDate} /></label>
+                <label><span>Người ký</span>
+                  <select className={styles.selectInput} onChange={(e) => setSigner(e.target.value)} value={signer}>
+                    <option value="">Chọn nhân viên ký</option>
+                    {SALES_STAFF.map((s) => <option key={s}>{s}</option>)}
+                    {custName ? <option value={custName}>{custName} (Khách hàng)</option> : null}
+                  </select>
+                </label>
+                <label className={styles.fullField}><span>Ghi chú M/S (Membership)</span>
+                  <textarea onChange={(e) => setSignNote(e.target.value)} placeholder="Ghi chú liên quan ký HĐ..." rows={2} value={signNote} />
+                </label>
+              </div>
+              {signStatus === "Đã ký" && signDate ? (
+                <div className={styles.contractInfoBanner}><CheckCircle2 size={14} /> Hợp đồng đã được ký vào ngày {signDate}</div>
+              ) : null}
+            </section>
+          ) : null}
+
+          {/* ============ Section 4: Thanh toán ============ */}
+          {activeSection === 4 ? (
+            <section className={`${styles.contractFormSection} ${styles.contractSectionOrange}`}>
+              <h3 className={styles.contractSectionHeader}><Wallet size={16} /> 4. Thanh toán</h3>
+
+              {selectedVoucher ? (
+                <div className={styles.contractVoucherApplied}>
+                  <div>
+                    <strong>{selectedVoucher.code}</strong>
+                    <span>{selectedVoucher.name}</span>
+                  </div>
+                  <strong className={styles.contractVoucherValue}>−{selectedVoucher.type === "percent" ? `${selectedVoucher.value}%` : formatCurrency(selectedVoucher.value)}</strong>
+                </div>
+              ) : null}
+
+              <div className={styles.contractGrid2}>
+                <label><span>Giá gốc</span><input readOnly value={formatCurrency(basePrice)} /></label>
+              </div>
+
+              {/* Sub-section Khuyến mãi */}
+              <div className={styles.contractPromoBlock}>
+                <header><strong>Khuyến mãi & Giảm giá</strong></header>
+                <div className={styles.contractRadioRow}>
+                  <label className={styles.contractRadioActive}><input checked readOnly type="radio" /> Chương trình KM / Voucher</label>
+                </div>
+                <div className={styles.contractVoucherGrid}>
+                  {vouchers.map((v) => {
+                    const eligible = !v.minOrder || basePrice >= v.minOrder;
+                    return (
+                      <button
+                        className={`${styles.contractVoucherCard} ${voucherCode === v.code ? styles.contractVoucherSelected : ""} ${!eligible ? styles.contractVoucherDisabled : ""}`}
+                        disabled={!eligible}
+                        key={v.code}
+                        onClick={() => setVoucherCode(voucherCode === v.code ? "" : v.code)}
+                        type="button"
+                      >
+                        <strong>{v.name}</strong>
+                        <span>{v.code}</span>
+                        <em>{v.type === "percent" ? `Giảm ${v.value}%` : `Giảm ${formatCurrency(v.value)}`}{v.minOrder ? ` · đơn ≥ ${formatCurrency(v.minOrder)}` : ""}</em>
+                      </button>
+                    );
+                  })}
+                </div>
+                <button className={styles.contractAddBtn} onClick={() => setVoucherModalOpen(true)} style={{ marginTop: 8 }} type="button">+ Tạo voucher mới</button>
+
+                <div className={styles.contractGrid2} style={{ marginTop: 12 }}>
+                  <label><span>Giảm giá ({discountKind === "percent" ? "%" : "VNĐ"})</span>
+                    <div className={styles.contractDiscountInput}>
+                      <input min={0} onChange={(e) => setDiscountValue(Number(e.target.value) || 0)} type="number" value={discountValue} />
+                      <select className={styles.selectInput} onChange={(e) => setDiscountKind(e.target.value as "amount" | "percent")} value={discountKind}>
+                        <option value="amount">VNĐ</option><option value="percent">%</option>
+                      </select>
+                    </div>
+                  </label>
+                  <label><span>Số tiền giảm</span><input readOnly value={formatCurrency(totalDiscount)} /></label>
+                  <label className={styles.fullField}><span>Sau giảm giá</span><input readOnly value={formatCurrency(afterDiscount)} /></label>
+                </div>
+              </div>
+
+              {/* VAT multi-line */}
+              <div className={styles.contractSubsection}>
+                <header className={styles.contractSubsectionHeader}>
+                  <strong>THUẾ</strong>
+                  <button className={styles.contractAddBtn} onClick={() => setVatLines([...vatLines, { rate: 5, amount: 0 }])} type="button">+ Thêm mức VAT</button>
+                </header>
+                {vatLines.map((line, i) => (
+                  <div className={styles.contractVatRow} key={i}>
+                    <select className={styles.selectInput} onChange={(e) => setVatLines(vatLines.map((l, idx) => idx === i ? { ...l, rate: Number(e.target.value) } : l))} value={line.rate}>
+                      {VAT_OPTIONS.map((v) => <option key={v} value={v}>{v}%</option>)}
+                    </select>
+                    <span>= {formatCurrency(Math.round((afterDiscount * line.rate) / 100))}</span>
+                    <button
+                      className={styles.contractRowRemove}
+                      disabled={vatLines.length === 1}
+                      onClick={() => setVatLines(vatLines.filter((_, idx) => idx !== i))}
+                      type="button"
+                    ><Trash2 size={14} /></button>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.contractTotalsCard}>
+                <div><span>Tổng thanh toán</span><strong className={styles.contractTotalAmount}>{formatCurrency(totalAmount)}</strong></div>
+                <div className={styles.contractMutedNote}>Giá gốc: {formatCurrency(basePrice)} · Giảm: {formatCurrency(totalDiscount)} · VAT: {formatCurrency(vatTotal)}</div>
+              </div>
+
+              {/* PTTT nhiều lần */}
+              <div className={styles.contractSubsection}>
+                <header className={styles.contractSubsectionHeader}>
+                  <strong>Phương thức thanh toán <b>*</b></strong>
+                  <button className={styles.contractAddBtn} onClick={() => setPayments([...payments, { method: "Tiền mặt", amount: 0, accountId: cashFunds[0]?.id }])} type="button">+ Thêm</button>
+                </header>
+                {payments.map((p, index) => (
+                  <div className={styles.contractPaymentBlock} key={index}>
+                    <header>
+                      <span className={styles.contractSaleIndex}>{index + 1}</span>
+                      <strong>Lần {index + 1}</strong>
+                      <button
+                        className={styles.contractRowRemove}
+                        disabled={payments.length === 1}
+                        onClick={() => setPayments(payments.filter((_, i) => i !== index))}
+                        type="button"
+                      ><Trash2 size={14} /></button>
+                    </header>
+                    <div className={styles.contractGrid2}>
+                      <label><span>Phương thức</span>
+                        <select className={styles.selectInput} onChange={(e) => updatePayment(index, { method: e.target.value as Payment["method"], accountId: undefined, txRef: undefined })} value={p.method}>
+                          {PAYMENT_METHODS.map((m) => <option key={m}>{m}</option>)}
+                        </select>
+                      </label>
+                      <label><span>Số tiền</span><input min={0} onChange={(e) => updatePayment(index, { amount: Number(e.target.value) || 0 })} placeholder="Nhập số tiền" type="number" value={p.amount} /></label>
+
+                      {p.method === "Chuyển khoản" ? (
+                        <>
+                          <label><span>Tài khoản nhận</span>
+                            <select className={styles.selectInput} onChange={(e) => updatePayment(index, { accountId: e.target.value })} value={p.accountId ?? bankAccounts[0]?.id}>
+                              {bankAccounts.map((a) => <option key={a.id} value={a.id}>{a.bank} — {a.name} ({a.number})</option>)}
+                            </select>
+                          </label>
+                          <label><span>Mã giao dịch xác nhận <b>*</b></span><input onChange={(e) => updatePayment(index, { txRef: e.target.value })} placeholder="Ref code từ ngân hàng" value={p.txRef ?? ""} /></label>
+                          <p className={`${styles.contractMutedNote} ${styles.fullField} ${styles.dangerText}`}>Bắt buộc</p>
+                        </>
+                      ) : null}
+
+                      {p.method === "Thẻ" ? (
+                        <>
+                          <label><span>Thiết bị POS</span>
+                            <select className={styles.selectInput} onChange={(e) => updatePayment(index, { accountId: e.target.value })} value={p.accountId ?? posDevices[0]?.id}>
+                              {posDevices.map((a) => <option key={a.id} value={a.id}>{a.name} — {a.bank}</option>)}
+                            </select>
+                          </label>
+                          <label><span>Mã giao dịch xác nhận <b>*</b></span><input onChange={(e) => updatePayment(index, { txRef: e.target.value })} placeholder="Ref code từ POS" value={p.txRef ?? ""} /></label>
+                          <p className={`${styles.contractMutedNote} ${styles.fullField} ${styles.dangerText}`}>Bắt buộc</p>
+                        </>
+                      ) : null}
+
+                      {p.method === "Tiền mặt" ? (
+                        <>
+                          <label><span>Quỹ tiền mặt</span>
+                            <select className={styles.selectInput} onChange={(e) => updatePayment(index, { accountId: e.target.value })} value={p.accountId ?? cashFunds[0]?.id}>
+                              {cashFunds.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.branch})</option>)}
+                            </select>
+                          </label>
+                          <p className={`${styles.contractMutedNote} ${styles.fullField}`}>Thu tiền mặt trực tiếp tại quầy</p>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <label className={styles.fullField} style={{ marginTop: 12 }}>
+                <span>Ghi chú</span>
+                <textarea onChange={(e) => setPaymentNote(e.target.value)} placeholder="Ghi chú thanh toán..." rows={2} value={paymentNote} />
               </label>
             </section>
           ) : null}
 
-          {/* Section 6 — Đính kèm */}
-          {activeSection === 6 ? (
-            <section className={styles.contractFormSection}>
-              <h3><ClipboardList size={16} /> 6. Tài liệu đính kèm + Ghi chú</h3>
-              <div className={styles.contractAttachments}>
-                {attachments.map((file, index) => (
-                  <div className={styles.contractAttachmentItem} key={index}>
-                    <FileText size={14} /> <span>{file}</span>
-                    <button onClick={() => setAttachments(attachments.filter((_, i) => i !== index))} type="button"><X size={12} /></button>
+          {/* ============ Section 5: Phiếu thu ============ */}
+          {activeSection === 5 ? (
+            <section className={`${styles.contractFormSection} ${styles.contractSectionTeal}`}>
+              <h3 className={styles.contractSectionHeader}><HandCoins size={16} /> 5. Phiếu thu</h3>
+              <div className={styles.contractGrid2}>
+                <label><span>Khách đưa</span><input min={0} onChange={(e) => setCustomerCash(Number(e.target.value) || 0)} type="number" value={customerCash} /></label>
+                <label><span>Tiền thừa</span>
+                  <div className={styles.contractChangeBox}>
+                    {change >= 0 ? <em className={styles.contractPaid}>Đủ tiền</em> : <em className={styles.dangerText}>Thiếu</em>}
+                    <strong>{formatCurrency(Math.max(0, change))}</strong>
                   </div>
-                ))}
-                {attachments.length < 3 ? (
-                  <button
-                    className={styles.contractUploadBtn}
-                    onClick={() => {
-                      const name = window.prompt("Tên file đính kèm (PDF/JPG/PNG):", "file.pdf");
-                      if (name) setAttachments([...attachments, name]);
-                    }}
-                    type="button"
-                  >
-                    + Đính kèm (tối đa 3 file, PDF/JPG/PNG ≤ 10MB)
-                  </button>
-                ) : null}
+                </label>
+                <label>
+                  <span>Số phiếu thu</span>
+                  <div className={styles.inputWithBtn}>
+                    <input onChange={(e) => setReceiptId(e.target.value)} value={receiptId} />
+                    <button className={styles.contractAutoBtn} onClick={() => setReceiptId(`PT${Date.now().toString().slice(-12)}`)} type="button">Tự động</button>
+                  </div>
+                </label>
+                <label><span>Ngày lập phiếu</span><input onChange={(e) => setReceiptDate(e.target.value)} placeholder="dd/mm/yyyy" value={receiptDate} /></label>
+                <label><span>Nhân viên thu</span>
+                  <select className={styles.selectInput} onChange={(e) => setReceiptCashier(e.target.value)} value={receiptCashier}>
+                    {SALES_STAFF.map((s) => <option key={s}>{s}</option>)}
+                  </select>
+                </label>
+                <label><span>Loại thu chi</span>
+                  <select className={styles.selectInput} onChange={(e) => setReceiptCategory(e.target.value)} value={receiptCategory}>
+                    {RECEIPT_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                  </select>
+                </label>
+                <label><span>Thời hạn thanh toán (Ngày)</span><input min={0} onChange={(e) => setPaymentDeadline(Number(e.target.value) || 0)} type="number" value={paymentDeadline} /></label>
+                <label className={styles.fullField}><span>Ghi chú phiếu thu</span><textarea onChange={(e) => setReceiptNote(e.target.value)} rows={2} value={receiptNote} /></label>
               </div>
-              <label className={styles.fullField}>
-                <span>Ghi chú</span>
-                <textarea onChange={(e) => setNote(e.target.value)} placeholder="Ghi chú nội bộ về hợp đồng..." rows={4} value={note} />
-              </label>
+
+              <div className={styles.contractReceiptPreview}>
+                <header>PHIẾU THU</header>
+                <div><span>Số: {receiptId}</span><span>Ngày tạo {receiptDate}</span></div>
+                <div><span>Khách hàng</span><strong>{custName || "—"}</strong></div>
+                <div><span>Mã hợp đồng</span><strong>{contractCode}</strong></div>
+                <div><span>Số tiền thu</span><strong>{formatCurrency(totalPaid)}</strong></div>
+                <div><span>Còn nợ</span><strong>{formatCurrency(Math.max(0, debt))}</strong></div>
+              </div>
+            </section>
+          ) : null}
+
+          {/* ============ Section 6: Đính kèm ============ */}
+          {activeSection === 6 ? (
+            <section className={`${styles.contractFormSection} ${styles.contractSectionIndigo}`}>
+              <h3 className={styles.contractSectionHeader}><ClipboardList size={16} /> 6. Tài liệu đính kèm</h3>
+              <button
+                className={styles.contractDropzone}
+                onClick={() => {
+                  const name = window.prompt("Tên file (PDF/JPG/PNG/DOCX):", "tai-lieu.pdf");
+                  if (name) setAttachments([...attachments, name]);
+                }}
+                type="button"
+              >
+                <ClipboardList size={32} />
+                <strong>Kéo thả file hoặc nhấn để chọn</strong>
+                <span>PDF, Word, Excel, JPG, PNG... tối đa 50 MB / file</span>
+              </button>
+              {attachments.length > 0 ? (
+                <ul className={styles.contractAttachmentList}>
+                  {attachments.map((f, i) => (
+                    <li key={i}>
+                      <FileText size={14} /> {f}
+                      <button onClick={() => setAttachments(attachments.filter((_, idx) => idx !== i))} type="button"><Trash2 size={12} /></button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              <p className={styles.contractMutedNote} style={{ marginTop: 14 }}>Trường bổ sung tin / Quản lý trường</p>
             </section>
           ) : null}
         </div>
 
         <footer className={styles.contractFormFooter}>
-          <span>Tổng thanh toán: <strong>{formatCurrency(totalAmount)}</strong> · Đã thu: <strong>{formatCurrency(totalPaid)}</strong></span>
+          <span>Tổng thanh toán: <strong>{formatCurrency(totalAmount)}</strong> · Đã thu: <strong>{formatCurrency(totalPaid)}</strong> · Còn nợ: <strong>{formatCurrency(Math.max(0, debt))}</strong></span>
           <div>
             <button className={styles.outlineButton} onClick={onClose} type="button">Hủy</button>
-            <button className={styles.greenButton} type="submit">{initial ? "Cập nhật" : "Lưu hợp đồng"}</button>
+            <button className={styles.greenButton} type="submit">{isEdit ? "Cập nhật" : "Lưu hợp đồng"}</button>
           </div>
         </footer>
       </form>
+
+      {groupModalOpen ? (
+        <AddSimpleModal title="Thêm nhóm khách hàng" onClose={() => setGroupModalOpen(false)} onSubmit={(name, desc) => { onCreateGroup(name, desc); setGroupModalOpen(false); }} />
+      ) : null}
+      {sourceModalOpen ? (
+        <AddSimpleModal title="Thêm nguồn khách hàng" onClose={() => setSourceModalOpen(false)} onSubmit={(name, desc) => { onCreateSource(name, desc); setSourceModalOpen(false); }} />
+      ) : null}
+      {contractTypeModalOpen ? (
+        <AddSimpleModal title="Thêm loại hợp đồng" onClose={() => setContractTypeModalOpen(false)} onSubmit={(name, desc) => { onCreateContractType(name, desc); setContractTypeModalOpen(false); }} />
+      ) : null}
+      {serviceTypeModalOpen ? (
+        <AddSimpleModal hideDescription title="Thêm loại dịch vụ" onClose={() => setServiceTypeModalOpen(false)} onSubmit={(name) => { onCreateServiceType(name); setServiceTypeModalOpen(false); }} />
+      ) : null}
+      {trainerModalOpen ? (
+        <AddSimpleModal title="Thêm HLV / NV PT" descriptionLabel="Chuyên môn" onClose={() => setTrainerModalOpen(false)} onSubmit={(name, desc) => { onCreateTrainer(name, desc); setTrainerModalOpen(false); }} />
+      ) : null}
+      {companionModalOpen ? (
+        <AddCompanionModal onClose={() => setCompanionModalOpen(false)} onSubmit={(c) => { setCompanions([...companions, c]); setCompanionModalOpen(false); }} />
+      ) : null}
+      {voucherModalOpen ? (
+        <AddVoucherModal onClose={() => setVoucherModalOpen(false)} onSubmit={(v) => { onCreateVoucher(v); setVoucherCode(v.code); setVoucherModalOpen(false); }} />
+      ) : null}
+      {customFieldModalOpen ? (
+        <AddCustomFieldModal onClose={() => setCustomFieldModalOpen(false)} onSubmit={(label, value) => { setCustomFields([...customFields, { label, value }]); setCustomFieldModalOpen(false); }} />
+      ) : null}
+    </div>
+  );
+}
+
+function AddSimpleModal({
+  title,
+  onClose,
+  onSubmit,
+  hideDescription,
+  descriptionLabel,
+}: {
+  title: string;
+  onClose: () => void;
+  onSubmit: (name: string, desc: string) => void;
+  hideDescription?: boolean;
+  descriptionLabel?: string;
+}) {
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+  return (
+    <div className={styles.nestedOverlay}>
+      <div className={styles.smallModal}>
+        <header><h2>{title}</h2><button onClick={onClose} type="button"><X size={16} /></button></header>
+        <div className={styles.smallModalBody}>
+          <label><span>Tên <b>*</b></span><input autoFocus onChange={(e) => setName(e.target.value)} value={name} /></label>
+          {!hideDescription ? (
+            <label><span>{descriptionLabel ?? "Mô tả"}</span><input onChange={(e) => setDesc(e.target.value)} value={desc} /></label>
+          ) : null}
+        </div>
+        <footer>
+          <button className={styles.outlineButton} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.blueButton} disabled={!name.trim()} onClick={() => onSubmit(name.trim(), desc.trim())} type="button">Thêm</button>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function AddCompanionModal({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void;
+  onSubmit: (c: Companion) => void;
+}) {
+  const [name, setName] = useState("");
+  const [relation, setRelation] = useState("Vợ/Chồng");
+  const [phone, setPhone] = useState("");
+  return (
+    <div className={styles.nestedOverlay}>
+      <div className={styles.smallModal}>
+        <header><h2>Thêm người đi cùng (NDC)</h2><button onClick={onClose} type="button"><X size={16} /></button></header>
+        <div className={styles.smallModalBody}>
+          <label><span>Họ tên <b>*</b></span><input autoFocus onChange={(e) => setName(e.target.value)} value={name} /></label>
+          <label><span>Quan hệ</span>
+            <select className={styles.selectInput} onChange={(e) => setRelation(e.target.value)} value={relation}>
+              {["Vợ/Chồng", "Con", "Bạn bè", "Đồng nghiệp", "Khác"].map((r) => <option key={r}>{r}</option>)}
+            </select>
+          </label>
+          <label><span>SĐT</span><input onChange={(e) => setPhone(e.target.value)} value={phone} /></label>
+        </div>
+        <footer>
+          <button className={styles.outlineButton} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.blueButton} disabled={!name.trim()} onClick={() => onSubmit({ id: `NDC-${Date.now()}`, name: name.trim(), relation, phone })} type="button">Thêm</button>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function AddVoucherModal({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void;
+  onSubmit: (v: Voucher) => void;
+}) {
+  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
+  const [type, setType] = useState<"percent" | "amount">("percent");
+  const [value, setValue] = useState(10);
+  const [minOrder, setMinOrder] = useState(0);
+  const [expires, setExpires] = useState(addMonthsToDate(todayString(), 6));
+  return (
+    <div className={styles.nestedOverlay}>
+      <div className={styles.smallModal}>
+        <header><h2>Tạo voucher mới</h2><button onClick={onClose} type="button"><X size={16} /></button></header>
+        <div className={styles.smallModalBody}>
+          <label><span>Mã voucher <b>*</b></span><input onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="VD: SUMMER2026" value={code} /></label>
+          <label><span>Tên voucher <b>*</b></span><input onChange={(e) => setName(e.target.value)} placeholder="VD: Khuyến mãi hè 2026" value={name} /></label>
+          <label><span>Loại</span>
+            <select className={styles.selectInput} onChange={(e) => setType(e.target.value as "percent" | "amount")} value={type}>
+              <option value="percent">Giảm theo %</option>
+              <option value="amount">Giảm tiền cố định</option>
+            </select>
+          </label>
+          <label><span>Giá trị</span><input min={0} onChange={(e) => setValue(Number(e.target.value) || 0)} type="number" value={value} /></label>
+          <label><span>Đơn tối thiểu (VNĐ, để 0 nếu không yêu cầu)</span><input min={0} onChange={(e) => setMinOrder(Number(e.target.value) || 0)} type="number" value={minOrder} /></label>
+          <label><span>Hết hạn</span><input onChange={(e) => setExpires(e.target.value)} placeholder="dd/mm/yyyy" value={expires} /></label>
+        </div>
+        <footer>
+          <button className={styles.outlineButton} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.blueButton} disabled={!code.trim() || !name.trim()} onClick={() => onSubmit({ code: code.trim(), name: name.trim(), type, value, minOrder: minOrder || undefined, expires })} type="button">Tạo</button>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function AddCustomFieldModal({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void;
+  onSubmit: (label: string, value: string) => void;
+}) {
+  const [label, setLabel] = useState("");
+  const [value, setValue] = useState("");
+  return (
+    <div className={styles.nestedOverlay}>
+      <div className={styles.smallModal}>
+        <header><h2>Thêm trường tùy chỉnh</h2><button onClick={onClose} type="button"><X size={16} /></button></header>
+        <div className={styles.smallModalBody}>
+          <label><span>Tên trường <b>*</b></span><input autoFocus onChange={(e) => setLabel(e.target.value)} placeholder="VD: Mã giới thiệu" value={label} /></label>
+          <label><span>Giá trị</span><input onChange={(e) => setValue(e.target.value)} value={value} /></label>
+        </div>
+        <footer>
+          <button className={styles.outlineButton} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.blueButton} disabled={!label.trim()} onClick={() => onSubmit(label.trim(), value)} type="button">Thêm</button>
+        </footer>
+      </div>
     </div>
   );
 }
@@ -1530,13 +2471,27 @@ function ContractDetailModal({
               <div className={styles.detailThree}>
                 <Info label="Họ tên" value={customer.name} />
                 <Info label="Mã HV" value={customer.code} />
+                <Info label="Mã sinh trắc học" value={customer.bioCode ?? "—"} />
                 <Info label="SĐT" value={customer.phone} />
                 <Info label="Email" value={customer.email} />
                 <Info label="CCCD/CMND" value={`${customer.cccd}${customer.cccdVerified ? " · ✓" : ""}`} />
                 <Info label="Ngày sinh" value={customer.birthDate} />
                 <Info label="Giới tính" value={customer.gender} />
+                <Info label="Thẻ KH" value={customer.card || "—"} />
+                <Info label="Người liên hệ" value={customer.contactName ? `${customer.contactName} · ${customer.contactPhone}` : "—"} />
                 <Info label="Địa chỉ" value={customer.address} />
               </div>
+              {customer.companions && customer.companions.length > 0 ? (
+                <>
+                  <h4 className={styles.contractSubheading}>Người đi cùng (NDC)</h4>
+                  <ul className={styles.contractAttachmentList}>
+                    {customer.companions.map((c) => (
+                      <li key={c.id}><strong>{c.name}</strong> · {c.relation}{c.phone ? ` · ${c.phone}` : ""}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+              {customer.note ? <p className={styles.contractMutedNote} style={{ marginTop: 10 }}>Ghi chú: {customer.note}</p> : null}
             </article>
           ) : null}
 
@@ -1546,14 +2501,19 @@ function ContractDetailModal({
               <div className={styles.detailThree}>
                 <Info label="Mã HĐ" value={contract.id} />
                 <Info label="Ngày ký" value={contract.signedDate} />
+                <Info label="Trạng thái ký" value={contract.signStatus ?? "—"} />
                 <Info label="Chi nhánh" value={contract.branch} />
                 <Info label="Người ký" value={contract.signer} />
+                <Info label="Loại HĐ" value={contract.contractTypeId ?? "—"} />
+                <Info label="Loại dịch vụ" value={contract.serviceTypeId ?? "—"} />
                 <Info label="Gói dịch vụ" value={pkg?.name ?? contract.packageCode} />
+                <Info label="Kích hoạt ngay" value={contract.activeNow ? "Có" : "Không"} />
                 <Info label="Số buổi ban đầu" value={String(contract.totalSessions)} />
                 <Info label="Số buổi còn lại" value={String(contract.remainingSessions)} />
                 <Info label="Ngày BĐ" value={contract.startDate} />
                 <Info label="Ngày KT" value={contract.endDate} />
               </div>
+              {contract.signNote ? <p className={styles.contractMutedNote} style={{ marginTop: 10 }}>Ghi chú M/S: {contract.signNote}</p> : null}
             </article>
           ) : null}
 
@@ -1562,25 +2522,65 @@ function ContractDetailModal({
               <h3>Thanh toán</h3>
               <div className={styles.detailThree}>
                 <Info label="Giá gốc" value={formatCurrency(contract.basePrice)} />
-                <Info label="Giảm giá" value={formatCurrency(contract.discountAmount)} />
-                <Info label="VAT" value={`${contract.vatPercent}%`} />
+                <Info label="Tổng giảm" value={formatCurrency(contract.discountAmount)} />
+                <Info label="VAT" value={contract.vatLines && contract.vatLines.length > 1
+                  ? contract.vatLines.map((l) => `${l.rate}%`).join(" + ")
+                  : `${contract.vatPercent}%`} />
                 <Info label="Tổng tiền" value={formatCurrency(contract.totalAmount)} />
                 <Info label="Đã thu" value={formatCurrency(contract.paid)} />
                 <Info danger={debt > 0} label="Còn nợ" value={formatCurrency(Math.max(0, debt))} />
+                <Info label="Khách đưa" value={formatCurrency(contract.customerCash ?? 0)} />
+                <Info label="Tiền thừa" value={formatCurrency(contract.changeAmount ?? 0)} />
+                <Info label="Thời hạn TT" value={`${contract.paymentDeadlineDays ?? 0} ngày`} />
               </div>
               <h4 className={styles.contractSubheading}>Phương thức thanh toán</h4>
               <ul className={styles.contractPaymentBreakdown}>
                 {contract.payments.map((p, i) => (
-                  <li key={i}><span>{p.method}</span><strong>{formatCurrency(p.amount)}</strong></li>
+                  <li key={i}>
+                    <span>{p.method}{p.accountId ? ` · ${p.accountId}` : ""}{p.txRef ? ` · Ref: ${p.txRef}` : ""}</span>
+                    <strong>{formatCurrency(p.amount)}</strong>
+                  </li>
                 ))}
               </ul>
+              {contract.receiptId ? (
+                <>
+                  <h4 className={styles.contractSubheading}>Phiếu thu</h4>
+                  <div className={styles.detailThree}>
+                    <Info label="Số phiếu" value={contract.receiptId} />
+                    <Info label="Ngày lập" value={contract.receiptDate ?? "—"} />
+                    <Info label="NV thu" value={contract.receiptCashier ?? "—"} />
+                    <Info label="Loại thu" value={contract.receiptCategory ?? "—"} />
+                  </div>
+                  {contract.receiptNote ? <p className={styles.contractMutedNote} style={{ marginTop: 8 }}>Ghi chú phiếu thu: {contract.receiptNote}</p> : null}
+                </>
+              ) : null}
             </article>
           ) : null}
 
           {tab === "promo" ? (
             <article className={styles.detailCard}>
               <h3>Khuyến mãi áp dụng</h3>
-              <p className={styles.contractMutedNote}>Hợp đồng này chưa áp dụng khuyến mãi nào — cấu hình KM tại Module 12 Cài đặt.</p>
+              {contract.voucherCode ? (
+                <div className={styles.contractVoucherApplied}>
+                  <div>
+                    <strong>{contract.voucherCode}</strong>
+                    <span>Đã áp dụng giảm giá vào HĐ này</span>
+                  </div>
+                  <strong className={styles.contractVoucherValue}>− {formatCurrency(contract.discountAmount)}</strong>
+                </div>
+              ) : (
+                <p className={styles.contractMutedNote}>Hợp đồng này chưa áp dụng khuyến mãi nào.</p>
+              )}
+              {contract.commissionMode ? (
+                <>
+                  <h4 className={styles.contractSubheading}>Hoa hồng</h4>
+                  <div className={styles.detailThree}>
+                    <Info label="Chế độ" value={contract.commissionMode === "preset" ? "Theo thiết lập" : contract.commissionMode === "custom" ? "Tùy chỉnh" : "Không áp dụng"} />
+                    {contract.commissionPercent !== undefined ? <Info label="Tỷ lệ" value={`${contract.commissionPercent}%`} /> : null}
+                    <Info label="Số tiền dự kiến" value={formatCurrency(contract.commissionAmount ?? 0)} />
+                  </div>
+                </>
+              ) : null}
             </article>
           ) : null}
 
@@ -1588,9 +2588,25 @@ function ContractDetailModal({
             <article className={styles.detailCard}>
               <h3>Nhân viên phụ trách</h3>
               <div className={styles.detailTwo}>
-                <Info label="NV Sale" value={contract.saleStaff} />
+                <Info label="NV Sale chính" value={contract.saleStaff} />
                 <Info label="Người tạo" value={contract.creator} />
               </div>
+              {contract.saleAllocations && contract.saleAllocations.length > 0 ? (
+                <>
+                  <h4 className={styles.contractSubheading}>Phân bổ tỷ lệ doanh số</h4>
+                  <ul className={styles.contractPaymentBreakdown}>
+                    {contract.saleAllocations.map((s, i) => (
+                      <li key={i}><span>NV #{i + 1} · {s.staff}</span><strong>{s.percent}%</strong></li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+              {contract.trainerId ? (
+                <>
+                  <h4 className={styles.contractSubheading}>HLV / Nhân viên PT</h4>
+                  <p className={styles.contractMutedNote}>Mã HLV: {contract.trainerId}</p>
+                </>
+              ) : null}
             </article>
           ) : null}
 
@@ -1623,6 +2639,16 @@ function ContractDetailModal({
                   )}
                 </div>
               </div>
+              {contract.customFields && contract.customFields.length > 0 ? (
+                <>
+                  <h4 className={styles.contractSubheading}>Trường tùy chỉnh</h4>
+                  <ul className={styles.contractAttachmentList}>
+                    {contract.customFields.map((f, i) => (
+                      <li key={i}><strong>{f.label}:</strong> {f.value || "—"}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
             </article>
           ) : null}
 
