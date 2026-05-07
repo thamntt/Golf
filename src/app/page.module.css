@@ -12682,3 +12682,397 @@ textarea.proInput {
   .ticketGroupTotalBanner { flex-direction: column; align-items: flex-start; }
   .ticketGroupTotalBanner strong { margin-left: 0; }
 }
+
+/* ============================================================================
+   M05 — GOLF TEETIME
+   ============================================================================ */
+
+.teetimeHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  margin-bottom: 16px;
+}
+
+.teetimeDateNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.teetimeDateNav > button:not(.teetimeTodayBtn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.teetimeDateNav > button:not(.teetimeTodayBtn):hover { background: #f1f5f9; color: #2563eb; border-color: #93c5fd; }
+
+.teetimeDateInput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  min-width: 200px;
+}
+.teetimeDateInput svg { color: #64748b; flex-shrink: 0; }
+.teetimeDateInput input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  background: transparent;
+  width: 100px;
+}
+.teetimeDateInput em {
+  font-size: 11px;
+  color: #64748b;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.teetimeTodayBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.teetimeTodayBtn:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  transform: translateY(-1px);
+}
+
+.teetimeBranchPicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+.teetimeBranchPicker svg { color: #64748b; }
+.teetimeBranchPicker select {
+  border: none !important;
+  background: transparent !important;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 6px 8px !important;
+}
+
+.teetimeConfigBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-left: 3px solid #16a34a;
+  border-radius: 10px;
+  margin: 12px 0;
+  font-size: 13px;
+  color: #15803d;
+}
+.teetimeConfigBanner svg { color: #16a34a; flex-shrink: 0; }
+.teetimeConfigBanner strong { color: #14532d; font-weight: 700; }
+
+.teetimeGridCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  margin-top: 12px;
+}
+
+.teetimeGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+@media (max-width: 1280px) {
+  .teetimeGrid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (max-width: 1024px) {
+  .teetimeGrid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 768px) {
+  .teetimeGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.teetimeSlot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 8px;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  min-height: 100px;
+}
+.teetimeSlot:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1); }
+.teetimeSlot strong { font-size: 22px; font-weight: 700; color: #0f172a; }
+.teetimeSlot em { font-size: 11px; color: #64748b; font-style: normal; }
+.teetimeSlotIndex {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.teetimeSlot_empty {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #86efac;
+}
+.teetimeSlot_empty:hover { border-color: #16a34a; }
+.teetimeSlot_empty strong { color: #15803d; }
+
+.teetimeSlot_booked {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #fcd34d;
+}
+.teetimeSlot_booked:hover { border-color: #f59e0b; }
+.teetimeSlot_booked strong { color: #b45309; }
+.teetimeSlot_booked em { color: #92400e; font-weight: 600; }
+
+.teetimeSlot_full {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: #fca5a5;
+  cursor: pointer;
+}
+.teetimeSlot_full strong { color: #b91c1c; }
+.teetimeSlot_full em { color: #991b1b; font-weight: 600; }
+
+.teetimeSlot_past {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.teetimeSlot_past strong { color: #64748b; }
+.teetimeSlot_past:hover { transform: none; box-shadow: none; }
+
+.teetimeLegend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #475569;
+}
+.teetimeLegend > span { display: inline-flex; align-items: center; gap: 6px; }
+.teetimeLegendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.teetimeEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 80px 20px;
+  text-align: center;
+  color: #64748b;
+}
+.teetimeEmpty svg { color: #cbd5e1; }
+.teetimeEmpty strong { font-size: 16px; color: #334155; }
+.teetimeEmpty span { font-size: 13px; }
+
+.teetimePreviewBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-left: 3px solid #2563eb;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #1e40af;
+}
+.teetimePreviewBanner svg { color: #2563eb; flex-shrink: 0; }
+.teetimePreviewBanner > div { display: flex; flex-direction: column; gap: 2px; }
+.teetimePreviewBanner strong { font-size: 14px; color: #1e3a8a; }
+.teetimePreviewBanner span { font-size: 12px; color: #1e40af; }
+
+.teetimeWarningBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-left: 3px solid #f59e0b;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #92400e;
+}
+.teetimeWarningBanner svg { color: #f59e0b; flex-shrink: 0; }
+
+.teetimeSlotPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.teetimeSlotSummary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.teetimeSlotSummary > div {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.teetimeSlotSummary span { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }
+.teetimeSlotSummary strong { font-size: 18px; color: #0f172a; font-weight: 700; }
+@media (max-width: 768px) {
+  .teetimeSlotSummary { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Customer search for register form */
+.teetimeCustomerSearch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.teetimeCustomerSearch svg { color: #64748b; }
+.teetimeCustomerSearch input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  font-size: 13px;
+  padding: 4px !important;
+}
+
+.teetimeCustomerList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.teetimeCustomerCard,
+.teetimeCustomerCardActive {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+.teetimeCustomerCard:hover { border-color: #cbd5e1; background: #f8fafc; }
+.teetimeCustomerCardActive {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+.teetimeCustomerCard > div:not(.teetimeCustomerAvatar),
+.teetimeCustomerCardActive > div:not(.teetimeCustomerAvatar) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.teetimeCustomerCard strong,
+.teetimeCustomerCardActive strong {
+  font-size: 13px;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.teetimeCustomerCard span,
+.teetimeCustomerCardActive span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #64748b;
+}
+.teetimeCustomerCard em,
+.teetimeCustomerCardActive em {
+  font-size: 11px;
+  color: #15803d;
+  font-style: normal;
+  font-weight: 600;
+}
+.teetimeWalkin { color: #94a3b8 !important; font-weight: 500 !important; }
+
+.teetimeCustomerAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.teetimeCustomerCardActive .teetimeCustomerAvatar {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
