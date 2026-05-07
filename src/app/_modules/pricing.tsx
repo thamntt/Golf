@@ -176,7 +176,7 @@ export default function PricingScreen() {
   const [editingPackage, setEditingPackage] = useState<ContractPackage | null>(null);
   const [editingTicket, setEditingTicket] = useState<SingleTicket | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ kind: "package" | "ticket"; code: string; name: string } | null>(null);
-  const [togglePackageTarget, setTogglePackageTarget] = useState<ContractPackage | null>(null);
+  const [toggleTarget, setToggleTarget] = useState<{ kind: "package" | "ticket"; code: string; name: string; status: "Hoạt động" | "Tạm ngưng"; usage: number } | null>(null);
 
   const [query, setQuery] = useState("");
   const [serviceFilter, setServiceFilter] = useState("Tất cả");
@@ -371,14 +371,17 @@ export default function PricingScreen() {
             onEdit={openEditPackage}
             onToggleStatus={(code) => {
               const pkg = packages.find((p) => p.code === code);
-              if (pkg) setTogglePackageTarget(pkg);
+              if (pkg) setToggleTarget({ kind: "package", code: pkg.code, name: pkg.name, status: pkg.status, usage: pkg.usage });
             }}
           />
         ) : (
           <TicketGrid
             onDelete={(t) => setDeleteTarget({ kind: "ticket", code: t.code, name: t.name })}
             onEdit={openEditTicket}
-            onToggleStatus={toggleTicketStatus}
+            onToggleStatus={(code) => {
+              const tk = tickets.find((t) => t.code === code);
+              if (tk) setToggleTarget({ kind: "ticket", code: tk.code, name: tk.name, status: tk.status, usage: 0 });
+            }}
             tickets={filteredTickets}
           />
         )}
@@ -433,14 +436,19 @@ export default function PricingScreen() {
         />
       ) : null}
 
-      {togglePackageTarget ? (
-        <TogglePackageStatusModal
-          pkg={togglePackageTarget}
-          onCancel={() => setTogglePackageTarget(null)}
+      {toggleTarget ? (
+        <TogglePricingStatusModal
+          code={toggleTarget.code}
+          kind={toggleTarget.kind}
+          name={toggleTarget.name}
+          onCancel={() => setToggleTarget(null)}
           onConfirm={() => {
-            togglePackageStatus(togglePackageTarget.code);
-            setTogglePackageTarget(null);
+            if (toggleTarget.kind === "package") togglePackageStatus(toggleTarget.code);
+            else toggleTicketStatus(toggleTarget.code);
+            setToggleTarget(null);
           }}
+          status={toggleTarget.status}
+          usage={toggleTarget.usage}
         />
       ) : null}
     </>
@@ -1352,194 +1360,422 @@ function ContractPackageFormModal({
   zones: Zone[];
 }) {
   const isEdit = !!initial;
+  const initialPrice = Number(initial?.price?.replace(/[^\d]/g, "")) || 0;
+
+  const [name, setName] = useState(initial?.name ?? "");
+  const [desc, setDesc] = useState(initial?.desc ?? "");
+  const [pkgStatus, setPkgStatus] = useState<"Hoạt động" | "Tạm ngưng">(initial?.status ?? "Hoạt động");
+  const [serviceType, setServiceType] = useState(initial?.serviceType ?? "Member - Golf");
+  const [serviceGroup, setServiceGroup] = useState("Teetime");
+  const [branch, setBranch] = useState(initial?.branch ?? "NextVision");
+  const [timeslotId, setTimeslotId] = useState("");
   const [packageMode, setPackageMode] = useState<"fixed" | "flex">("fixed");
-  const [commissionMode, setCommissionMode] = useState<"default" | "custom" | "none">("default");
+  const [unit, setUnit] = useState("Buổi");
+  const [duration, setDuration] = useState(initial?.duration?.match(/\d+/)?.[0] ?? "1");
+  const [vat, setVat] = useState("0");
+  const [sessions, setSessions] = useState(initial?.sessions?.match(/\d+/)?.[0] ?? "");
+  const [priceAfterVat, setPriceAfterVat] = useState(String(initialPrice));
   const [selectedZones, setSelectedZones] = useState<string[]>(zones.map((z) => z.code));
   const [selectedSlots, setSelectedSlots] = useState<string[]>(timeslots.map((t) => t.id));
+  const [transferable, setTransferable] = useState(true);
+  const [commissionMode, setCommissionMode] = useState<"default" | "custom" | "none">("default");
+  const [hhUnit, setHhUnit] = useState<"VND" | "%">("VND");
+  const [hhSale, setHhSale] = useState("");
+  const [hhCoach, setHhCoach] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name") ?? "").trim();
-    if (!name) { setError("Tên gói bắt buộc"); return; }
+  const code = initial?.code ?? `PKG - MNNZ55DX - 350`;
+  const vatRate = Number(vat) / 100;
+  const priceAfter = Number(priceAfterVat) || 0;
+  const priceBeforeVat = vatRate > 0 ? Math.round(priceAfter / (1 + vatRate)) : priceAfter;
+  const vatAmount = priceAfter - priceBeforeVat;
+  const totalCommission = (Number(hhSale) || 0) + (Number(hhCoach) || 0);
+  const sessionsNum = Number(sessions) || 0;
+  const pricePerSession = sessionsNum > 0 ? Math.round(priceBeforeVat / sessionsNum) : 0;
 
+  const fmt = (n: number) => `${n.toLocaleString("vi-VN")} VND`;
+
+  const submit = () => {
+    if (!name.trim()) { setError("Tên gói bắt buộc"); return; }
     onSubmit({
       code: initial?.code ?? `P${String(Date.now()).slice(-3)}`,
       name,
-      desc: String(data.get("desc") ?? ""),
-      serviceType: String(data.get("serviceType") ?? "Member - Golf"),
-      branch: String(data.get("branch") ?? "NextVision"),
-      sessions: packageMode === "flex" ? "Theo buổi" : `${data.get("sessions") ?? "8"} buổi`,
-      duration: `${data.get("duration") ?? "1"} tháng`,
-      price: `${data.get("price") ?? "0"} đ${packageMode === "flex" ? "/buổi" : ""}`,
-      status: initial?.status ?? "Hoạt động",
+      desc,
+      serviceType,
+      branch,
+      sessions: packageMode === "flex" ? "Theo buổi" : `${sessions || 0} buổi`,
+      duration: `${duration} tháng`,
+      price: `${priceAfter.toLocaleString("vi-VN")} đ${packageMode === "flex" ? "/buổi" : ""}`,
+      status: pkgStatus,
       usage: initial?.usage ?? 0,
     });
   };
 
-  const toggleZone = (code: string) =>
-    setSelectedZones((c) => c.includes(code) ? c.filter((z) => z !== code) : [...c, code]);
+  const toggleZone = (zcode: string) =>
+    setSelectedZones((c) => c.includes(zcode) ? c.filter((z) => z !== zcode) : [...c, zcode]);
   const toggleSlot = (id: string) =>
     setSelectedSlots((c) => c.includes(id) ? c.filter((s) => s !== id) : [...c, id]);
 
   return (
     <div className={styles.modalOverlay}>
-      <form className={styles.modalShell} onSubmit={handleSubmit}>
-        <header className={styles.modalHeader}>
+      <section className={styles.contractPriceModal}>
+        <header className={styles.contractPriceHero}>
           <div>
-            <h2>{isEdit ? "Chỉnh sửa Bảng giá Hợp đồng" : "Tạo Bảng giá Hợp đồng mới"}</h2>
-            <p>{isEdit ? `Đang sửa ${initial?.code} — sửa giá chỉ áp dụng cho HĐ ký mới sau (BR-M9-07)` : "Form gồm 11 section. Tham khảo SRS Module 02 để cấu hình đầy đủ."}</p>
+            <h2>{isEdit ? "Chỉnh sửa Bảng Giá" : "Tạo Bảng Giá Mới"}</h2>
+            <p>{isEdit ? `Sửa giá chỉ áp dụng cho HĐ ký mới sau thời điểm sửa` : "Tạo một bảng giá mới cho dịch vụ của bạn."}</p>
           </div>
-          <button onClick={onClose} type="button"><X size={22} /></button>
+          <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
 
-        <div className={styles.modalBody}>
+        <div className={styles.contractPriceBody}>
           {error ? <p className={styles.formError}>{error}</p> : null}
 
-          <h3>1. Thông tin gói</h3>
-          <div className={styles.formGrid}>
-            <FormField label="Mã gói" name="code" value={initial?.code ?? "PKG-AUTO"} />
-            <FormField defaultValue={initial?.name} label="Tên gói" name="name" placeholder="VD: Gói Cao Cấp Golf" required />
-          </div>
-          <FormField area defaultValue={initial?.desc} label="Mô tả" name="desc" placeholder="Mô tả chi tiết + điều khoản" />
-
-          <h3>2. Phân loại</h3>
-          <div className={styles.formGrid}>
-            <SelectField defaultValue={initial?.serviceType} label="Loại Dịch Vụ" name="serviceType" options={["Member - Golf", "Practice", "Combo", "Trial"]} />
-            <SelectField defaultValue={initial?.branch} label="Chi nhánh" name="branch" options={["NextVision", "Hà Nội Center", "Sài Gòn West"]} />
+          <div className={styles.cpField}>
+            <label className={styles.cpLabel}># Mã Gói <b>*</b> <span className={styles.cpHint}>(Tự động sinh)</span></label>
+            <div className={styles.cpAutoCode}>{code}</div>
+            <small>Mã gói được tự động sinh ra và không thể chỉnh sửa</small>
           </div>
 
-          <h3>3. Chế độ gói (BR-M9-15)</h3>
-          <div className={styles.modeToggle}>
-            <button
-              className={packageMode === "fixed" ? styles.modeActive : styles.modeIdle}
-              onClick={() => setPackageMode("fixed")}
-              type="button"
-            >
-              <strong>Gói Cố Định</strong>
-              <span>Pay upfront, đủ 8 field</span>
-            </button>
-            <button
-              className={packageMode === "flex" ? styles.modeActive : styles.modeIdle}
-              onClick={() => setPackageMode("flex")}
-              type="button"
-            >
-              <strong>Gói Linh Hoạt</strong>
-              <span>Pay per use, rút gọn 4 field</span>
-            </button>
+          <div className={styles.cpField}>
+            <label className={styles.cpLabel}>Tên Gói <b>*</b></label>
+            <input className={styles.cpInput} value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Gói Cao Cấp" />
           </div>
 
-          <h3>4. Cấu hình giá & buổi</h3>
-          <div className={styles.formGrid}>
-            <SelectField label="Đơn vị tính" name="unit" options={["Buổi", "Giờ", "Ngày", "Tháng"]} />
-            <FormField defaultValue={initial?.duration?.match(/\d+/)?.[0]} label="Thời hạn (tháng)" name="duration" placeholder="VD: 3" type="number" />
-            <SelectField label="VAT (%)" name="vat" options={["0%", "5%", "8%", "10%"]} />
-            {packageMode === "fixed" ? (
-              <>
-                <FormField defaultValue={initial?.sessions?.match(/\d+/)?.[0]} label="Số lượng buổi" name="sessions" placeholder="VD: 8" type="number" />
-                <FormField label="Giá sau VAT (VNĐ)" name="price" placeholder="VD: 5500000" type="number" />
-              </>
-            ) : (
-              <FormField label="Giá theo đơn vị (VNĐ)" name="price" placeholder="VD: 250000" type="number" />
-            )}
+          <div className={styles.cpField}>
+            <label className={styles.cpLabel}>Mô Tả</label>
+            <textarea className={styles.cpInput} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Mô tả chi tiết về gói" rows={3} />
           </div>
 
-          {packageMode === "fixed" ? (
-            <>
-              <h3>6. Khu vực áp dụng <span className={styles.sectionHint}>Default tick tất cả khu vực của chi nhánh (BR-M9-22)</span></h3>
-              <div className={styles.checkGrid}>
-                {zones.map((z) => (
-                  <label className={styles.checkPill} key={z.code}>
-                    <input
-                      checked={selectedZones.includes(z.code)}
-                      onChange={() => toggleZone(z.code)}
-                      type="checkbox"
-                    />
-                    <span>{z.name}</span>
-                  </label>
-                ))}
-              </div>
+          <div className={styles.cpRow2}>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Trạng Thái <b>*</b></label>
+              <select className={styles.cpInput} value={pkgStatus} onChange={(e) => setPkgStatus(e.target.value as "Hoạt động" | "Tạm ngưng")}>
+                <option>Hoạt động</option>
+                <option>Tạm ngưng</option>
+              </select>
+            </div>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>
+                Loại Dịch Vụ <b>*</b>
+                <button type="button" className={styles.cpAddLink} onClick={() => alert("Mở dialog Thêm loại dịch vụ")}>
+                  <Plus size={12} /> Thêm loại dịch vụ
+                </button>
+              </label>
+              <select className={styles.cpInput} value={serviceType} onChange={(e) => setServiceType(e.target.value)}>
+                <option>Thành Viên</option>
+                <option>Member - Golf</option>
+                <option>Practice</option>
+                <option>Combo</option>
+                <option>Trial</option>
+              </select>
+            </div>
+          </div>
 
-              <h3>7. Khung giờ áp dụng</h3>
-              <div className={styles.checkGrid}>
-                {timeslots.map((s) => (
-                  <label className={styles.checkPill} key={s.id}>
-                    <input
-                      checked={selectedSlots.includes(s.id)}
-                      onChange={() => toggleSlot(s.id)}
-                      type="checkbox"
-                    />
-                    <span><span className={`${styles.colorDot} ${styles[`dot_${s.color}`]}`} /> {s.name}</span>
-                  </label>
-                ))}
-              </div>
+          <div className={styles.cpRow2}>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>
+                Nhóm Dịch Vụ <b>*</b>
+                <button type="button" className={styles.cpAddLink} onClick={() => alert("Mở dialog Thêm nhóm")}>
+                  <Plus size={12} /> Thêm nhóm
+                </button>
+              </label>
+              <select className={styles.cpInput} value={serviceGroup} onChange={(e) => setServiceGroup(e.target.value)}>
+                <option>Teetime</option>
+                <option>Practice</option>
+                <option>Combo</option>
+              </select>
+            </div>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Chi Nhánh <b>*</b></label>
+              <input className={styles.cpInput} value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="VD: Chi Nhánh 1" />
+            </div>
+          </div>
 
-              <h3>8. Điều kiện sử dụng</h3>
-              <div className={styles.formGrid}>
-                <FormField label="Giới hạn / ngày" name="limitDay" placeholder="0 = không giới hạn" type="number" />
-                <FormField label="Giới hạn / tuần" name="limitWeek" placeholder="0 = không giới hạn" type="number" />
-                <FormField label="Giới hạn / tháng" name="limitMonth" placeholder="0 = không giới hạn" type="number" />
-                <FormField label="Đặt trước tối thiểu (giờ)" name="minBook" placeholder="VD: 12" type="number" />
-                <FormField label="Chính sách hủy (giờ)" name="cancelHours" placeholder="VD: 24" type="number" />
-                <label className={styles.transferableLabel}>
-                  <input type="checkbox" />
-                  <span>Cho phép chuyển nhượng</span>
+          <div className={styles.cpRow2}>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>
+                Khung Thời Gian <b>*</b>
+                <button type="button" className={styles.cpAddLink} onClick={() => alert("Mở dialog Thêm khung giờ")}>
+                  <Plus size={12} /> Thêm khung giờ
+                </button>
+              </label>
+              <select className={styles.cpInput} value={timeslotId} onChange={(e) => setTimeslotId(e.target.value)}>
+                <option value="">Chọn khung giờ</option>
+                {timeslots.map((t) => <option key={t.id} value={t.id}>{t.name} ({t.startTime} - {t.endTime})</option>)}
+              </select>
+            </div>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Chế Độ Gói <b>*</b></label>
+              <div className={styles.cpRadioCol}>
+                <label className={packageMode === "fixed" ? styles.cpRadioActive : styles.cpRadioIdle}>
+                  <input type="radio" checked={packageMode === "fixed"} onChange={() => setPackageMode("fixed")} />
+                  <strong>Gói Cố Định</strong>
+                  <span>Khách hàng mua gói với số lượng và giá cố định</span>
+                </label>
+                <label className={packageMode === "flex" ? styles.cpRadioActive : styles.cpRadioIdle}>
+                  <input type="radio" checked={packageMode === "flex"} onChange={() => setPackageMode("flex")} />
+                  <strong>Gói Linh Hoạt</strong>
+                  <span>Khách hàng trả theo đơn vị sử dụng</span>
                 </label>
               </div>
-
-              <h3>9. Tiện ích</h3>
-              <div className={styles.checkGrid}>
-                {["Khăn lau gậy", "Tủ để gậy", "Trà bánh nhẹ", "Khăn nóng", "Đồ uống miễn phí"].map((u) => (
-                  <label className={styles.checkPill} key={u}>
-                    <input type="checkbox" />
-                    <span>{u}</span>
-                  </label>
-                ))}
-              </div>
-            </>
-          ) : null}
-
-          <h3>10. Hoa hồng (BR-M9-26)</h3>
-          <p className={styles.sectionHint}>Hoa hồng LUÔN tính trên giá trước VAT (HH = Giá_trước_VAT × rate%)</p>
-          <div className={styles.modeToggle}>
-            <button className={commissionMode === "default" ? styles.modeActive : styles.modeIdle} onClick={() => setCommissionMode("default")} type="button">
-              <strong>Mặc Định</strong>
-              <span>Lấy từ ma trận Module 11</span>
-            </button>
-            <button className={commissionMode === "custom" ? styles.modeActive : styles.modeIdle} onClick={() => setCommissionMode("custom")} type="button">
-              <strong>Tùy Chỉnh</strong>
-              <span>Override riêng cho gói này</span>
-            </button>
-            <button className={commissionMode === "none" ? styles.modeActive : styles.modeIdle} onClick={() => setCommissionMode("none")} type="button">
-              <strong>Không HH</strong>
-              <span>Gói nội bộ / dùng thử</span>
-            </button>
-          </div>
-          {commissionMode === "custom" ? (
-            <div className={styles.formGrid}>
-              <SelectField label="Đơn vị" name="hhUnit" options={["%", "VNĐ"]} />
-              <FormField label="HH Sale" name="hhSale" placeholder="VD: 5" type="number" />
-              <FormField label="HH HLV" name="hhCoach" placeholder="VD: 3" type="number" />
             </div>
-          ) : null}
-
-          <h3>11. Preview</h3>
-          <div className={styles.pricingPreview}>
-            <div><span>Tên gói</span><strong>{initial?.name ?? "Gói mới"}</strong></div>
-            <div><span>Số buổi / Thời hạn</span><strong>{packageMode === "flex" ? "Theo buổi" : "8 buổi"} / {initial?.duration ?? "1 tháng"}</strong></div>
-            <div><span>Giá (chưa VAT)</span><strong>{initial?.price?.replace(/\D+\d*/, "") ?? "—"}</strong></div>
-            <div><span>VAT (8%)</span><strong>0 đ</strong></div>
-            <div><span>Tổng thanh toán</span><strong className={styles.previewTotal}>{initial?.price ?? "—"}</strong></div>
-            <div><span>Giá / buổi</span><strong className={styles.previewPerSession}>—</strong></div>
           </div>
+
+          <div className={styles.cpRow2}>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Đơn Vị Tính <b>*</b></label>
+              <select className={styles.cpInput} value={unit} onChange={(e) => setUnit(e.target.value)}>
+                <option>Buổi</option>
+                <option>Giờ</option>
+                <option>Ngày</option>
+                <option>Tháng</option>
+              </select>
+            </div>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Thời Hạn Sử Dụng (Tháng) <b>*</b></label>
+              <input className={styles.cpInput} value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="1" type="number" />
+              <small>Thời gian khách hàng có thể sử dụng gói</small>
+            </div>
+          </div>
+
+          <div className={styles.cpRow2}>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>VAT (%) <b>*</b></label>
+              <select className={styles.cpInput} value={vat} onChange={(e) => setVat(e.target.value)}>
+                <option value="0">0% - Không VAT</option>
+                <option value="5">5%</option>
+                <option value="8">8%</option>
+                <option value="10">10%</option>
+              </select>
+              <small>Thuế giá trị tăng áp dụng cho gói</small>
+            </div>
+            {packageMode === "fixed" ? (
+              <div className={styles.cpField}>
+                <label className={styles.cpLabel}>Số Lượng buổi <b>*</b></label>
+                <input className={styles.cpInput} value={sessions} onChange={(e) => setSessions(e.target.value)} placeholder="VD: 50" type="number" />
+              </div>
+            ) : <div />}
+          </div>
+
+          <div className={styles.cpRow2}>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Giá Sau VAT (VND) <b>*</b></label>
+              <input className={styles.cpInput} value={priceAfterVat} onChange={(e) => setPriceAfterVat(e.target.value)} placeholder="VD: 11000000" type="number" />
+              <small>Giá đã bao gồm VAT {vat}%</small>
+            </div>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Tiền VAT (VND) <span className={styles.cpHint}>(Tự động)</span></label>
+              <div className={styles.cpAutoOrange}>{fmt(vatAmount)}</div>
+              <small>Tự động tính từ: Giá sau VAT − Giá gói</small>
+            </div>
+          </div>
+
+          <div className={styles.cpField}>
+            <label className={styles.cpLabel}>Giá Trước VAT (VND) <span className={styles.cpHint}>(Tự động)</span></label>
+            <div className={styles.cpAutoBox}>{fmt(priceBeforeVat)}</div>
+            <small>Tự động tính từ: Giá sau VAT ÷ (1 + VAT/100)</small>
+          </div>
+
+          <section className={styles.cpSection}>
+            <header>
+              <h3><MapPin size={16} /> Quản Lý Khu Vực</h3>
+              <button type="button" className={styles.cpAddBtn} onClick={() => alert("Thêm khu vực mới")}>
+                <Plus size={14} /> Thêm khu vực
+              </button>
+            </header>
+            <div className={styles.cpCheckGrid}>
+              {zones.slice(0, 4).map((z) => (
+                <label className={styles.cpCheck} key={z.code}>
+                  <input checked={selectedZones.includes(z.code)} onChange={() => toggleZone(z.code)} type="checkbox" />
+                  <MapPin size={14} /> {z.name}
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.cpSection}>
+            <header>
+              <h3><Timer size={16} /> Quản Lý Khung Giờ</h3>
+              <button type="button" className={styles.cpAddBtn} onClick={() => alert("Thêm khung giờ mới")}>
+                <Plus size={14} /> Thêm khung giờ
+              </button>
+            </header>
+            <div className={styles.cpCheckGrid}>
+              {timeslots.slice(0, 4).map((s) => (
+                <label className={styles.cpCheck} key={s.id}>
+                  <input checked={selectedSlots.includes(s.id)} onChange={() => toggleSlot(s.id)} type="checkbox" />
+                  <Timer size={14} />
+                  <div>
+                    <strong>{s.name}</strong>
+                    <em>{s.startTime} - {s.endTime}</em>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.cpSection}>
+            <header>
+              <h3><Calendar size={16} /> Điều Kiện Sử Dụng Gói</h3>
+            </header>
+            <div className={styles.cpRow2}>
+              <div className={styles.cpField}>
+                <label className={styles.cpLabel}>Giới Hạn Sử Dụng Mỗi Ngày</label>
+                <input className={styles.cpInput} placeholder="0 = Không giới hạn" type="number" />
+                <small>Số lần tối đa có thể sử dụng trong 1 ngày</small>
+              </div>
+              <div className={styles.cpField}>
+                <label className={styles.cpLabel}>Giới Hạn Sử Dụng Mỗi Tuần</label>
+                <input className={styles.cpInput} placeholder="0 = Không giới hạn" type="number" />
+                <small>Số lần tối đa có thể sử dụng trong 1 tuần</small>
+              </div>
+            </div>
+            <div className={styles.cpRow2}>
+              <div className={styles.cpField}>
+                <label className={styles.cpLabel}>Giới Hạn Sử Dụng Mỗi Tháng</label>
+                <input className={styles.cpInput} placeholder="0 = Không giới hạn" type="number" />
+              </div>
+              <div className={styles.cpField}>
+                <label className={styles.cpLabel}>Thời Gian Đặt Trước Tối Thiểu</label>
+                <input className={styles.cpInput} placeholder="VD: 24 (giờ)" type="number" />
+                <small>Phải đặt trước bao nhiêu giờ</small>
+              </div>
+            </div>
+            <div className={styles.cpRow2}>
+              <div className={styles.cpField}>
+                <label className={styles.cpLabel}>Chính Sách Hủy Lịch</label>
+                <input className={styles.cpInput} placeholder="VD: 48 (giờ)" type="number" />
+                <small>Phải hủy trước bao nhiêu giờ</small>
+              </div>
+              <div className={styles.cpField}>
+                <label className={styles.cpLabel}>Chuyển Nhượng</label>
+                <label className={styles.cpCheckSimple}>
+                  <input type="checkbox" checked={transferable} onChange={(e) => setTransferable(e.target.checked)} />
+                  Cho phép chuyển nhượng gói này
+                </label>
+              </div>
+            </div>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Điều Kiện Khác</label>
+              <textarea className={styles.cpInput} rows={2} placeholder="Nhập các điều kiện, quy định khác (nếu có)..." />
+            </div>
+          </section>
+
+          <section className={styles.cpSection}>
+            <header>
+              <h3>✨ Tiện Ích Đi Kèm</h3>
+            </header>
+            <div className={styles.cpCheckGrid}>
+              <label className={styles.cpCheck}><input type="checkbox" /> 🧺 Khăn tắm</label>
+              <label className={styles.cpCheck}><input type="checkbox" /> 🛏 Tủ đồ cá nhân</label>
+            </div>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Tiện Ích Khác</label>
+              <textarea className={styles.cpInput} rows={2} placeholder="Nhập các tiện ích, dịch vụ đi kèm khác (nếu có)..." />
+            </div>
+          </section>
+
+          <section className={styles.cpSection}>
+            <header>
+              <h3>% Cấu Hình Hoa Hồng</h3>
+            </header>
+            <div className={styles.cpField}>
+              <label className={styles.cpLabel}>Loại Hoa Hồng <b>*</b></label>
+              <div className={styles.cpRadioCol}>
+                <label className={commissionMode === "default" ? styles.cpRadioActive : styles.cpRadioIdle}>
+                  <input type="radio" checked={commissionMode === "default"} onChange={() => setCommissionMode("default")} />
+                  <strong>Mặc Định</strong>
+                  <span>Hoa hồng theo cài đặt mặc định</span>
+                </label>
+                <label className={commissionMode === "custom" ? styles.cpRadioActive : styles.cpRadioIdle}>
+                  <input type="radio" checked={commissionMode === "custom"} onChange={() => setCommissionMode("custom")} />
+                  <strong>Tùy Chỉnh</strong>
+                  <span>Hoa hồng tùy chỉnh</span>
+                </label>
+                <label className={commissionMode === "none" ? styles.cpRadioActive : styles.cpRadioIdle}>
+                  <input type="radio" checked={commissionMode === "none"} onChange={() => setCommissionMode("none")} />
+                  <strong>Không Hoa Hồng</strong>
+                  <span>Không áp dụng hoa hồng</span>
+                </label>
+              </div>
+            </div>
+            {commissionMode !== "none" ? (
+              <>
+                <div className={styles.cpField}>
+                  <label className={styles.cpLabel}>Đơn Vị Tính Hoa Hồng</label>
+                  <div className={styles.cpInlineRadio}>
+                    <label>
+                      <input type="radio" checked={hhUnit === "VND"} onChange={() => setHhUnit("VND")} />
+                      VND (Số tiền cố định)
+                    </label>
+                    <label>
+                      <input type="radio" checked={hhUnit === "%"} onChange={() => setHhUnit("%")} />
+                      % (Phần trăm)
+                    </label>
+                  </div>
+                  {commissionMode === "default" ? (
+                    <em className={styles.cpHintGreen}>✓ Đang sử dụng cài đặt mặc định của hệ thống</em>
+                  ) : null}
+                </div>
+                <div className={styles.cpRow2}>
+                  <div className={styles.cpField}>
+                    <label className={styles.cpLabel}>Hoa Hồng Nhân Viên Bán Hàng ({hhUnit})</label>
+                    <input className={styles.cpInput} value={hhSale} onChange={(e) => setHhSale(e.target.value)} placeholder="VD: 50000" type="number" disabled={commissionMode === "default"} />
+                    <small>{(Number(hhSale) || 0).toLocaleString("vi-VN")} {hhUnit}/gói</small>
+                  </div>
+                  <div className={styles.cpField}>
+                    <label className={styles.cpLabel}>Hoa Hồng Huấn Luyện Viên ({hhUnit})</label>
+                    <input className={styles.cpInput} value={hhCoach} onChange={(e) => setHhCoach(e.target.value)} placeholder="VD: 30000" type="number" disabled={commissionMode === "default"} />
+                    <small>{(Number(hhCoach) || 0).toLocaleString("vi-VN")} {hhUnit}/gói</small>
+                  </div>
+                </div>
+                <div className={styles.cpTotalCallout}>
+                  <strong>Tổng hoa hồng:</strong> {totalCommission.toLocaleString("vi-VN")} {hhUnit}
+                </div>
+              </>
+            ) : null}
+          </section>
+
+          <section className={styles.cpPreview}>
+            <h3>Xem Trước</h3>
+            <div className={styles.cpPreviewRow}>
+              <span>Tên gói:</span>
+              <strong>{name || "---"}</strong>
+            </div>
+            <div className={styles.cpPreviewRow}>
+              <span>Số buổi:</span>
+              <strong>{sessions || 0} buổi</strong>
+            </div>
+            <div className={styles.cpPreviewRow}>
+              <span>Thời hạn:</span>
+              <strong>{duration} tháng</strong>
+            </div>
+            <div className={styles.cpPreviewRow}>
+              <span>Giá gói (chưa VAT):</span>
+              <strong className={styles.cpPreviewBlue}>{fmt(priceBeforeVat)}</strong>
+            </div>
+            <div className={styles.cpPreviewRow}>
+              <span>VAT ({vat}%):</span>
+              <strong className={styles.cpPreviewBlue}>+{fmt(vatAmount)}</strong>
+            </div>
+            <div className={`${styles.cpPreviewRow} ${styles.cpPreviewTotal}`}>
+              <span>Tổng thanh toán:</span>
+              <strong className={styles.cpPreviewBlue}>{fmt(priceAfter)}</strong>
+            </div>
+            <div className={styles.cpPreviewRow}>
+              <span>Giá/buổi:</span>
+              <strong className={styles.cpPreviewGreen}>{fmt(pricePerSession)}</strong>
+            </div>
+          </section>
         </div>
 
-        <footer className={styles.modalFooter}>
-          <button onClick={onClose} type="button">Hủy bỏ</button>
-          <button className={styles.blueButton} type="submit">{isEdit ? "Cập nhật" : "Lưu bảng giá"}</button>
+        <footer className={styles.cpFooter}>
+          <button className={styles.cpSubmitBtn} onClick={submit} type="button">
+            {isEdit ? "Cập Nhật Bảng Giá" : "Tạo Bảng Giá"}
+          </button>
+          <button className={styles.cpCancelBtn} onClick={onClose} type="button">Hủy</button>
         </footer>
-      </form>
+      </section>
     </div>
   );
 }
@@ -1556,109 +1792,319 @@ function SingleTicketFormModal({
   onSubmit: (ticket: SingleTicket) => void;
 }) {
   const isEdit = !!initial;
+  const initVat = 8;
+  const initWeekday = Number(initial?.prices.weekday.replace(/[^\d]/g, "")) || 0;
+  const initWeekend = Number(initial?.prices.weekend.replace(/[^\d]/g, "")) || 0;
+  const initHoliday = Number(initial?.prices.holiday.replace(/[^\d]/g, "")) || 0;
+
+  const [code, setCode] = useState(initial?.code ?? "");
+  const [name, setName] = useState(initial?.name ?? "");
+  const [duration, setDuration] = useState(initial?.durationHours?.match(/[\d.]+/)?.[0] ?? "4");
   const [serviceType, setServiceType] = useState<SingleTicket["serviceType"]>(initial?.serviceType ?? "Teetime");
+  const [otherService, setOtherService] = useState("");
+  const [serviceGroup, setServiceGroup] = useState("");
+  const [staffCode, setStaffCode] = useState("");
+  const [staffName, setStaffName] = useState("");
+  const [desc, setDesc] = useState(initial?.desc ?? "");
+
+  const [weekdayPrice, setWeekdayPrice] = useState(String(initWeekday));
+  const [weekdayVat, setWeekdayVat] = useState(String(initVat));
+  const [weekendPrice, setWeekendPrice] = useState(String(initWeekend));
+  const [weekendVat, setWeekendVat] = useState(String(initVat));
+  const [holidayPrice, setHolidayPrice] = useState(String(initHoliday));
+  const [holidayVat, setHolidayVat] = useState(String(initVat));
+
+  const [weekendDays, setWeekendDays] = useState<string[]>(["T7", "CN"]);
+  const [holidays, setHolidays] = useState<string[]>([]);
+  const [holidayInput, setHolidayInput] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [timeSlots, setTimeSlots] = useState<Array<{ start: string; end: string }>>([{ start: "", end: "" }]);
+  const [activateNow, setActivateNow] = useState(true);
   const [error, setError] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name") ?? "").trim();
-    if (!name) { setError("Tên bảng giá bắt buộc"); return; }
+  const calcTotal = (price: string, vatPercent: string) => {
+    const p = Number(price) || 0;
+    const v = Number(vatPercent) || 0;
+    return Math.round(p * (1 + v / 100));
+  };
+
+  const fmt = (n: number) => n.toLocaleString("vi-VN");
+
+  const toggleDay = (d: string) =>
+    setWeekendDays((c) => c.includes(d) ? c.filter((x) => x !== d) : [...c, d]);
+
+  const addHoliday = () => {
+    const trimmed = holidayInput.trim();
+    if (!trimmed) return;
+    setHolidays((c) => [...c, trimmed]);
+    setHolidayInput("");
+  };
+
+  const removeHoliday = (i: number) =>
+    setHolidays((c) => c.filter((_, idx) => idx !== i));
+
+  const addTimeSlot = () =>
+    setTimeSlots((c) => [...c, { start: "", end: "" }]);
+
+  const updateTimeSlot = (i: number, key: "start" | "end", value: string) =>
+    setTimeSlots((c) => c.map((s, idx) => idx === i ? { ...s, [key]: value } : s));
+
+  const removeTimeSlot = (i: number) =>
+    setTimeSlots((c) => c.filter((_, idx) => idx !== i));
+
+  const submit = () => {
+    if (!name.trim()) { setError("Tên bảng giá bắt buộc"); return; }
     onSubmit({
-      code: initial?.code ?? `T${String(Date.now()).slice(-3)}`,
+      code: initial?.code ?? (code || `T${String(Date.now()).slice(-3)}`),
       name,
-      desc: String(data.get("desc") ?? ""),
+      desc,
       serviceType,
-      durationHours: serviceType === "Dịch vụ khác" ? "—" : `${data.get("duration") ?? "1"} giờ`,
-      status: initial?.status ?? "Hoạt động",
+      durationHours: serviceType === "Dịch vụ khác" ? "—" : `${duration} giờ`,
+      status: activateNow ? "Hoạt động" : "Tạm ngưng",
       prices: {
-        weekday: `${data.get("weekday") ?? "0"} đ`,
-        weekend: `${data.get("weekend") ?? "0"} đ`,
-        holiday: `${data.get("holiday") ?? "0"} đ`,
-        peak: `${data.get("peak") ?? "0"} đ`,
+        weekday: `${fmt(calcTotal(weekdayPrice, weekdayVat))} đ`,
+        weekend: `${fmt(calcTotal(weekendPrice, weekendVat))} đ`,
+        holiday: `${fmt(calcTotal(holidayPrice, holidayVat))} đ`,
+        peak: initial?.prices.peak ?? `${fmt(calcTotal(holidayPrice, holidayVat))} đ`,
       },
-      pillTimes: initial?.pillTimes ?? ["06-21h"],
-      effective: String(data.get("effective") ?? "01/01/2026 - 31/12/2026"),
+      pillTimes: timeSlots.filter((t) => t.start || t.end).map((t) => `${t.start}-${t.end}`),
+      effective: startDate && endDate ? `${startDate} - ${endDate}` : "01/01/2026 - 31/12/2026",
     });
   };
 
   return (
     <div className={styles.modalOverlay}>
-      <form className={styles.modalShell} onSubmit={handleSubmit}>
-        <header className={styles.modalHeader}>
+      <section className={styles.ticketPriceModal}>
+        <header className={styles.ticketPriceHeader}>
           <div>
-            <h2>{isEdit ? "Chỉnh sửa Bảng giá Vé lẻ" : "Tạo Bảng giá Vé lẻ mới"}</h2>
-            <p>4 tier giá theo BR-M9-11 (Ngày thường / Cuối tuần / Lễ-Tết / Giờ cao điểm)</p>
+            <h2>{isEdit ? "Chỉnh sửa bảng giá vé lẻ" : "Tạo bảng giá mới"}</h2>
+            <p>{isEdit ? `Đang sửa ${initial?.code} — ${initial?.name}` : "Thêm bảng giá vé lẻ cho dịch vụ golf"}</p>
           </div>
-          <button onClick={onClose} type="button"><X size={22} /></button>
+          <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
-
-        <div className={styles.modalBody}>
-          {error ? <p className={styles.formError}>{error}</p> : null}
-
-          <h3>1. Thông tin vé</h3>
-          <div className={styles.formGrid}>
-            <FormField label="Mã" name="code" value={initial?.code ?? "T-AUTO"} />
-            <FormField defaultValue={initial?.name} label="Tên bảng giá" name="name" placeholder="VD: Teetime 18 Holes - Standard" required />
-          </div>
-          <FormField area defaultValue={initial?.desc} label="Mô tả" name="desc" placeholder="Mô tả chi tiết..." />
-
-          <h3>2. Loại dịch vụ</h3>
-          <div className={styles.modeToggle}>
-            {(["Teetime", "Practice", "Dịch vụ khác"] as const).map((s) => (
-              <button
-                className={serviceType === s ? styles.modeActive : styles.modeIdle}
-                key={s}
-                onClick={() => setServiceType(s)}
-                type="button"
-              >
-                <strong>{s}</strong>
-                <span>{s === "Dịch vụ khác" ? "Không có thời lượng (BR-M9-09)" : `Có thời lượng tính theo giờ`}</span>
-              </button>
-            ))}
-          </div>
-
-          {serviceType !== "Dịch vụ khác" ? (
-            <div className={styles.formGrid}>
-              <FormField defaultValue={initial?.durationHours?.match(/[\d.]+/)?.[0]} label="Thời lượng (giờ)" name="duration" placeholder="VD: 4" type="number" />
-              <FormField defaultValue={initial?.effective} label="Ngày hiệu lực" name="effective" placeholder="01/01/2026 - 31/12/2026" />
-            </div>
-          ) : null}
-
-          <h3>3. Bảng 4 tier giá (BR-M9-11)</h3>
-          <div className={styles.tierForm}>
-            <TierFormCell label="Ngày thường" name="weekday" placeholder="850000" tone="green" defaultValue={initial?.prices.weekday.match(/[\d.]+/)?.[0].replace(/\./g, "")} />
-            <TierFormCell label="Cuối tuần" name="weekend" placeholder="1200000" tone="blue" defaultValue={initial?.prices.weekend.match(/[\d.]+/)?.[0].replace(/\./g, "")} />
-            <TierFormCell label="Lễ / Tết" name="holiday" placeholder="1500000" tone="amber" defaultValue={initial?.prices.holiday.match(/[\d.]+/)?.[0].replace(/\./g, "")} />
-            <TierFormCell label="Giờ cao điểm" name="peak" placeholder="1600000" tone="red" defaultValue={initial?.prices.peak.match(/[\d.]+/)?.[0].replace(/\./g, "")} />
-          </div>
-
-          <h3>4. Ngày cuối tuần áp dụng</h3>
-          <div className={styles.dayPills}>
-            {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((d) => (
-              <label className={styles.dayPill} key={d}>
-                <input defaultChecked={d === "T7" || d === "CN"} type="checkbox" />
-                <span>{d}</span>
-              </label>
-            ))}
-          </div>
-
-          <h3>5. Danh sách ngày lễ / Tết</h3>
-          <div className={styles.holidayList}>
-            {["01/01/2026 — Tết Dương lịch", "10/02/2026 — 30 Tết", "11-15/02/2026 — Tết Nguyên đán", "30/04 - 01/05/2026 — Lễ 30/4 + 1/5", "02/09/2026 — Quốc khánh"].map((h) => (
-              <span className={styles.holidayChip} key={h}>{h} <button onClick={() => alert("Xóa ngày lễ")} type="button"><X size={12} /></button></span>
-            ))}
-            <button className={styles.holidayAdd} onClick={() => alert("Thêm ngày lễ")} type="button">
-              <Plus size={14} /> Thêm ngày
+        <div className={styles.ticketPriceToolbar}>
+          <span className={styles.ticketRequiredHint}><b>*</b> Thông tin bắt buộc</span>
+          <div className={styles.ticketToolbarActions}>
+            <button className={styles.cpCancelBtn} onClick={onClose} type="button">Hủy</button>
+            <button className={styles.tpSaveBtn} onClick={submit} type="button">
+              💾 Lưu bảng giá
             </button>
           </div>
         </div>
 
-        <footer className={styles.modalFooter}>
-          <button onClick={onClose} type="button">Hủy bỏ</button>
-          <button className={styles.blueButton} type="submit">{isEdit ? "Cập nhật" : "Lưu bảng giá"}</button>
-        </footer>
-      </form>
+        <div className={styles.ticketPriceBody}>
+          {error ? <p className={styles.formError}>{error}</p> : null}
+
+          <section className={`${styles.tpSection} ${styles.tpBlue}`}>
+            <h3>Thông tin cơ bản</h3>
+            <div className={styles.tpField}>
+              <label>Mã gói <b>*</b></label>
+              <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: T18S" />
+            </div>
+            <div className={styles.tpField}>
+              <label>Tên bảng giá <b>*</b></label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Teetime 18 Holes - Standard" />
+            </div>
+            <div className={styles.tpField}>
+              <label>Thời lượng (giờ) <b>*</b></label>
+              <input value={duration} onChange={(e) => setDuration(e.target.value)} type="number" />
+            </div>
+            <div className={styles.tpField}>
+              <label>Loại dịch vụ <b>*</b></label>
+              <select value={serviceType} onChange={(e) => setServiceType(e.target.value as SingleTicket["serviceType"])}>
+                <option>Teetime</option>
+                <option>Practice</option>
+                <option>Dịch vụ khác</option>
+              </select>
+            </div>
+            <div className={styles.tpField}>
+              <div className={styles.tpFieldHead}>
+                <label>Dịch vụ khác</label>
+                <button type="button" className={styles.cpAddLink} onClick={() => alert("Thêm dịch vụ khác")}>
+                  <Plus size={12} /> Thêm dịch vụ khác
+                </button>
+              </div>
+              <input value={otherService} onChange={(e) => setOtherService(e.target.value)} placeholder="Nhập tên dịch vụ khác" />
+            </div>
+            <div className={styles.tpField}>
+              <div className={styles.tpFieldHead}>
+                <label>Nhóm dịch vụ</label>
+                <button type="button" className={styles.cpAddLink} onClick={() => alert("Thêm nhóm")}>
+                  <Plus size={12} /> Thêm nhóm
+                </button>
+              </div>
+              <input value={serviceGroup} onChange={(e) => setServiceGroup(e.target.value)} placeholder="Nhập tên nhóm dịch vụ" />
+            </div>
+            <div className={styles.tpRow2}>
+              <div className={styles.tpField}>
+                <label># Mã nhân viên</label>
+                <input value={staffCode} onChange={(e) => setStaffCode(e.target.value)} placeholder="VD: NV001" />
+              </div>
+              <div className={styles.tpField}>
+                <label>👤 Nhân viên</label>
+                <input value={staffName} onChange={(e) => setStaffName(e.target.value)} placeholder="VD: Nguyễn Văn A" />
+              </div>
+            </div>
+            <div className={styles.tpField}>
+              <label>Mô tả <b>*</b></label>
+              <textarea rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Mô tả chi tiết về bảng giá này..." />
+            </div>
+          </section>
+
+          <section className={`${styles.tpSection} ${styles.tpGreen}`}>
+            <h3>Bảng giá</h3>
+            <div className={`${styles.tpTier} ${styles.tpTierWeekday}`}>
+              <h4>Giá ngày thường <b>*</b></h4>
+              <div className={styles.tpTier3Col}>
+                <div className={styles.tpField}>
+                  <label>Đơn giá (VND) <b>*</b></label>
+                  <input value={weekdayPrice} onChange={(e) => setWeekdayPrice(e.target.value)} type="number" placeholder="0" />
+                </div>
+                <div className={styles.tpField}>
+                  <label>VAT (%)</label>
+                  <input value={weekdayVat} onChange={(e) => setWeekdayVat(e.target.value)} type="number" placeholder="0" />
+                </div>
+                <div className={styles.tpField}>
+                  <label>Thành tiền (VND)</label>
+                  <input value={fmt(calcTotal(weekdayPrice, weekdayVat))} readOnly className={styles.tpReadonly} />
+                </div>
+              </div>
+            </div>
+            <div className={`${styles.tpTier} ${styles.tpTierWeekend}`}>
+              <h4>Giá cuối tuần <b>*</b></h4>
+              <div className={styles.tpTier3Col}>
+                <div className={styles.tpField}>
+                  <label>Đơn giá (VND) <b>*</b></label>
+                  <input value={weekendPrice} onChange={(e) => setWeekendPrice(e.target.value)} type="number" placeholder="0" />
+                </div>
+                <div className={styles.tpField}>
+                  <label>VAT (%)</label>
+                  <input value={weekendVat} onChange={(e) => setWeekendVat(e.target.value)} type="number" placeholder="0" />
+                </div>
+                <div className={styles.tpField}>
+                  <label>Thành tiền (VND)</label>
+                  <input value={fmt(calcTotal(weekendPrice, weekendVat))} readOnly className={styles.tpReadonly} />
+                </div>
+              </div>
+            </div>
+            <div className={`${styles.tpTier} ${styles.tpTierHoliday}`}>
+              <h4>Giá lễ/Tết <b>*</b></h4>
+              <div className={styles.tpTier3Col}>
+                <div className={styles.tpField}>
+                  <label>Đơn giá (VND) <b>*</b></label>
+                  <input value={holidayPrice} onChange={(e) => setHolidayPrice(e.target.value)} type="number" placeholder="0" />
+                </div>
+                <div className={styles.tpField}>
+                  <label>VAT (%)</label>
+                  <input value={holidayVat} onChange={(e) => setHolidayVat(e.target.value)} type="number" placeholder="0" />
+                </div>
+                <div className={styles.tpField}>
+                  <label>Thành tiền (VND)</label>
+                  <input value={fmt(calcTotal(holidayPrice, holidayVat))} readOnly className={styles.tpReadonly} />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className={`${styles.tpSection} ${styles.tpPurple}`}>
+            <h3>Quy tắc áp dụng giá</h3>
+            <div className={`${styles.tpTier} ${styles.tpTierWeekend}`}>
+              <h4>Ngày cuối tuần áp dụng</h4>
+              <div className={styles.tpDayPills}>
+                {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((d) => {
+                  const labels: Record<string, string> = { T2: "Thứ 2", T3: "Thứ 3", T4: "Thứ 4", T5: "Thứ 5", T6: "Thứ 6", T7: "Thứ 7", CN: "Chủ nhật" };
+                  return (
+                    <button
+                      className={weekendDays.includes(d) ? styles.tpDayActive : styles.tpDayIdle}
+                      key={d}
+                      onClick={() => toggleDay(d)}
+                      type="button"
+                    >
+                      {labels[d]}
+                    </button>
+                  );
+                })}
+              </div>
+              <small className={styles.tpHint}>Đã chọn: {weekendDays.length} ngày</small>
+            </div>
+            <div className={`${styles.tpTier} ${styles.tpTierHoliday}`}>
+              <h4>Danh sách ngày lễ/Tết</h4>
+              <div className={styles.tpHolidayInput}>
+                <input
+                  value={holidayInput}
+                  onChange={(e) => setHolidayInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addHoliday(); } }}
+                  placeholder="VD: 01/01/2026 — Tết Dương lịch"
+                />
+                <button onClick={addHoliday} className={holidayInput.trim() ? styles.cpSubmitBtn : styles.cpCancelBtn} type="button" disabled={!holidayInput.trim()}>
+                  + Thêm
+                </button>
+              </div>
+              {holidays.length === 0 ? (
+                <p className={styles.tpEmptyHint}>Chưa có ngày lễ/Tết nào được thêm</p>
+              ) : (
+                <div className={styles.tpHolidayList}>
+                  {holidays.map((h, i) => (
+                    <span className={styles.holidayChip} key={`${h}-${i}`}>
+                      {h} <button onClick={() => removeHoliday(i)} type="button"><X size={12} /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className={`${styles.tpSection} ${styles.tpAmber}`}>
+            <h3>Thời gian hiệu lực</h3>
+            <div className={styles.tpRow2}>
+              <div className={styles.tpField}>
+                <label>Ngày bắt đầu <b>*</b></label>
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              </div>
+              <div className={styles.tpField}>
+                <label>Ngày kết thúc <b>*</b></label>
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              </div>
+            </div>
+          </section>
+
+          <section className={`${styles.tpSection} ${styles.tpRed}`}>
+            <div className={styles.tpSectionHead}>
+              <h3>Khung giờ áp dụng</h3>
+              <button className={styles.cpSubmitBtn} onClick={addTimeSlot} type="button">
+                <Plus size={14} /> Thêm khung giờ
+              </button>
+            </div>
+            {timeSlots.map((slot, i) => (
+              <div className={styles.tpTimeRow} key={i}>
+                <span>Khung {i + 1}</span>
+                <input value={slot.start} onChange={(e) => updateTimeSlot(i, "start", e.target.value)} placeholder="06:00" type="time" />
+                <span>→</span>
+                <input value={slot.end} onChange={(e) => updateTimeSlot(i, "end", e.target.value)} placeholder="22:00" type="time" />
+                {timeSlots.length > 1 ? (
+                  <button onClick={() => removeTimeSlot(i)} type="button" className={styles.deleteIcon} aria-label="Xóa khung giờ">
+                    <Trash2 size={14} />
+                  </button>
+                ) : null}
+              </div>
+            ))}
+          </section>
+
+          <section className={`${styles.tpSection} ${styles.tpGreen}`}>
+            <h3>Trạng thái</h3>
+            <label className={styles.tpStatusCheck}>
+              <input type="checkbox" checked={activateNow} onChange={(e) => setActivateNow(e.target.checked)} />
+              <span>Kích hoạt bảng giá ngay khi tạo</span>
+            </label>
+            <small className={styles.tpHint}>
+              {activateNow
+                ? "Bảng giá sẽ ngay lập tức xuất hiện trong form bán vé sau khi lưu"
+                : "Bảng giá sẽ ở trạng thái Tạm ngưng — phải bật kích hoạt thủ công sau"}
+            </small>
+          </section>
+        </div>
+      </section>
     </div>
   );
 }
@@ -1687,16 +2133,27 @@ function TierFormCell({
 
 /* ---------------- Delete Modal ---------------- */
 
-function TogglePackageStatusModal({
-  pkg,
+function TogglePricingStatusModal({
+  code,
+  kind,
+  name,
   onCancel,
   onConfirm,
+  status,
+  usage,
 }: {
-  pkg: ContractPackage;
+  code: string;
+  kind: "package" | "ticket";
+  name: string;
   onCancel: () => void;
   onConfirm: () => void;
+  status: "Hoạt động" | "Tạm ngưng";
+  usage: number;
 }) {
-  const isActivating = pkg.status === "Tạm ngưng";
+  const isActivating = status === "Tạm ngưng";
+  const label = kind === "package" ? "bảng giá Hợp đồng" : "bảng giá Vé lẻ";
+  const moduleRef = kind === "package" ? "Module 03 (Hợp đồng)" : "Module 04 (Vé lẻ)";
+  const usageNoun = kind === "package" ? "HĐ" : "vé đã bán";
 
   return (
     <div className={styles.modalOverlay}>
@@ -1706,8 +2163,8 @@ function TogglePackageStatusModal({
             {isActivating ? <AlertCircle size={26} /> : <Power size={26} />}
           </div>
           <div>
-            <h2>{isActivating ? "Bật kích hoạt bảng giá" : "Hủy kích hoạt bảng giá"}</h2>
-            <p>{pkg.code} — {pkg.name}</p>
+            <h2>{isActivating ? `Bật kích hoạt ${label}` : `Hủy kích hoạt ${label}`}</h2>
+            <p>{code} — {name}</p>
           </div>
           <button className={styles.deleteClose} onClick={onCancel} type="button"><X size={20} /></button>
         </header>
@@ -1716,30 +2173,30 @@ function TogglePackageStatusModal({
           {isActivating ? (
             <>
               <p>
-                Bạn có chắc muốn <strong>bật kích hoạt</strong> bảng giá này? Sau khi kích hoạt:
+                Bạn có chắc muốn <strong>bật kích hoạt</strong> {label} này? Sau khi kích hoạt:
               </p>
               <ul className={styles.toggleStatusBullets}>
-                <li>✓ Bảng giá sẽ xuất hiện trong form bán Hợp đồng (Module 03)</li>
-                <li>✓ Sale có thể chọn bảng giá này khi ký HĐ mới</li>
+                <li>✓ {label.charAt(0).toUpperCase() + label.slice(1)} sẽ xuất hiện trong form bán {moduleRef}</li>
+                <li>✓ Sale / Lễ tân có thể chọn {label} này khi tạo mới</li>
                 <li>✓ Trạng thái <strong>Tạm ngưng</strong> sẽ chuyển thành <strong>Hoạt động</strong></li>
               </ul>
               <div className={styles.toggleStatusInfoCard}>
-                <span>Đã có {pkg.usage} HĐ dùng bảng giá này — không bị ảnh hưởng khi đổi trạng thái.</span>
+                <span>Đã có {usage} {usageNoun} dùng {label} này — không bị ảnh hưởng khi đổi trạng thái.</span>
               </div>
             </>
           ) : (
             <>
               <p>
-                Bạn có chắc muốn <strong>hủy kích hoạt</strong> bảng giá này? Khi tạm ngưng:
+                Bạn có chắc muốn <strong>hủy kích hoạt</strong> {label} này? Khi tạm ngưng:
               </p>
               <ul className={styles.toggleStatusBullets}>
-                <li>✗ Bảng giá <strong>không còn hiển thị</strong> trong form bán Hợp đồng (Module 03)</li>
-                <li>✓ {pkg.usage} HĐ đang dùng bảng giá <strong>không bị ảnh hưởng</strong></li>
+                <li>✗ {label.charAt(0).toUpperCase() + label.slice(1)} <strong>không còn hiển thị</strong> trong form bán {moduleRef}</li>
+                <li>✓ {usage} {usageNoun} đang dùng {label} <strong>không bị ảnh hưởng</strong></li>
                 <li>✓ Có thể bật lại bất kỳ lúc nào</li>
               </ul>
               <div className={styles.toggleStatusWarnCard}>
                 <AlertCircle size={16} />
-                <span>Sale + Lễ tân sẽ không bán được gói này cho HĐ mới sau khi tạm ngưng.</span>
+                <span>Sale + Lễ tân sẽ không bán được {kind === "package" ? "gói này cho HĐ mới" : "vé này"} sau khi tạm ngưng.</span>
               </div>
             </>
           )}
@@ -1752,7 +2209,7 @@ function TogglePackageStatusModal({
             onClick={onConfirm}
             type="button"
           >
-            {isActivating ? <Power size={16} /> : <Power size={16} />}
+            <Power size={16} />
             {isActivating ? "Kích hoạt" : "Hủy kích hoạt"}
           </button>
         </footer>

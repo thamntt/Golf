@@ -6438,3 +6438,843 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* === Contract Price Modal (Bảng Giá Hợp Đồng) === */
+.contractPriceModal {
+  width: min(960px, calc(100vw - 40px));
+  max-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.contractPriceHero {
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 28px;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  color: #ffffff;
+}
+
+.contractPriceHero h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.contractPriceHero p {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+}
+
+.contractPriceHero > button {
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.contractPriceBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 22px 28px;
+  display: grid;
+  gap: 16px;
+}
+
+.cpField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cpField small {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.cpLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cpLabel b {
+  color: #e60012;
+  margin: 0 2px;
+}
+
+.cpHint {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.cpAddLink {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: #175cff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cpAddLink:hover {
+  text-decoration: underline;
+}
+
+.cpInput {
+  min-height: 40px;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  color: #101828;
+  font: inherit;
+  font-size: 14px;
+}
+
+.cpInput:focus-visible {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.cpInput[disabled] {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.cpAutoCode {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #475569;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cpAutoOrange {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cpAutoBox {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cpRow2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cpRadioCol {
+  display: grid;
+  gap: 8px;
+}
+
+.cpRadioActive,
+.cpRadioIdle {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e6ee;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.cpRadioActive {
+  border-color: #079b67;
+  background: #f0fdf4;
+}
+
+.cpRadioIdle:hover {
+  border-color: #94a3b8;
+}
+
+.cpRadioActive input,
+.cpRadioIdle input {
+  grid-row: 1 / span 2;
+  accent-color: #079b67;
+}
+
+.cpRadioActive strong,
+.cpRadioIdle strong {
+  color: #101828;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cpRadioActive span,
+.cpRadioIdle span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.cpSection {
+  border: 1px solid #e2e6ee;
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #ffffff;
+  display: grid;
+  gap: 14px;
+}
+
+.cpSection > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cpSection h3 {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #d97706;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.cpSection:nth-of-type(2) h3 {
+  color: #7c3aed;
+}
+
+.cpAddBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cpAddBtn:hover {
+  border-color: #175cff;
+  color: #175cff;
+}
+
+.cpCheckGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+}
+
+.cpCheck {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  background: #f8fafc;
+  cursor: pointer;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cpCheck > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cpCheck strong {
+  color: #101828;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cpCheck em {
+  color: #94a3b8;
+  font-size: 11px;
+  font-style: normal;
+}
+
+.cpCheckSimple {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 0;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cpInlineRadio {
+  display: flex;
+  gap: 18px;
+}
+
+.cpInlineRadio label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cpHintGreen {
+  display: block;
+  margin-top: 6px;
+  color: #079b67;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.cpTotalCallout {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #15803d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cpTotalCallout strong {
+  color: #15803d;
+  font-weight: 700;
+}
+
+.cpPreview {
+  border: 1px solid #e2e6ee;
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: #f8fafc;
+  display: grid;
+  gap: 8px;
+}
+
+.cpPreview h3 {
+  margin: 0 0 4px;
+  color: #101828;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.cpPreviewRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.cpPreviewRow span {
+  color: #475467;
+}
+
+.cpPreviewRow strong {
+  color: #101828;
+  font-weight: 600;
+}
+
+.cpPreviewBlue {
+  color: #2563eb !important;
+}
+
+.cpPreviewGreen {
+  color: #059669 !important;
+}
+
+.cpPreviewTotal {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e6ee;
+  font-size: 14px;
+}
+
+.cpPreviewTotal strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.cpFooter {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px 28px;
+  border-top: 1px solid #e2e6ee;
+  background: #ffffff;
+}
+
+.cpSubmitBtn {
+  min-height: 42px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.cpSubmitBtn:hover {
+  background: #1d4ed8;
+}
+
+.cpSubmitBtn[disabled] {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.cpCancelBtn {
+  min-height: 42px;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cpCancelBtn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* === Ticket Price Modal (Bảng Giá Vé Lẻ) === */
+.ticketPriceModal {
+  width: min(820px, calc(100vw - 40px));
+  max-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.ticketPriceHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.ticketPriceHeader h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.ticketPriceHeader p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.ticketPriceHeader > button {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ticketPriceToolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.ticketRequiredHint {
+  color: #475467;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ticketRequiredHint b {
+  color: #e60012;
+}
+
+.ticketToolbarActions {
+  display: flex;
+  gap: 10px;
+}
+
+.ticketToolbarActions .cpCancelBtn {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.tpSaveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tpSaveBtn:hover {
+  background: #1d4ed8;
+}
+
+.ticketPriceBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.tpSection {
+  border: 1px solid #e2e6ee;
+  border-left: 4px solid #2563eb;
+  border-radius: 10px;
+  padding: 14px 18px;
+  background: #ffffff;
+  display: grid;
+  gap: 12px;
+}
+
+.tpBlue {
+  border-left-color: #2563eb;
+}
+.tpGreen {
+  border-left-color: #059669;
+}
+.tpPurple {
+  border-left-color: #7c3aed;
+}
+.tpAmber {
+  border-left-color: #d97706;
+}
+.tpRed {
+  border-left-color: #dc2626;
+}
+
+.tpSection h3 {
+  margin: 0;
+  color: #101828;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.tpSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tpSectionHead .cpSubmitBtn {
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+.tpField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tpField label {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tpField label b {
+  color: #e60012;
+}
+
+.tpField input,
+.tpField select,
+.tpField textarea {
+  min-height: 38px;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  font-size: 14px;
+}
+
+.tpField input:focus-visible,
+.tpField select:focus-visible,
+.tpField textarea:focus-visible {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.tpFieldHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tpRow2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.tpTier {
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.tpTier h4 {
+  margin: 0;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tpTier h4 b {
+  color: #e60012;
+}
+
+.tpTierWeekday {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.tpTierWeekend {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.tpTierWeekend h4 {
+  color: #059669;
+}
+
+.tpTierHoliday {
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+}
+
+.tpTierHoliday h4 {
+  color: #be185d;
+}
+
+.tpTier3Col {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tpReadonly {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  font-weight: 600;
+}
+
+.tpDayPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tpDayActive,
+.tpDayIdle {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tpDayIdle:hover {
+  border-color: #94a3b8;
+}
+
+.tpDayActive {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.tpHint {
+  color: #667085;
+  font-size: 12px;
+}
+
+.tpHolidayInput {
+  display: flex;
+  gap: 10px;
+}
+
+.tpHolidayInput input {
+  flex: 1;
+  min-height: 38px;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.tpHolidayInput .cpSubmitBtn,
+.tpHolidayInput .cpCancelBtn {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.tpEmptyHint {
+  margin: 0;
+  text-align: center;
+  padding: 12px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.tpHolidayList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tpTimeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.tpTimeRow > span:first-child {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.tpTimeRow input {
+  flex: 0 1 140px;
+  min-height: 38px;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.tpStatusCheck {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tpStatusCheck input {
+  width: 18px;
+  height: 18px;
+  accent-color: #2563eb;
+}
+
+@media (max-width: 768px) {
+  .cpRow2,
+  .tpRow2 {
+    grid-template-columns: 1fr;
+  }
+  .cpFooter {
+    grid-template-columns: 1fr;
+  }
+  .cpCheckGrid {
+    grid-template-columns: 1fr;
+  }
+  .tpTier3Col {
+    grid-template-columns: 1fr;
+  }
+}
