@@ -1426,6 +1426,20 @@
   cursor: pointer;
 }
 
+.modalHeader button.blueButton,
+.detailHeader button.blueButton {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: #175cff;
+  color: #ffffff;
+}
+
+.modalHeader button.blueButton:hover,
+.detailHeader button.blueButton:hover {
+  background: #1450e0;
+}
+
 .modalBody,
 .detailBody {
   overflow: auto;
@@ -1716,11 +1730,22 @@
 }
 
 .companionModal footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
   padding: 0 22px 22px;
 }
 
-.companionModal footer .greenButton {
-  width: 100%;
+.companionModal footer button {
+  min-height: 36px;
+  padding: 0 18px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
 }
 
 .detailModal {
@@ -1763,12 +1788,16 @@
 
 .detailTabs button {
   min-height: 48px;
+  padding: 0 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: #344054;
   cursor: pointer;
   font: inherit;
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -2263,4 +2292,237 @@
 .customFieldRemove:hover {
   background: #fde8e8;
   color: #e23131;
+}
+
+/* Lịch sử check-in — bar chart 12 tháng */
+.monthlyChart {
+  height: 220px;
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  padding: 16px 12px 8px;
+  border-radius: 10px;
+  background: linear-gradient(#f8fafc, #ffffff);
+}
+
+.monthlyBar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  gap: 6px;
+  min-width: 0;
+  height: 100%;
+}
+
+.monthlyBar small {
+  color: #475467;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.monthlyBar > span {
+  width: 100%;
+  min-height: 8px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #175cff, #6b8cff);
+}
+
+.monthlyBar em {
+  color: #667085;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Profile modal — 2-step stepper */
+.profileModal {
+  width: min(820px, calc(100vw - 80px));
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.profileHeader {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: #079b67;
+  color: #ffffff;
+}
+
+.profileHeader h2 {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.profileHeader button {
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.stepItem > span {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e2e6ee;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.stepActive {
+  color: #079b67;
+}
+
+.stepActive > span {
+  background: #079b67;
+  color: #ffffff;
+}
+
+.stepDone > span {
+  background: #c6f3df;
+  color: #079b67;
+}
+
+.stepConnector {
+  flex: 1;
+  height: 2px;
+  background: #e2e6ee;
+}
+
+.profileBody {
+  flex: 1;
+  overflow: auto;
+  padding: 22px 24px;
+  display: grid;
+  gap: 18px;
+}
+
+.profileSection {
+  margin: 0;
+  color: #079b67;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.profileSubsection {
+  margin: 4px 0 0;
+  color: #079b67;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profileFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px;
+  border-top: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.profileFooter > span {
+  /* spacer khi chưa có nút Quay lại */
+}
+
+.profileFooter button {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.profileFooter > div {
+  display: flex;
+  gap: 10px;
+}
+
+.profileFooter button.greenButton {
+  background: #079b67;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.profileFooter button.greenButton:hover {
+  background: #068157;
+}
+
+.levelRadios {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.levelIdle,
+.levelActive {
+  min-height: 56px;
+  border: 2px solid #d9dee7;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.levelIdle:hover {
+  border-color: #94a3b8;
+}
+
+.levelActive {
+  border-color: #079b67;
+  background: #e7f8ec;
+  color: #079b67;
+}
+
+@media (max-width: 768px) {
+  .monthlyChart {
+    height: 180px;
+    gap: 6px;
+  }
+  .levelRadios {
+    grid-template-columns: 1fr;
+  }
 }

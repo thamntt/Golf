@@ -664,7 +664,10 @@ function AddCompanionModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
         <footer>
-          <button className={styles.greenButton} type="button">+ Thêm người đi cùng</button>
+          <button onClick={onClose} type="button">Hủy bỏ</button>
+          <button className={styles.greenButton} onClick={onClose} type="button">
+            <Plus size={16} />Thêm người đi cùng
+          </button>
         </footer>
       </section>
     </div>
@@ -680,7 +683,7 @@ function CustomerDetailModal({
   onChangeTab: (tab: string) => void;
   onClose: () => void;
 }) {
-  const tabs = ["Thông tin cơ bản", "Hợp đồng", "Lịch sử giao dịch", "Lịch sử checkin", "Kết quả tập luyện", "Inbody", "Meal Plan", "Thông tin TA"];
+  const tabs = ["Thông tin cơ bản", "Hợp đồng", "Lịch sử giao dịch", "Lịch sử checkin", "Kết quả tập luyện", "Inbody", "Meal Plan", "Trợ giảng TA", "Profile"];
 
   return (
     <div className={styles.modalOverlay}>
@@ -730,22 +733,11 @@ function CustomerDetailTab({ activeTab }: { activeTab: string }) {
   }
 
   if (activeTab === "Lịch sử giao dịch") {
-    return (
-      <section className={styles.detailCard}>
-        <h3>Lịch sử giao dịch</h3>
-        <MiniTable rows={[["PT001", "Thu hợp đồng Golf Teetime - VIP", "15.000.000 VND"], ["PT002", "Thu vé lẻ Line tập", "650.000 VND"], ["CN001", "Công nợ còn lại", "1.500.000 VND"]]} />
-      </section>
-    );
+    return <TransactionsTab />;
   }
 
   if (activeTab === "Lịch sử checkin") {
-    return (
-      <section className={styles.detailCard}>
-        <h3>Lịch sử check-in</h3>
-        <div className={styles.chartBars}>{[42, 56, 38, 70, 64, 82].map((height, index) => <span key={index} style={{ height: `${height}%` }} />)}</div>
-        <MiniTable rows={[["7/4/2026", "Golf Teetime", "08:00 - 10:00"], ["5/4/2026", "Golf Line Tập", "16:00 - 17:00"]]} />
-      </section>
-    );
+    return <CheckinHistoryTab />;
   }
 
   if (activeTab === "Kết quả tập luyện") {
@@ -757,20 +749,15 @@ function CustomerDetailTab({ activeTab }: { activeTab: string }) {
   }
 
   if (activeTab === "Meal Plan") {
-    return (
-      <section className={styles.detailCard}>
-        <h3>Meal Plan <button className={styles.blueButton} type="button"><Plus size={16} />Thêm kế hoạch</button></h3>
-        <div className={styles.detailTwo}>
-          <InfoBlock label="Kế hoạch">Giảm mỡ - Tăng cơ</InfoBlock>
-          <InfoBlock label="Mục tiêu ngày">2,100 kcal · 130g protein</InfoBlock>
-        </div>
-        <MiniTable rows={[["07:00", "Bữa sáng", "450 kcal · 32g protein"], ["10:00", "Bữa phụ", "220 kcal · 18g protein"], ["12:30", "Bữa trưa", "620 kcal · 42g protein"]]} />
-      </section>
-    );
+    return <MealPlanTab />;
   }
 
-  if (activeTab === "Thông tin TA") {
+  if (activeTab === "Trợ giảng TA") {
     return <TaTab />;
+  }
+
+  if (activeTab === "Profile") {
+    return <ProfilesTab />;
   }
 
   return <BasicInfoTab />;
@@ -969,13 +956,25 @@ function BasicInfoTab() {
 }
 
 function ContractsTab() {
+  const contracts: Array<[string, string, string, string, string, string]> = [
+    ["Golf Teetime - VIP", "Hết hạn", "HD001", "15/1/2024", "15/7/2024", "15,000,000 VND"],
+    ["Golf Practice - Premium", "Còn hạn", "HD002", "1/2/2024", "31/12/2026", "25,000,000 VND"],
+  ];
   return (
-    <section className={styles.detailCard}>
-      <h3>Danh sách hợp đồng <button className={styles.blueButton} type="button"><Plus size={16} />Thêm hợp đồng</button></h3>
-      {[
-        ["Golf Teetime - VIP", "Hết hạn", "HD001", "15/1/2024", "15/7/2024", "15,000,000 VND"],
-        ["Golf Practice - Premium", "Còn hạn", "HD002", "1/2/2024", "31/12/2026", "25,000,000 VND"],
-      ].map(([name, status, code, start, end, value]) => (
+    <>
+      <section className={styles.detailCard}>
+        <h3>
+          <span className={styles.taBadge}>{contracts.length} hợp đồng</span>
+          <button className={styles.blueButton} type="button"><Plus size={16} />Thêm hợp đồng (M03)</button>
+        </h3>
+        <div className={styles.statsGrid}>
+          <SimpleMetric label="Đang hiệu lực" value={String(contracts.filter((c) => c[1] === "Còn hạn").length)} />
+          <SimpleMetric label="Hết hạn" value={String(contracts.filter((c) => c[1] === "Hết hạn").length)} />
+          <SimpleMetric label="Tổng giá trị" value="40M VND" />
+          <SimpleMetric label="Đã thanh toán" value="38.5M VND" />
+        </div>
+      </section>
+      {contracts.map(([name, status, code, start, end, value]) => (
         <article className={styles.contractCard} key={code}>
           <div>
             <h4>{name} <CustomerStatus status={status} /></h4>
@@ -989,6 +988,320 @@ function ContractsTab() {
           <button type="button">Xem chi tiết</button>
         </article>
       ))}
+    </>
+  );
+}
+
+function TransactionsTab() {
+  const txs: Array<{ code: string; date: string; type: string; desc: string; amount: string; status: string; positive: boolean }> = [
+    { code: "PT0245", date: "24/04/2026", type: "Phiếu thu", desc: "Thu hợp đồng Golf Teetime VIP", amount: "+15.000.000 VND", status: "Hoàn tất", positive: true },
+    { code: "PT0312", date: "12/03/2026", type: "Phiếu thu", desc: "Thu vé lẻ Line tập + 1 voucher", amount: "+650.000 VND", status: "Hoàn tất", positive: true },
+    { code: "CN0101", date: "01/02/2026", type: "Công nợ", desc: "Phần còn lại HĐ Golf Teetime VIP", amount: "−1.500.000 VND", status: "Đang nợ", positive: false },
+    { code: "PC0089", date: "20/01/2026", type: "Phiếu chi", desc: "Hoàn buổi học không sử dụng", amount: "−480.000 VND", status: "Hoàn tất", positive: false },
+  ];
+  return (
+    <section className={styles.detailCard}>
+      <h3>
+        Lịch sử giao dịch
+        <span className={styles.taBadge}>{txs.length} giao dịch</span>
+      </h3>
+      <div className={styles.statsGrid}>
+        <SimpleMetric label="Tổng thu" value="15.65M" />
+        <SimpleMetric label="Tổng chi" value="0.48M" />
+        <SimpleMetric label="Công nợ" value="1.50M" />
+        <SimpleMetric label="Số GD" value={String(txs.length)} />
+      </div>
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Ngày</th>
+              <th>Loại</th>
+              <th>Diễn giải</th>
+              <th>Số tiền</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            {txs.map((t) => (
+              <tr key={t.code}>
+                <td><span className={styles.memberCode}>{t.code}</span></td>
+                <td>{t.date}</td>
+                <td>{t.type}</td>
+                <td>{t.desc}</td>
+                <td className={t.positive ? styles.dateGreen : styles.dateRed}>{t.amount}</td>
+                <td><CustomerStatus status={t.status === "Hoàn tất" ? "Còn hạn" : "Hết hạn"} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
+  );
+}
+
+function CheckinHistoryTab() {
+  const months = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"];
+  const counts = [12, 18, 22, 28, 35, 32, 24, 20, 26, 31, 38, 42];
+  const max = Math.max(...counts);
+  const total = counts.reduce((a, b) => a + b, 0);
+  const checkins = [
+    { date: "07/04/2026", facility: "Golf Teetime", in: "08:00", out: "10:00", duration: "2h 00m" },
+    { date: "05/04/2026", facility: "Golf Line Tập", in: "16:00", out: "17:00", duration: "1h 00m" },
+    { date: "01/04/2026", facility: "Golf Teetime", in: "07:30", out: "11:00", duration: "3h 30m" },
+    { date: "28/03/2026", facility: "Golf Line Tập", in: "16:30", out: "18:00", duration: "1h 30m" },
+  ];
+  return (
+    <>
+      <section className={styles.detailCard}>
+        <h3>
+          Lượt check-in theo tháng (2026)
+          <span className={styles.taBadge}>Tổng {total} lượt</span>
+        </h3>
+        <div className={styles.monthlyChart}>
+          {counts.map((c, i) => (
+            <div className={styles.monthlyBar} key={months[i]}>
+              <small>{c}</small>
+              <span style={{ height: `${(c / max) * 100}%` }} />
+              <em>{months[i]}</em>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className={styles.detailCard}>
+        <h3>Chi tiết check-in gần đây</h3>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Ngày</th>
+                <th>Cơ sở</th>
+                <th>Giờ vào</th>
+                <th>Giờ ra</th>
+                <th>Thời lượng</th>
+              </tr>
+            </thead>
+            <tbody>
+              {checkins.map((c) => (
+                <tr key={`${c.date}-${c.in}`}>
+                  <td>{c.date}</td>
+                  <td>{c.facility}</td>
+                  <td>{c.in}</td>
+                  <td>{c.out}</td>
+                  <td><strong>{c.duration}</strong></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function MealPlanTab() {
+  const meals = [
+    { time: "07:00", name: "Bữa sáng", items: "Yến mạch, trứng luộc, sữa hạt", cal: 450, pro: 32 },
+    { time: "10:00", name: "Bữa phụ sáng", items: "Chuối + whey protein", cal: 220, pro: 18 },
+    { time: "12:30", name: "Bữa trưa", items: "Cơm gạo lứt, ức gà, salad", cal: 620, pro: 42 },
+    { time: "15:30", name: "Bữa phụ chiều", items: "Hạt mix + sữa chua", cal: 180, pro: 12 },
+    { time: "18:30", name: "Bữa tối", items: "Cá hồi áp chảo, broccoli", cal: 540, pro: 38 },
+    { time: "21:00", name: "Bữa phụ tối", items: "Casein + bơ đậu phộng", cal: 190, pro: 22 },
+  ];
+  const totalCal = meals.reduce((a, m) => a + m.cal, 0);
+  const totalPro = meals.reduce((a, m) => a + m.pro, 0);
+  const maxCal = Math.max(...meals.map((m) => m.cal));
+  const maxPro = Math.max(...meals.map((m) => m.pro));
+  return (
+    <>
+      <section className={styles.detailCard}>
+        <h3>Meal Plan <button className={styles.blueButton} type="button"><Plus size={16} />Thêm kế hoạch</button></h3>
+        <div className={styles.detailThree}>
+          <InfoBlock label="Kế hoạch">Giảm mỡ - Tăng cơ</InfoBlock>
+          <InfoBlock label="Mục tiêu / ngày">2,100 kcal · 130g protein</InfoBlock>
+          <InfoBlock label="Hiện tại">{totalCal.toLocaleString()} kcal · {totalPro}g protein</InfoBlock>
+        </div>
+      </section>
+      <section className={styles.detailCard}>
+        <h3>Lịch trình 6 bữa / ngày</h3>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Giờ</th>
+                <th>Bữa</th>
+                <th>Thực đơn</th>
+                <th>Calories</th>
+                <th>Protein</th>
+              </tr>
+            </thead>
+            <tbody>
+              {meals.map((m) => (
+                <tr key={m.time}>
+                  <td><strong>{m.time}</strong></td>
+                  <td>{m.name}</td>
+                  <td>{m.items}</td>
+                  <td>{m.cal} kcal</td>
+                  <td>{m.pro} g</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <div className={styles.detailTwo}>
+        <article className={styles.chartCard}>
+          <h4>Calories theo bữa</h4>
+          <div className={styles.chartBars}>
+            {meals.map((m, i) => <span key={i} style={{ height: `${(m.cal / maxCal) * 100}%` }} />)}
+          </div>
+        </article>
+        <article className={styles.chartCard}>
+          <h4>Protein theo bữa (g)</h4>
+          <div className={styles.chartBars}>
+            {meals.map((m, i) => <span key={i} style={{ height: `${(m.pro / maxPro) * 100}%` }} />)}
+          </div>
+        </article>
+      </div>
+    </>
+  );
+}
+
+function ProfilesTab() {
+  const [showModal, setShowModal] = useState(false);
+  const profiles = [
+    { id: "PR001", course: "Beginner Golf - Khoá 12", level: "Beginner", handicap: "—", coach: "HLV Minh", goal: "Học swing cơ bản, làm quen sân", health: "Không có ghi chú đặc biệt", created: "15/01/2026" },
+  ];
+  return (
+    <>
+      <section className={styles.detailCard}>
+        <h3>
+          <span className={styles.taBadge}>{profiles.length} profile</span>
+          <button className={styles.greenButton} onClick={() => setShowModal(true)} type="button">
+            <Plus size={16} />Thêm profile
+          </button>
+        </h3>
+        {profiles.map((p) => (
+          <article className={styles.contractCard} key={p.id}>
+            <div>
+              <h4>
+                {p.course}
+                <span className={p.level === "Beginner" ? styles.statusGreen : styles.statusDark}>{p.level}</span>
+              </h4>
+              <div className={styles.contractGrid}>
+                <InfoBlock label="Mã profile"><span className={styles.memberCode}>{p.id}</span></InfoBlock>
+                <InfoBlock label="Handicap WHS">{p.handicap}</InfoBlock>
+                <InfoBlock label="HLV phụ trách">{p.coach}</InfoBlock>
+                <InfoBlock label="Ngày tạo">{p.created}</InfoBlock>
+              </div>
+              <div className={styles.contractGrid}>
+                <InfoBlock label="Mục tiêu chơi golf">{p.goal}</InfoBlock>
+                <InfoBlock label="Lưu ý sức khoẻ">{p.health}</InfoBlock>
+              </div>
+            </div>
+            <button type="button">Xem chi tiết</button>
+          </article>
+        ))}
+      </section>
+      {showModal ? <AddProfileModal onClose={() => setShowModal(false)} /> : null}
+    </>
+  );
+}
+
+function AddProfileModal({ onClose }: { onClose: () => void }) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [level, setLevel] = useState<"Beginner" | "Experienced">("Beginner");
+  return (
+    <div className={styles.nestedOverlay}>
+      <section className={styles.profileModal}>
+        <header className={styles.profileHeader}>
+          <h2>Thêm mới Profile hội viên</h2>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.stepIndicator}>
+          <div className={`${styles.stepItem} ${step >= 1 ? styles.stepActive : ""} ${step > 1 ? styles.stepDone : ""}`}>
+            <span>1</span> Thông tin cơ bản
+          </div>
+          <span className={styles.stepConnector} />
+          <div className={`${styles.stepItem} ${step >= 2 ? styles.stepActive : ""}`}>
+            <span>2</span> Thông tin kinh nghiệm về golf
+          </div>
+        </div>
+        <div className={styles.profileBody}>
+          {step === 1 ? (
+            <>
+              <h3 className={styles.profileSection}>Thông tin cơ bản</h3>
+              <div className={styles.formGrid}>
+                <FormField label="Số khoá học" placeholder="VD: 12" />
+                <FormField label="HLV đã từng học tại EPGA" placeholder="HLV đã học tại EPGA" />
+                <FormField label="Học viên/HLV đã từng học ngoài EPGA" placeholder="Học viên / HLV ngoài EPGA" />
+                <FormField label="Họ và tên" placeholder="Họ và tên đầy đủ" />
+                <SelectField label="Giới tính" name="profileGender" options={["Nam", "Nữ", "Khác"]} />
+                <FormField label="Ngày sinh" type="date" />
+                <FormField label="Số điện thoại" placeholder="0xxxxxxxxx" />
+                <FormField label="Email" placeholder="email@example.com" />
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className={styles.profileSection}>Golf Experience Assessment</h3>
+              <div className={styles.levelRadios}>
+                <button
+                  className={level === "Beginner" ? styles.levelActive : styles.levelIdle}
+                  onClick={() => setLevel("Beginner")}
+                  type="button"
+                >
+                  Người mới / Beginner
+                </button>
+                <button
+                  className={level === "Experienced" ? styles.levelActive : styles.levelIdle}
+                  onClick={() => setLevel("Experienced")}
+                  type="button"
+                >
+                  Người có kinh nghiệm / Experienced
+                </button>
+              </div>
+              <div className={styles.formGrid}>
+                <FormField label="Handicap" placeholder="Tôi không có hoặc số 0-54" />
+                <FormField label="Thời gian chơi golf trước khoá học" type="date" />
+              </div>
+              <h4 className={styles.profileSubsection}>
+                {level === "Beginner" ? "Người mới / Beginner" : "Người có kinh nghiệm / Experienced"}
+              </h4>
+              <div className={styles.formGrid}>
+                <FormField label="Mục tiêu chơi golf / Playing goal" placeholder="VD: Học swing cơ bản" />
+                <SelectField label="Tay thuận / Handedness" name="handedness" options={["Phải", "Trái"]} />
+                <FormField label="Bộ môn thể thao đã từng chơi" placeholder="VD: Cầu lông, Tennis" />
+                <FormField label="Tần suất tập với HLV / tuần" placeholder="VD: 2 buổi/tuần" />
+                <FormField label="Tần suất tự tập / tuần" placeholder="VD: 3 buổi/tuần" />
+                <FormField label="Bộ gậy đang dùng" placeholder="Hãng / loại gậy" />
+                <FormField label="Mức độ thể lực hiện tại" placeholder="Tốt / Trung bình / Cần cải thiện" />
+              </div>
+              <FormField
+                area
+                label="Lưu ý sức khoẻ (giới hạn cơ thể, chấn thương, tiền sử bệnh)"
+                placeholder="Mô tả chi tiết..."
+              />
+            </>
+          )}
+        </div>
+        <footer className={styles.profileFooter}>
+          {step === 2 ? (
+            <button onClick={() => setStep(1)} type="button">← Quay lại</button>
+          ) : (
+            <span />
+          )}
+          <div>
+            <button onClick={onClose} type="button">Đóng</button>
+            {step === 1 ? (
+              <button className={styles.greenButton} onClick={() => setStep(2)} type="button">Tiếp tục →</button>
+            ) : (
+              <button className={styles.greenButton} onClick={onClose} type="button">Lưu profile</button>
+            )}
+          </div>
+        </footer>
+      </section>
+    </div>
   );
 }
