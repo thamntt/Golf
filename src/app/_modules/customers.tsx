@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import {
   Calendar,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   DollarSign,
   Download,
   Edit,
@@ -13,6 +15,7 @@ import {
   Plus,
   Search,
   Settings,
+  Trash2,
   Upload,
   UploadCloud,
   User,
@@ -26,9 +29,7 @@ import {
   FormField,
   InfoBlock,
   InfoLine,
-  MiniTable,
   SelectField,
-  SimpleMetric,
 } from "../_shared/components";
 import { customerRows } from "../_shared/data";
 import type { Customer } from "../_shared/types";
@@ -764,92 +765,439 @@ function CustomerDetailTab({ activeTab }: { activeTab: string }) {
 }
 
 function TrainingResultsTab() {
-  const sessions: Array<{ date: string; weekday: string; session: string; pkg: string; coach: string; ta: string; content: string; homework: string; note: string }> = [
-    { date: "24/04/2026", weekday: "Thứ 5", session: "Buổi 5", pkg: "Gói Golf Swing 3 tháng", coach: "HLV Minh", ta: "TA Hoàng Nam", content: "Swing cơ bản, chỉnh tư thế stance", homework: "Tập chipping 30 phút/ngày", note: "Tiến bộ rõ rệt ở pitch shot" },
-    { date: "18/04/2026", weekday: "Thứ 6", session: "Buổi 4", pkg: "Gói Golf Swing 3 tháng", coach: "HLV Minh", ta: "TA Hoàng Nam", content: "Putting và short game", homework: "30 cú putt 2m mỗi ngày", note: "Cần cải thiện grip" },
-    { date: "11/04/2026", weekday: "Thứ 6", session: "Buổi 3", pkg: "Gói Golf Swing 3 tháng", coach: "HLV An", ta: "—", content: "Driver 200y - line drill", homework: "Đo carry 50 swing", note: "—" },
-  ];
+  const [addOpen, setAddOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [sessions, setSessions] = useState<Array<{ name: string; pkg: string; tier: string; date: string; coach: string; ta: string; session: string; content: string; contentSub: string; drill: string; drillSub: string; note: string }>>([
+    {
+      name: "Nguyễn Văn An",
+      pkg: "Eagle",
+      tier: "Premium",
+      date: "15/05/2024",
+      coach: "Trần Quốc Toàn",
+      ta: "Lê Minh",
+      session: "Buổi 1",
+      content: "Swing & Driver",
+      contentSub: "Chỉnh sửa tư thế & tốc độ",
+      drill: "Swing & Driver",
+      drillSub: "Chỉnh sửa tư thế & tốc độ",
+      note: "Tốc độ đầu gậy cải thiện 15% so với tháng trước.",
+    },
+  ]);
+
+  const handleSave = (entry: typeof sessions[number]) => {
+    setSessions((current) => [entry, ...current]);
+    setAddOpen(false);
+  };
+
   return (
-    <section className={styles.detailCard}>
-      <h3>Kết quả tập luyện <button className={styles.blueButton} type="button"><Plus size={16} />Thêm kết quả</button></h3>
-      <div className={styles.statsGrid}>
-        <SimpleMetric label="Điểm TB" value="82" />
-        <SimpleMetric label="Handicap WHS" value="18.4" />
-        <SimpleMetric label="Tổng buổi" value="24" />
-        <SimpleMetric label="Giờ tập" value="36h" />
-      </div>
-      <div className={styles.tableWrap}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Ngày kiểm tra</th>
-              <th>Buổi</th>
-              <th>Gói tập</th>
-              <th>HLV / Trợ giảng</th>
-              <th>Nội dung</th>
-              <th>BTVN</th>
-              <th>Ghi chú</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessions.map((s) => (
-              <tr key={s.date}>
-                <td><strong>{s.date}</strong><div className={styles.cellMuted}>{s.weekday}</div></td>
-                <td><span className={styles.sessionBadge}>{s.session}</span></td>
-                <td>{s.pkg}</td>
-                <td><strong>{s.coach}</strong><div className={styles.cellMuted}>{s.ta}</div></td>
-                <td className={styles.cellTruncate}>{s.content}</td>
-                <td className={styles.cellTruncate}>{s.homework}</td>
-                <td className={styles.cellTruncate}>{s.note}</td>
-                <td className={styles.rowActions}>
-                  <button type="button"><Edit size={14} /></button>
-                  <button type="button"><X size={14} /></button>
-                </td>
+    <>
+      <section className={styles.detailCard}>
+        <div className={styles.tabSectionHeader}>
+          <h3>Kết quả tập luyện</h3>
+          <button className={styles.blueButton} onClick={() => setAddOpen(true)} type="button">
+            <Plus size={16} />Thêm kết quả
+          </button>
+        </div>
+        <div className={styles.tableWrap}>
+          <table className={styles.upperTable}>
+            <thead>
+              <tr>
+                <th>Tên KH</th>
+                <th>Gói tập</th>
+                <th>Ngày kiểm tra</th>
+                <th>HLV</th>
+                <th>Trợ giảng</th>
+                <th>Buổi học thứ</th>
+                <th>Nội dung buổi học</th>
+                <th>Drill/Bài tập về nhà</th>
+                <th>Ghi chú khác</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
+            </thead>
+            <tbody>
+              {sessions.map((s, i) => (
+                <tr key={`${s.name}-${i}`}>
+                  <td>
+                    <div className={styles.taName}>
+                      <span>{s.name.split(" ").map((p) => p[0]).slice(-2).join("")}</span>
+                      <strong>{s.name}</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div className={styles.pkgBadges}>
+                      <span className={styles.pkgPrimary}>{s.pkg}</span>
+                      <span className={styles.pkgSecondary}>{s.tier}</span>
+                    </div>
+                  </td>
+                  <td>{s.date}</td>
+                  <td>{s.coach}</td>
+                  <td>{s.ta}</td>
+                  <td><strong>{s.session}</strong></td>
+                  <td>
+                    <strong>{s.content}</strong>
+                    <div className={styles.cellMuted}>{s.contentSub}</div>
+                  </td>
+                  <td>
+                    <strong>{s.drill}</strong>
+                    <div className={styles.cellMuted}>{s.drillSub}</div>
+                  </td>
+                  <td className={styles.cellTruncate}>{s.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className={styles.miniPagination}>
+          <span>Hiển thị {sessions.length}</span>
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} type="button"><ChevronLeft size={14} /></button>
+          <button className={styles.greenPageActive} type="button">{page}</button>
+          <button onClick={() => setPage((p) => p + 1)} type="button"><ChevronRight size={14} /></button>
+        </div>
+      </section>
+      {addOpen ? <AddTrainingResultModal onClose={() => setAddOpen(false)} onSave={handleSave} /> : null}
+    </>
   );
 }
 
-function InbodyTab() {
-  const metrics: Array<{ label: string; value: string; trend?: string }> = [
-    { label: "Cân nặng", value: "65 kg", trend: "−1.2 kg" },
-    { label: "Chiều cao", value: "1.70 m" },
-    { label: "Cơ xương", value: "31.2 kg", trend: "+0.4 kg" },
-    { label: "Mỡ cơ thể", value: "18 %", trend: "−0.6 %" },
-    { label: "BMI", value: "22.4", trend: "Bình thường" },
-    { label: "Carry (Driver)", value: "168 yards", trend: "+4 yards" },
-    { label: "Total (Driver)", value: "212 yards" },
-    { label: "Angle Attack", value: "−3.2 °" },
-    { label: "Spin Rate", value: "2,450 rpm" },
-  ];
+function AddTrainingResultModal({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave: (entry: { name: string; pkg: string; tier: string; date: string; coach: string; ta: string; session: string; content: string; contentSub: string; drill: string; drillSub: string; note: string }) => void;
+}) {
+  const [form, setForm] = useState({
+    name: "Nguyễn Văn Minh",
+    pkg: "",
+    date: "2026-05-05",
+    session: "Buổi 1",
+    coach: "",
+    ta: "",
+    content: "",
+    drill: "",
+    note: "",
+  });
+  const update = (key: keyof typeof form, value: string) =>
+    setForm((current) => ({ ...current, [key]: value }));
+
+  const submit = () => {
+    if (!form.pkg || !form.coach || !form.content.trim()) return;
+    onSave({
+      name: form.name,
+      pkg: form.pkg.split(" ")[0] || "Eagle",
+      tier: form.pkg.split(" ").slice(1).join(" ") || "Premium",
+      date: form.date.split("-").reverse().join("/"),
+      coach: form.coach,
+      ta: form.ta || "—",
+      session: form.session,
+      content: form.content.split("\n")[0] || form.content,
+      contentSub: form.content.split("\n").slice(1).join(" "),
+      drill: form.drill.split("\n")[0] || form.drill || "—",
+      drillSub: form.drill.split("\n").slice(1).join(" "),
+      note: form.note || "—",
+    });
+  };
+
   return (
-    <section className={styles.detailCard}>
-      <h3>Inbody · 9 chỉ số <button className={styles.blueButton} type="button"><Plus size={16} />Thêm Inbody</button></h3>
-      <div className={styles.inbodyGrid}>
-        {metrics.map((m) => (
-          <article className={styles.inbodyCard} key={m.label}>
-            <span>{m.label}</span>
-            <strong>{m.value}</strong>
-            {m.trend ? <small>{m.trend}</small> : null}
-          </article>
-        ))}
-      </div>
-      <div className={styles.detailTwo}>
-        <article className={styles.chartCard}>
-          <h4>Radar 5 chiều</h4>
-          <div className={styles.radarPlaceholder}>★ Carry · Total · Spin · Angle · Path</div>
+    <div className={styles.nestedOverlay}>
+      <section className={styles.miniModal}>
+        <header className={styles.miniHeader}>
+          <h2>Thêm kết quả tập luyện</h2>
+          <button onClick={onClose} type="button"><X size={18} /></button>
+        </header>
+        <div className={styles.miniBody}>
+          <div className={styles.miniGrid}>
+            <label>
+              <span>Tên KH</span>
+              <input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Nguyễn Văn Minh" />
+            </label>
+            <label>
+              <span>Nội dung buổi học <b>*</b></span>
+              <textarea
+                onChange={(e) => update("content", e.target.value)}
+                placeholder="Nhập thông tin..."
+                rows={3}
+                value={form.content}
+              />
+            </label>
+            <label>
+              <span>Gói tập <b>*</b></span>
+              <select className={styles.selectInput} value={form.pkg} onChange={(e) => update("pkg", e.target.value)}>
+                <option value="">Chọn gói tập</option>
+                <option>Eagle Premium</option>
+                <option>Birdie Standard</option>
+                <option>Par Basic</option>
+              </select>
+            </label>
+            <label>
+              <span>Drill/BTVN</span>
+              <textarea
+                onChange={(e) => update("drill", e.target.value)}
+                placeholder="Nhập gợi ý bài tập..."
+                rows={3}
+                value={form.drill}
+              />
+            </label>
+            <label>
+              <span>Ngày kiểm tra <b>*</b></span>
+              <input type="date" value={form.date} onChange={(e) => update("date", e.target.value)} />
+            </label>
+            <label>
+              <span>Buổi học</span>
+              <input value={form.session} onChange={(e) => update("session", e.target.value)} />
+            </label>
+            <label>
+              <span>HLV <b>*</b></span>
+              <select className={styles.selectInput} value={form.coach} onChange={(e) => update("coach", e.target.value)}>
+                <option value="">Chọn HLV</option>
+                <option>Trần Quốc Toàn</option>
+                <option>Lê Minh</option>
+                <option>Nguyễn Văn Hải</option>
+              </select>
+            </label>
+            <label>
+              <span>Ghi chú khác</span>
+              <textarea
+                onChange={(e) => update("note", e.target.value)}
+                placeholder="Nhập ghi chú thêm..."
+                rows={3}
+                value={form.note}
+              />
+            </label>
+            <label>
+              <span>Trợ giảng (TA)</span>
+              <select className={styles.selectInput} value={form.ta} onChange={(e) => update("ta", e.target.value)}>
+                <option value="">Chọn trợ giảng</option>
+                <option>Lê Minh</option>
+                <option>Phạm Hoàng Nam</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <footer className={styles.miniFooter}>
+          <button onClick={onClose} type="button">Hủy</button>
+          <button className={styles.blueButton} onClick={submit} type="button">Lưu</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+type Measurement = {
+  date: string;
+  club: string;
+  carry: number;
+  total: number;
+  angle: number;
+  height: number;
+  clubPath: number;
+  swingDir: number;
+  faceAngle: number;
+  spin: number;
+};
+
+function InbodyTab() {
+  const [addOpen, setAddOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [measurements, setMeasurements] = useState<Measurement[]>([
+    { date: "12/10/2023", club: "Driver", carry: 250, total: 275, angle: -1.2, height: 95, clubPath: 2.5, swingDir: 1.8, faceAngle: -0.5, spin: 2450 },
+    { date: "12/10/2023", club: "7 Iron", carry: 165, total: 172, angle: -4.5, height: 110, clubPath: 0.5, swingDir: -0.2, faceAngle: 1.1, spin: 6800 },
+    { date: "11/10/2023", club: "Driver", carry: 242, total: 268, angle: 0.8, height: 102, clubPath: -1.5, swingDir: 0.5, faceAngle: -1.2, spin: 2100 },
+  ]);
+
+  const formatSigned = (n: number, decimals = 1) => (n >= 0 ? `+${n.toFixed(decimals)}` : n.toFixed(decimals));
+  const handleSave = (entry: Measurement) => {
+    setMeasurements((curr) => [entry, ...curr]);
+    setAddOpen(false);
+  };
+
+  return (
+    <>
+      <section className={styles.detailCard}>
+        <div className={styles.tabSectionHeader}>
+          <h3>Inbody</h3>
+          <button className={styles.blueButton} onClick={() => setAddOpen(true)} type="button">
+            <Plus size={16} />Thêm kết quả
+          </button>
+        </div>
+        <article className={styles.greenCard}>
+          <header className={styles.greenCardHeader}>
+            <h4>Danh sách Golf Measurements</h4>
+            <div className={styles.greenCardActions}>
+              <button className={styles.outlineButton} onClick={() => alert("Mở biểu đồ Inbody (radar + line chart)...")} type="button">
+                Xem biểu đồ
+              </button>
+              <button className={styles.greenButton} onClick={() => setAddOpen(true)} type="button">
+                <Plus size={14} />Thêm mới
+              </button>
+            </div>
+          </header>
+          <div className={styles.tableWrap}>
+            <table className={styles.upperTable}>
+              <thead>
+                <tr>
+                  <th>Ngày đo</th>
+                  <th>Gậy đo</th>
+                  <th>Carry (yds)</th>
+                  <th>Total (yds)</th>
+                  <th>Angle Attack (°)</th>
+                  <th>Height (ft)</th>
+                  <th>Club Path (°)</th>
+                  <th>Swing Dir. (°)</th>
+                  <th>Face Angle (°)</th>
+                  <th>Spin Rate</th>
+                  <th>Ảnh Trackman</th>
+                </tr>
+              </thead>
+              <tbody>
+                {measurements.map((m, i) => (
+                  <tr key={`${m.date}-${m.club}-${i}`}>
+                    <td>{m.date}</td>
+                    <td>{m.club}</td>
+                    <td>{m.carry}</td>
+                    <td>{m.total}</td>
+                    <td>{formatSigned(m.angle)}</td>
+                    <td>{m.height}</td>
+                    <td>{formatSigned(m.clubPath)}</td>
+                    <td>{formatSigned(m.swingDir)}</td>
+                    <td>{formatSigned(m.faceAngle)}</td>
+                    <td>{m.spin.toLocaleString()}</td>
+                    <td>
+                      <button className={styles.linkButton} onClick={() => alert("Mở ảnh Trackman...")} type="button">
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className={styles.miniPagination}>
+            <span>Hiển thị 1 - {measurements.length} của {measurements.length} mục</span>
+            <button onClick={() => setPage(1)} type="button" aria-label="Trang đầu"><ChevronLeft size={14} /><ChevronLeft size={14} /></button>
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} type="button"><ChevronLeft size={14} /></button>
+            <button className={styles.greenPageActive} type="button">{page}</button>
+            <button onClick={() => setPage((p) => p + 1)} type="button"><ChevronRight size={14} /></button>
+            <button onClick={() => setPage(1)} type="button" aria-label="Trang cuối"><ChevronRight size={14} /><ChevronRight size={14} /></button>
+          </div>
         </article>
-        <article className={styles.chartCard}>
-          <h4>Lịch sử cân nặng</h4>
-          <div className={styles.chartBars}>{[58, 60, 62, 64, 66, 65, 65].map((h, i) => <span key={i} style={{ height: `${h}%` }} />)}</div>
-        </article>
-      </div>
-    </section>
+      </section>
+      {addOpen ? <AddGolfMeasurementModal onClose={() => setAddOpen(false)} onSave={handleSave} /> : null}
+    </>
+  );
+}
+
+function AddGolfMeasurementModal({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave: (entry: Measurement) => void;
+}) {
+  const [form, setForm] = useState({
+    date: "2026-05-05",
+    club: "",
+    carry: "",
+    total: "",
+    angle: "",
+    height: "",
+    clubPath: "",
+    swingDir: "",
+    faceAngle: "",
+    spin: "",
+  });
+  const update = (key: keyof typeof form, value: string) =>
+    setForm((current) => ({ ...current, [key]: value }));
+
+  const submit = () => {
+    if (!form.club || !form.carry) return;
+    onSave({
+      date: form.date.split("-").reverse().join("/"),
+      club: form.club,
+      carry: Number(form.carry) || 0,
+      total: Number(form.total) || 0,
+      angle: Number(form.angle) || 0,
+      height: Number(form.height) || 0,
+      clubPath: Number(form.clubPath) || 0,
+      swingDir: Number(form.swingDir) || 0,
+      faceAngle: Number(form.faceAngle) || 0,
+      spin: Number(form.spin) || 0,
+    });
+  };
+
+  return (
+    <div className={styles.nestedOverlay}>
+      <section className={styles.measureModal}>
+        <header className={styles.measureHeader}>
+          <h2>THÊM GOLF MEASUREMENT</h2>
+          <button onClick={onClose} type="button"><X size={18} /></button>
+        </header>
+        <div className={styles.measureBody}>
+          <h3 className={styles.measureSection}>4. THEO DÕI CÁC CHỈ SỐ ĐO ĐẠC TRỌNG YẾU</h3>
+          <div className={styles.measureGrid}>
+            <label>
+              <span>NGÀY ĐO <b>*</b></span>
+              <input type="date" value={form.date} onChange={(e) => update("date", e.target.value)} />
+            </label>
+            <label>
+              <span>GẬY ĐO <b>*</b></span>
+              <select className={styles.selectInput} value={form.club} onChange={(e) => update("club", e.target.value)}>
+                <option value="">Chọn gậy</option>
+                <option>Driver</option>
+                <option>3 Wood</option>
+                <option>5 Iron</option>
+                <option>7 Iron</option>
+                <option>9 Iron</option>
+                <option>PW</option>
+              </select>
+            </label>
+            <label>
+              <span>CARRY (YARDS) <b>*</b></span>
+              <input inputMode="decimal" placeholder="0.0" value={form.carry} onChange={(e) => update("carry", e.target.value)} />
+            </label>
+            <label>
+              <span>TOTAL (YARDS) <b>*</b></span>
+              <input inputMode="decimal" placeholder="0.0" value={form.total} onChange={(e) => update("total", e.target.value)} />
+            </label>
+          </div>
+          <h4 className={styles.measureSubsection}>CHỈ SỐ KHÁC</h4>
+          <div className={styles.measureGrid}>
+            <label>
+              <span>ANGLE ATTACK (°) <b>*</b></span>
+              <input inputMode="decimal" placeholder="0.0" value={form.angle} onChange={(e) => update("angle", e.target.value)} />
+            </label>
+            <label>
+              <span>HEIGHT (FT) <b>*</b></span>
+              <input inputMode="decimal" placeholder="0.0" value={form.height} onChange={(e) => update("height", e.target.value)} />
+            </label>
+            <label>
+              <span>CLUB PATH (°) <b>*</b></span>
+              <input inputMode="decimal" placeholder="0.0" value={form.clubPath} onChange={(e) => update("clubPath", e.target.value)} />
+            </label>
+            <label>
+              <span>SWING DIRECTION (°) <b>*</b></span>
+              <input inputMode="decimal" placeholder="0.0" value={form.swingDir} onChange={(e) => update("swingDir", e.target.value)} />
+            </label>
+            <label>
+              <span>FACE ANGLE (°) <b>*</b></span>
+              <input inputMode="decimal" placeholder="0.0" value={form.faceAngle} onChange={(e) => update("faceAngle", e.target.value)} />
+            </label>
+            <label>
+              <span>SPIN RATE (°) <b>*</b></span>
+              <input inputMode="decimal" placeholder="0" value={form.spin} onChange={(e) => update("spin", e.target.value)} />
+            </label>
+          </div>
+          <button className={styles.outlineButton} onClick={() => alert("Mở dialog tải ảnh Trackman (JPG/PNG, max 5MB)")} type="button">
+            <UploadCloud size={16} /> Chọn ảnh Trackman
+          </button>
+        </div>
+        <footer className={styles.measureFooter}>
+          <button onClick={onClose} type="button"><X size={14} /> Đóng</button>
+          <button className={styles.greenButton} onClick={submit} type="button">
+            Lưu dữ liệu
+          </button>
+        </footer>
+      </section>
+    </div>
   );
 }
 
@@ -907,6 +1255,15 @@ function TaTab() {
 }
 
 function BasicInfoTab() {
+  const [companionOpen, setCompanionOpen] = useState(false);
+  const [companions, setCompanions] = useState([
+    { name: "Nguyễn Văn B", relation: "Vợ/Chồng", phone: "0912345678", birth: "20/6/1992" },
+    { name: "Nguyễn Văn C", relation: "Con", phone: "0923456789", birth: "15/8/2010" },
+  ]);
+
+  const removeCompanion = (index: number) =>
+    setCompanions((current) => current.filter((_, i) => i !== index));
+
   return (
     <>
       <section className={styles.detailCard}>
@@ -942,15 +1299,39 @@ function BasicInfoTab() {
       </div>
 
       <section className={styles.detailCard}>
-        <h3>Người đi cùng <button className={styles.greenButton} type="button"><UserPlus size={16} />Thêm người đi cùng</button></h3>
-        {["Nguyễn Văn B · Vợ/Chồng · 0912345678 · 20/6/1992", "Nguyễn Văn C · Con · 0923456789 · 15/8/2010"].map((item) => (
-          <div className={styles.companionRow} key={item}>
-            <span>N</span>
-            <strong>{item}</strong>
-            <div><button type="button"><Edit size={16} /></button><button type="button"><X size={16} /></button></div>
-          </div>
-        ))}
+        <h3>Thông tin quản lý</h3>
+        <div className={styles.mgmtGrid}>
+          <InfoBlock label="Ngày tạo">10/1/2024</InfoBlock>
+          <InfoBlock label="Người tạo">Admin</InfoBlock>
+          <InfoBlock label="Nhóm khách hàng"><span className={styles.mgmtMuted}>---</span></InfoBlock>
+          <InfoBlock label="Nguồn khách hàng"><span className={styles.mgmtMuted}>---</span></InfoBlock>
+        </div>
       </section>
+
+      <section className={styles.detailCard}>
+        <h3>
+          Người đi cùng
+          <button className={styles.greenButton} onClick={() => setCompanionOpen(true)} type="button">
+            <UserPlus size={16} />Thêm người đi cùng
+          </button>
+        </h3>
+        {companions.length === 0 ? (
+          <p className={styles.mgmtMuted}>Chưa có người đi cùng nào.</p>
+        ) : (
+          companions.map((c, index) => (
+            <div className={styles.companionRow} key={`${c.name}-${index}`}>
+              <span>{c.name.charAt(0)}</span>
+              <strong>{c.name} · {c.relation} · {c.phone} · {c.birth}</strong>
+              <div>
+                <button type="button" aria-label={`Sửa ${c.name}`}><Edit size={16} /></button>
+                <button onClick={() => removeCompanion(index)} type="button" aria-label={`Xóa ${c.name}`}><X size={16} /></button>
+              </div>
+            </div>
+          ))
+        )}
+      </section>
+
+      {companionOpen ? <AddCompanionModal onClose={() => setCompanionOpen(false)} /> : null}
     </>
   );
 }
@@ -961,19 +1342,13 @@ function ContractsTab() {
     ["Golf Practice - Premium", "Còn hạn", "HD002", "1/2/2024", "31/12/2026", "25,000,000 VND"],
   ];
   return (
-    <>
-      <section className={styles.detailCard}>
-        <h3>
-          <span className={styles.taBadge}>{contracts.length} hợp đồng</span>
-          <button className={styles.blueButton} type="button"><Plus size={16} />Thêm hợp đồng (M03)</button>
-        </h3>
-        <div className={styles.statsGrid}>
-          <SimpleMetric label="Đang hiệu lực" value={String(contracts.filter((c) => c[1] === "Còn hạn").length)} />
-          <SimpleMetric label="Hết hạn" value={String(contracts.filter((c) => c[1] === "Hết hạn").length)} />
-          <SimpleMetric label="Tổng giá trị" value="40M VND" />
-          <SimpleMetric label="Đã thanh toán" value="38.5M VND" />
-        </div>
-      </section>
+    <section className={styles.detailCard}>
+      <div className={styles.tabSectionHeader}>
+        <h3>Danh sách hợp đồng</h3>
+        <button className={styles.blueButton} type="button">
+          <Plus size={16} />Thêm hợp đồng
+        </button>
+      </div>
       {contracts.map(([name, status, code, start, end, value]) => (
         <article className={styles.contractCard} key={code}>
           <div>
@@ -985,53 +1360,53 @@ function ContractsTab() {
               <InfoBlock label="Giá trị"><span className={styles.dateGreen}>{value}</span></InfoBlock>
             </div>
           </div>
-          <button type="button">Xem chi tiết</button>
+          <button type="button" onClick={() => alert(`Xem chi tiết hợp đồng ${code}`)}>Xem chi tiết</button>
         </article>
       ))}
-    </>
+    </section>
   );
 }
 
 function TransactionsTab() {
-  const txs: Array<{ code: string; date: string; type: string; desc: string; amount: string; status: string; positive: boolean }> = [
-    { code: "PT0245", date: "24/04/2026", type: "Phiếu thu", desc: "Thu hợp đồng Golf Teetime VIP", amount: "+15.000.000 VND", status: "Hoàn tất", positive: true },
-    { code: "PT0312", date: "12/03/2026", type: "Phiếu thu", desc: "Thu vé lẻ Line tập + 1 voucher", amount: "+650.000 VND", status: "Hoàn tất", positive: true },
-    { code: "CN0101", date: "01/02/2026", type: "Công nợ", desc: "Phần còn lại HĐ Golf Teetime VIP", amount: "−1.500.000 VND", status: "Đang nợ", positive: false },
-    { code: "PC0089", date: "20/01/2026", type: "Phiếu chi", desc: "Hoàn buổi học không sử dụng", amount: "−480.000 VND", status: "Hoàn tất", positive: false },
+  const txs: Array<{ code: string; date: string; type: string; amount: string; method: string; status: "Hoàn thành" | "Đang xử lý" }> = [
+    { code: "GD001", date: "15/3/2026", type: "Thanh toán hợp đồng", amount: "15,000,000 VND", method: "Chuyển khoản", status: "Hoàn thành" },
+    { code: "GD002", date: "10/3/2026", type: "Booking Teetime", amount: "500,000 VND", method: "Tiền mặt", status: "Hoàn thành" },
+    { code: "GD003", date: "5/3/2026", type: "Thanh toán công nợ", amount: "1,500,000 VND", method: "Momo", status: "Đang xử lý" },
   ];
   return (
     <section className={styles.detailCard}>
-      <h3>
-        Lịch sử giao dịch
-        <span className={styles.taBadge}>{txs.length} giao dịch</span>
-      </h3>
-      <div className={styles.statsGrid}>
-        <SimpleMetric label="Tổng thu" value="15.65M" />
-        <SimpleMetric label="Tổng chi" value="0.48M" />
-        <SimpleMetric label="Công nợ" value="1.50M" />
-        <SimpleMetric label="Số GD" value={String(txs.length)} />
-      </div>
+      <h3>Lịch sử giao dịch</h3>
       <div className={styles.tableWrap}>
-        <table className={styles.table}>
+        <table className={styles.softTable}>
           <thead>
             <tr>
-              <th>Mã</th>
+              <th>Mã GD</th>
               <th>Ngày</th>
-              <th>Loại</th>
-              <th>Diễn giải</th>
+              <th>Loại giao dịch</th>
               <th>Số tiền</th>
+              <th>Phương thức</th>
               <th>Trạng thái</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
             {txs.map((t) => (
               <tr key={t.code}>
-                <td><span className={styles.memberCode}>{t.code}</span></td>
+                <td><button className={styles.linkButton} type="button" onClick={() => alert(`Chi tiết giao dịch ${t.code}`)}>{t.code}</button></td>
                 <td>{t.date}</td>
                 <td>{t.type}</td>
-                <td>{t.desc}</td>
-                <td className={t.positive ? styles.dateGreen : styles.dateRed}>{t.amount}</td>
-                <td><CustomerStatus status={t.status === "Hoàn tất" ? "Còn hạn" : "Hết hạn"} /></td>
+                <td className={styles.amountGreen}>{t.amount}</td>
+                <td>{t.method}</td>
+                <td>
+                  <span className={t.status === "Hoàn thành" ? styles.softStatusDone : styles.softStatusPending}>
+                    {t.status}
+                  </span>
+                </td>
+                <td>
+                  <button className={styles.outlineButton} onClick={() => alert(`Chi tiết giao dịch ${t.code}`)} type="button">
+                    Chi tiết
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -1042,129 +1417,426 @@ function TransactionsTab() {
 }
 
 function CheckinHistoryTab() {
-  const months = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"];
-  const counts = [12, 18, 22, 28, 35, 32, 24, 20, 26, 31, 38, 42];
-  const max = Math.max(...counts);
-  const total = counts.reduce((a, b) => a + b, 0);
+  const months: Array<{ label: string; count: number }> = [
+    { label: "T1", count: 12 },
+    { label: "T2", count: 15 },
+    { label: "T3", count: 18 },
+    { label: "T4", count: 14 },
+    { label: "T5", count: 16 },
+    { label: "T6", count: 19 },
+  ];
   const checkins = [
-    { date: "07/04/2026", facility: "Golf Teetime", in: "08:00", out: "10:00", duration: "2h 00m" },
-    { date: "05/04/2026", facility: "Golf Line Tập", in: "16:00", out: "17:00", duration: "1h 00m" },
-    { date: "01/04/2026", facility: "Golf Teetime", in: "07:30", out: "11:00", duration: "3h 30m" },
-    { date: "28/03/2026", facility: "Golf Line Tập", in: "16:30", out: "18:00", duration: "1h 30m" },
+    { date: "17/3/2026", time: "08:00 - 10:30", staff: "Nguyễn Văn A", note: "Hoàn thành" },
+    { date: "15/3/2026", time: "14:00 - 18:15", staff: "Trần Thị B", note: "Hoàn thành" },
+    { date: "13/3/2026", time: "09:00 - 10:45", staff: "Lê Văn C", note: "Hoàn thành" },
+    { date: "10/3/2026", time: "07:30 - 11:45", staff: "Phạm Thị D", note: "Hoàn thành" },
+    { date: "8/3/2026", time: "15:00 - 17:00", staff: "Nguyễn Văn A", note: "Hoàn thành" },
+    { date: "5/3/2026", time: "08:30 - 12:30", staff: "Trần Thị B", note: "Hoàn thành" },
+    { date: "3/3/2026", time: "10:00 - 11:30", staff: "Lê Văn C", note: "Hoàn thành" },
+    { date: "1/3/2026", time: "14:30 - 18:00", staff: "Phạm Thị D", note: "Hoàn thành" },
   ];
   return (
     <>
       <section className={styles.detailCard}>
-        <h3>
-          Lượt check-in theo tháng (2026)
-          <span className={styles.taBadge}>Tổng {total} lượt</span>
-        </h3>
-        <div className={styles.monthlyChart}>
-          {counts.map((c, i) => (
-            <div className={styles.monthlyBar} key={months[i]}>
-              <small>{c}</small>
-              <span style={{ height: `${(c / max) * 100}%` }} />
-              <em>{months[i]}</em>
-            </div>
-          ))}
-        </div>
-      </section>
-      <section className={styles.detailCard}>
-        <h3>Chi tiết check-in gần đây</h3>
+        <h3>Lịch sử checkin</h3>
         <div className={styles.tableWrap}>
-          <table className={styles.table}>
+          <table className={styles.softTable}>
             <thead>
               <tr>
                 <th>Ngày</th>
-                <th>Cơ sở</th>
-                <th>Giờ vào</th>
-                <th>Giờ ra</th>
-                <th>Thời lượng</th>
+                <th>Giờ</th>
+                <th>Nhân viên</th>
+                <th>Ghi chú</th>
               </tr>
             </thead>
             <tbody>
-              {checkins.map((c) => (
-                <tr key={`${c.date}-${c.in}`}>
+              {checkins.map((c, i) => (
+                <tr key={`${c.date}-${i}`}>
                   <td>{c.date}</td>
-                  <td>{c.facility}</td>
-                  <td>{c.in}</td>
-                  <td>{c.out}</td>
-                  <td><strong>{c.duration}</strong></td>
+                  <td>{c.time}</td>
+                  <td>{c.staff}</td>
+                  <td>{c.note}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+      <section className={styles.detailCard}>
+        <h3>Biểu đồ checkin theo tháng</h3>
+        <div className={styles.violetChart}>
+          <div className={styles.violetGrid}>
+            <span>20</span>
+            <span>15</span>
+            <span>10</span>
+          </div>
+          <div className={styles.violetBars}>
+            {months.map((m) => (
+              <div className={styles.violetBar} key={m.label}>
+                <span style={{ height: `${(m.count / 20) * 100}%` }} title={`${m.count} lượt`} />
+                <em>{m.label}</em>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </>
   );
 }
 
+type Meal = { name: string; time: string; items: string[]; cal: number; pro: number };
+type MealPlan = {
+  name: string;
+  start: string;
+  end: string;
+  cal: number;
+  pro: number;
+  carbs: number;
+  fat: number;
+  expert: string;
+  meals: Meal[];
+};
+
 function MealPlanTab() {
-  const meals = [
-    { time: "07:00", name: "Bữa sáng", items: "Yến mạch, trứng luộc, sữa hạt", cal: 450, pro: 32 },
-    { time: "10:00", name: "Bữa phụ sáng", items: "Chuối + whey protein", cal: 220, pro: 18 },
-    { time: "12:30", name: "Bữa trưa", items: "Cơm gạo lứt, ức gà, salad", cal: 620, pro: 42 },
-    { time: "15:30", name: "Bữa phụ chiều", items: "Hạt mix + sữa chua", cal: 180, pro: 12 },
-    { time: "18:30", name: "Bữa tối", items: "Cá hồi áp chảo, broccoli", cal: 540, pro: 38 },
-    { time: "21:00", name: "Bữa phụ tối", items: "Casein + bơ đậu phộng", cal: 190, pro: 22 },
-  ];
-  const totalCal = meals.reduce((a, m) => a + m.cal, 0);
-  const totalPro = meals.reduce((a, m) => a + m.pro, 0);
-  const maxCal = Math.max(...meals.map((m) => m.cal));
-  const maxPro = Math.max(...meals.map((m) => m.pro));
+  const [addOpen, setAddOpen] = useState(false);
+  const [plan, setPlan] = useState<MealPlan | null>({
+    name: "Kế hoạch Giảm mỡ - Tăng cơ",
+    start: "1/3/2026",
+    end: "31/3/2026",
+    cal: 2200,
+    pro: 165,
+    carbs: 220,
+    fat: 70,
+    expert: "Chuyên gia dinh dưỡng Lê Thị Mai",
+    meals: [
+      { name: "Bữa sáng", time: "7:00", items: ["Yến mạch 80g", "Chuối 1 trái", "Sữa tươi không đường 250ml", "Trứng luộc 2 quả"], cal: 520, pro: 28 },
+      { name: "Bữa phụ 1", time: "10:00", items: ["Táo 1 trái", "Hạnh nhân 30g"], cal: 220, pro: 8 },
+      { name: "Bữa trưa", time: "12:30", items: ["Cơm gạo lứt 150g", "Ức gà nướng 150g", "Rau xanh 200g", "Dầu olive 1 muỗng"], cal: 650, pro: 52 },
+      { name: "Bữa phụ 2", time: "15:30", items: ["Sữa chua Hy Lạp 200g", "Quả việt quất 50g"], cal: 180, pro: 15 },
+      { name: "Bữa tối", time: "19:00", items: ["Cá hồi nướng 150g", "Khoai lang 150g", "Salad rau trộn 150g", "Dầu olive 1 muỗng"], cal: 580, pro: 48 },
+      { name: "Bữa phụ 3", time: "21:00", items: ["Whey protein 30g", "Chuối 1 trái"], cal: 200, pro: 26 },
+    ],
+  });
+
+  if (!plan) {
+    return (
+      <section className={styles.detailCard}>
+        <div className={styles.tabSectionHeader}>
+          <h3>Meal Plan</h3>
+          <button className={styles.blueButton} onClick={() => setAddOpen(true)} type="button">
+            <Plus size={16} />Thêm kế hoạch
+          </button>
+        </div>
+        <p className={styles.mgmtMuted}>Khách hàng chưa có Meal Plan nào.</p>
+        {addOpen ? <AddMealPlanModal onClose={() => setAddOpen(false)} onSave={(p) => { setPlan(p); setAddOpen(false); }} /> : null}
+      </section>
+    );
+  }
+
+  const handleDelete = () => {
+    if (confirm("Bạn có chắc muốn xóa Meal Plan này?")) setPlan(null);
+  };
+
+  const days = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
   return (
     <>
       <section className={styles.detailCard}>
-        <h3>Meal Plan <button className={styles.blueButton} type="button"><Plus size={16} />Thêm kế hoạch</button></h3>
-        <div className={styles.detailThree}>
-          <InfoBlock label="Kế hoạch">Giảm mỡ - Tăng cơ</InfoBlock>
-          <InfoBlock label="Mục tiêu / ngày">2,100 kcal · 130g protein</InfoBlock>
-          <InfoBlock label="Hiện tại">{totalCal.toLocaleString()} kcal · {totalPro}g protein</InfoBlock>
+        <div className={styles.tabSectionHeader}>
+          <h3>Meal Plan</h3>
+          <button className={styles.blueButton} onClick={() => setAddOpen(true)} type="button">
+            <Plus size={16} />Thêm kế hoạch
+          </button>
         </div>
       </section>
+
       <section className={styles.detailCard}>
-        <h3>Lịch trình 6 bữa / ngày</h3>
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Giờ</th>
-                <th>Bữa</th>
-                <th>Thực đơn</th>
-                <th>Calories</th>
-                <th>Protein</th>
-              </tr>
-            </thead>
-            <tbody>
-              {meals.map((m) => (
-                <tr key={m.time}>
-                  <td><strong>{m.time}</strong></td>
-                  <td>{m.name}</td>
-                  <td>{m.items}</td>
-                  <td>{m.cal} kcal</td>
-                  <td>{m.pro} g</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className={styles.tabSectionHeader}>
+          <h3>Thông tin Meal Plan</h3>
+          <div className={styles.cardActions}>
+            <button className={styles.outlineButton} onClick={() => setAddOpen(true)} type="button">
+              <Edit size={14} />Chỉnh sửa
+            </button>
+            <button className={styles.dangerOutline} onClick={handleDelete} type="button">
+              <Trash2 size={14} />Xóa
+            </button>
+          </div>
+        </div>
+        <div className={styles.mealMetaGrid}>
+          <InfoBlock label="Tên kế hoạch">{plan.name}</InfoBlock>
+          <InfoBlock label="Ngày bắt đầu">{plan.start}</InfoBlock>
+          <InfoBlock label="Ngày kết thúc">{plan.end}</InfoBlock>
+          <InfoBlock label="Calories">{plan.cal.toLocaleString()} kcal/ngày</InfoBlock>
+          <InfoBlock label="Protein">{plan.pro} g/ngày</InfoBlock>
+          <InfoBlock label="Carbs">{plan.carbs} g/ngày</InfoBlock>
+          <InfoBlock label="Fat">{plan.fat} g/ngày</InfoBlock>
+          <InfoBlock label="Chuyên gia dinh dưỡng">{plan.expert}</InfoBlock>
         </div>
       </section>
-      <div className={styles.detailTwo}>
-        <article className={styles.chartCard}>
-          <h4>Calories theo bữa</h4>
-          <div className={styles.chartBars}>
-            {meals.map((m, i) => <span key={i} style={{ height: `${(m.cal / maxCal) * 100}%` }} />)}
+
+      <section className={styles.detailCard}>
+        <h3>Lịch trình ăn uống</h3>
+        <div className={styles.mealGrid}>
+          {plan.meals.map((m, i) => (
+            <article className={styles.mealCard} key={`${m.name}-${i}`}>
+              <h4>{m.name} <span className={styles.mealTime}>({m.time})</span></h4>
+              <ul>
+                {m.items.map((it, j) => <li key={j}>{it}</li>)}
+              </ul>
+              <footer>
+                <span><strong>Calories:</strong> <em className={styles.calValue}>{m.cal} kcal</em></span>
+                <span><strong>Protein:</strong> <em className={styles.proValue}>{m.pro} g</em></span>
+              </footer>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.detailCard}>
+        <h3>Tiến trình dinh dưỡng</h3>
+        <div className={styles.nutritionChart}>
+          <div className={styles.nutritionGrid}>
+            {[2400, 1800, 1200, 600, 0].map((v) => <span key={v}>{v}</span>)}
           </div>
-        </article>
-        <article className={styles.chartCard}>
-          <h4>Protein theo bữa (g)</h4>
-          <div className={styles.chartBars}>
-            {meals.map((m, i) => <span key={i} style={{ height: `${(m.pro / maxPro) * 100}%` }} />)}
+          <div className={styles.nutritionBars}>
+            {days.map((d) => (
+              <div className={styles.nutritionDay} key={d}>
+                <div className={styles.nutritionPair}>
+                  <span className={styles.nutritionCal} style={{ height: `${(plan.cal / 2400) * 100}%` }} title={`${plan.cal} kcal`} />
+                  <span className={styles.nutritionPro} style={{ height: `${(plan.pro / 200) * 100}%` }} title={`${plan.pro} g`} />
+                </div>
+                <em>{d}</em>
+              </div>
+            ))}
           </div>
-        </article>
-      </div>
+          <div className={styles.nutritionLegend}>
+            <span><i className={styles.nutritionCal} /> Calories (kcal)</span>
+            <span><i className={styles.nutritionPro} /> Protein (g)</span>
+          </div>
+        </div>
+      </section>
+
+      {addOpen ? <AddMealPlanModal onClose={() => setAddOpen(false)} onSave={(p) => { setPlan(p); setAddOpen(false); }} initial={plan} /> : null}
     </>
+  );
+}
+
+function AddMealPlanModal({
+  onClose,
+  onSave,
+  initial,
+}: {
+  onClose: () => void;
+  onSave: (plan: MealPlan) => void;
+  initial?: MealPlan;
+}) {
+  const [form, setForm] = useState<MealPlan>(
+    initial ?? {
+      name: "",
+      start: "",
+      end: "",
+      cal: 0,
+      pro: 0,
+      carbs: 0,
+      fat: 0,
+      expert: "",
+      meals: [{ name: "Bữa sáng", time: "", items: [""], cal: 0, pro: 0 }],
+    }
+  );
+  const update = <K extends keyof MealPlan>(key: K, value: MealPlan[K]) =>
+    setForm((current) => ({ ...current, [key]: value }));
+
+  const updateMeal = (index: number, patch: Partial<Meal>) =>
+    setForm((current) => ({
+      ...current,
+      meals: current.meals.map((m, i) => (i === index ? { ...m, ...patch } : m)),
+    }));
+
+  const addMeal = () =>
+    setForm((current) => ({
+      ...current,
+      meals: [...current.meals, { name: `Bữa phụ ${current.meals.length}`, time: "", items: [""], cal: 0, pro: 0 }],
+    }));
+
+  const removeMeal = (index: number) =>
+    setForm((current) => ({ ...current, meals: current.meals.filter((_, i) => i !== index) }));
+
+  const addItem = (mealIndex: number) =>
+    updateMeal(mealIndex, { items: [...form.meals[mealIndex].items, ""] });
+
+  const updateItem = (mealIndex: number, itemIndex: number, value: string) => {
+    const items = [...form.meals[mealIndex].items];
+    items[itemIndex] = value;
+    updateMeal(mealIndex, { items });
+  };
+
+  const removeItem = (mealIndex: number, itemIndex: number) => {
+    const items = form.meals[mealIndex].items.filter((_, i) => i !== itemIndex);
+    updateMeal(mealIndex, { items });
+  };
+
+  const submit = () => {
+    if (!form.name.trim() || !form.start || !form.end) {
+      alert("Tên kế hoạch, ngày bắt đầu và ngày kết thúc là bắt buộc.");
+      return;
+    }
+    if (form.meals.length === 0 || form.meals.some((m) => m.items.filter((i) => i.trim()).length === 0)) {
+      alert("Mỗi bữa ăn phải có ít nhất 1 món ăn.");
+      return;
+    }
+    onSave({
+      ...form,
+      start: form.start.includes("-") ? form.start.split("-").reverse().join("/") : form.start,
+      end: form.end.includes("-") ? form.end.split("-").reverse().join("/") : form.end,
+    });
+  };
+
+  return (
+    <div className={styles.nestedOverlay}>
+      <section className={styles.mealModal}>
+        <header className={styles.mealModalHeader}>
+          <div className={styles.mealHeaderIcon}>🍎</div>
+          <div>
+            <h2>{initial ? "Chỉnh sửa Meal Plan" : "Thêm Meal Plan mới"}</h2>
+            <p>Tạo kế hoạch dinh dưỡng cho khách hàng</p>
+          </div>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.mealModalBody}>
+          <section className={styles.mealModalSection}>
+            <h3><Calendar size={16} /> Thông tin cơ bản</h3>
+            <label>
+              <span>Tên kế hoạch <b>*</b></span>
+              <input
+                onChange={(e) => update("name", e.target.value)}
+                placeholder="VD: Kế hoạch Giảm mỡ - Tăng cơ"
+                value={form.name}
+              />
+            </label>
+            <div className={styles.miniGrid}>
+              <label>
+                <span>Ngày bắt đầu <b>*</b></span>
+                <input
+                  onChange={(e) => update("start", e.target.value)}
+                  type="date"
+                  value={form.start.includes("/") ? form.start.split("/").reverse().join("-") : form.start}
+                />
+              </label>
+              <label>
+                <span>Ngày kết thúc <b>*</b></span>
+                <input
+                  onChange={(e) => update("end", e.target.value)}
+                  type="date"
+                  value={form.end.includes("/") ? form.end.split("/").reverse().join("-") : form.end}
+                />
+              </label>
+            </div>
+            <label>
+              <span>Chuyên gia dinh dưỡng</span>
+              <input
+                onChange={(e) => update("expert", e.target.value)}
+                placeholder="VD: Chuyên gia dinh dưỡng Lê Thị Mai"
+                value={form.expert}
+              />
+            </label>
+          </section>
+
+          <section className={styles.mealModalSection}>
+            <h3><span style={{ color: "#7c3aed" }}>📈</span> Mục tiêu dinh dưỡng (mỗi ngày)</h3>
+            <div className={styles.fourCol}>
+              <label>
+                <span>Calories (kcal)</span>
+                <input inputMode="numeric" placeholder="VD: 2200" value={form.cal || ""} onChange={(e) => update("cal", Number(e.target.value) || 0)} />
+              </label>
+              <label>
+                <span>Protein (g)</span>
+                <input inputMode="numeric" placeholder="VD: 165" value={form.pro || ""} onChange={(e) => update("pro", Number(e.target.value) || 0)} />
+              </label>
+              <label>
+                <span>Carbs (g)</span>
+                <input inputMode="numeric" placeholder="VD: 220" value={form.carbs || ""} onChange={(e) => update("carbs", Number(e.target.value) || 0)} />
+              </label>
+              <label>
+                <span>Fat (g)</span>
+                <input inputMode="numeric" placeholder="VD: 70" value={form.fat || ""} onChange={(e) => update("fat", Number(e.target.value) || 0)} />
+              </label>
+            </div>
+          </section>
+
+          <section className={styles.mealModalSection}>
+            <div className={styles.tabSectionHeader}>
+              <h3>🍽 Lịch trình bữa ăn</h3>
+              <button className={styles.outlineButton} onClick={addMeal} type="button">
+                <Plus size={14} />Thêm bữa ăn
+              </button>
+            </div>
+            {form.meals.map((meal, mealIndex) => (
+              <article className={styles.mealEditCard} key={mealIndex}>
+                <header>
+                  <strong>Bữa ăn #{mealIndex + 1}</strong>
+                  <button className={styles.deleteIcon} onClick={() => removeMeal(mealIndex)} type="button" aria-label={`Xóa bữa ${mealIndex + 1}`}>
+                    <Trash2 size={14} />
+                  </button>
+                </header>
+                <div className={styles.miniGrid}>
+                  <label>
+                    <span>Tên bữa ăn</span>
+                    <input value={meal.name} onChange={(e) => updateMeal(mealIndex, { name: e.target.value })} placeholder="Bữa sáng" />
+                  </label>
+                  <label>
+                    <span>Thời gian</span>
+                    <input value={meal.time} onChange={(e) => updateMeal(mealIndex, { time: e.target.value })} placeholder="7:00" />
+                  </label>
+                  <label>
+                    <span>Calories (kcal)</span>
+                    <input inputMode="numeric" value={meal.cal || ""} onChange={(e) => updateMeal(mealIndex, { cal: Number(e.target.value) || 0 })} placeholder="VD: 520" />
+                  </label>
+                  <label>
+                    <span>Protein (g)</span>
+                    <input inputMode="numeric" value={meal.pro || ""} onChange={(e) => updateMeal(mealIndex, { pro: Number(e.target.value) || 0 })} placeholder="VD: 28" />
+                  </label>
+                </div>
+                <div className={styles.mealItemsHeader}>
+                  <span>Món ăn</span>
+                  <button className={styles.outlineButton} onClick={() => addItem(mealIndex)} type="button">
+                    <Plus size={14} />Thêm món
+                  </button>
+                </div>
+                {meal.items.map((item, itemIndex) => (
+                  <div className={styles.mealItemRow} key={itemIndex}>
+                    <input
+                      onChange={(e) => updateItem(mealIndex, itemIndex, e.target.value)}
+                      placeholder="VD: Yến mạch 80g, Trứng luộc 2 quả"
+                      value={item}
+                    />
+                    <button className={styles.deleteIcon} onClick={() => removeItem(mealIndex, itemIndex)} type="button" aria-label="Xóa món">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </article>
+            ))}
+          </section>
+
+          <aside className={styles.mealHint}>
+            <strong>💡 Hướng dẫn:</strong>
+            <ul>
+              <li>Tên kế hoạch, ngày bắt đầu và ngày kết thúc là bắt buộc</li>
+              <li>Mỗi meal plan phải có ít nhất 1 bữa ăn</li>
+              <li>Mỗi bữa ăn phải có ít nhất 1 món ăn</li>
+              <li>Mục tiêu dinh dưỡng tổng = tổng các bữa ăn trong ngày</li>
+              <li>Có thể thêm nhiều bữa phụ trong ngày (6-7 bữa/ngày)</li>
+            </ul>
+          </aside>
+        </div>
+        <footer className={styles.mealModalFooter}>
+          <button onClick={onClose} type="button">Hủy</button>
+          <button className={styles.greenButton} onClick={submit} type="button">
+            🍎 Lưu Meal Plan
+          </button>
+        </footer>
+      </section>
+    </div>
   );
 }
 

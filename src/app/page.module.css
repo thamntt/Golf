@@ -2526,3 +2526,1033 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* === Section header chung trong tab === */
+.tabSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tabSectionHeader h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* === Soft table dùng trong Lịch sử giao dịch / checkin === */
+.softTable {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.softTable thead tr {
+  background: #f8fafc;
+}
+
+.softTable th {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e6ee;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.softTable td {
+  padding: 14px;
+  border-bottom: 1px solid #edf0f4;
+  color: #344054;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.softTable tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Uppercase header table cho Kết quả tập luyện + Inbody */
+.upperTable {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.upperTable thead tr {
+  background: #f8fafc;
+}
+
+.upperTable th {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e6ee;
+  color: #475467;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.upperTable td {
+  padding: 14px;
+  border-bottom: 1px solid #edf0f4;
+  color: #344054;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* Link button (table cell) */
+.linkButton {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #175cff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
+/* Outline button white border */
+.outlineButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #d9dee7;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.outlineButton:hover {
+  border-color: #175cff;
+  color: #175cff;
+}
+
+.dangerOutline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dangerOutline:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.amountGreen {
+  color: #00a651;
+  font-weight: 700;
+}
+
+.softStatusDone {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e7f8ec;
+  color: #00a651;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.softStatusPending {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff4d6;
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Violet bar chart cho checkin */
+.violetChart {
+  position: relative;
+  height: 260px;
+  display: flex;
+  padding: 12px 12px 8px;
+}
+
+.violetGrid {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0 8px 18px 0;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.violetBars {
+  flex: 1;
+  display: flex;
+  align-items: end;
+  gap: 18px;
+  border-left: 1px solid #e2e6ee;
+  border-bottom: 1px solid #e2e6ee;
+  padding: 8px 8px 0;
+  background-image: linear-gradient(transparent calc(100% - 1px), #edf0f4 100%),
+    linear-gradient(transparent calc(100% - 1px), #edf0f4 100%),
+    linear-gradient(transparent calc(100% - 1px), #edf0f4 100%);
+  background-size: 100% 33.33%, 100% 66.66%, 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.violetBar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  gap: 6px;
+  height: 100%;
+}
+
+.violetBar > span {
+  width: 100%;
+  min-height: 6px;
+  border-radius: 8px 8px 0 0;
+  background: #a78bfa;
+}
+
+.violetBar em {
+  color: #667085;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Mgmt grid cho Thông tin quản lý */
+.mgmtGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.mgmtMuted {
+  color: #94a3b8;
+}
+
+/* Pkg badges cho Kết quả tập luyện */
+.pkgBadges {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.pkgPrimary {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pkgSecondary {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Mini pagination */
+.miniPagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 12px 4px 0;
+  color: #475467;
+  font-size: 13px;
+}
+
+.miniPagination > span {
+  margin-right: 12px;
+}
+
+.miniPagination button {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e6ee;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.miniPagination button:hover {
+  border-color: #175cff;
+  color: #175cff;
+}
+
+.greenPageActive {
+  background: #079b67 !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+/* Green card (Inbody Golf Measurements wrapper) */
+.greenCard {
+  border: 1px solid #d9dee7;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  margin-top: 4px;
+}
+
+.greenCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #079b67;
+  color: #ffffff;
+}
+
+.greenCardHeader h4 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.greenCardHeader .outlineButton {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+}
+
+.greenCardHeader .outlineButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.greenCardHeader .greenButton {
+  background: #ffffff;
+  color: #079b67;
+}
+
+.greenCardHeader .greenButton:hover {
+  background: #f1f5f9;
+}
+
+.greenCardActions {
+  display: flex;
+  gap: 8px;
+}
+
+.greenCard .tableWrap {
+  padding: 4px 0;
+}
+
+.greenCard .miniPagination {
+  padding: 12px 18px 14px;
+}
+
+/* Mini modal (Add training result) */
+.miniModal {
+  width: min(720px, calc(100vw - 60px));
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+}
+
+.miniHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.miniHeader h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.miniHeader button {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.miniBody {
+  overflow: auto;
+  padding: 18px 20px;
+}
+
+.miniGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+}
+
+.miniGrid label {
+  display: grid;
+  gap: 6px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.miniGrid label > span {
+  color: #344054;
+}
+
+.miniGrid label b {
+  color: #e60012;
+}
+
+.miniGrid input,
+.miniGrid textarea {
+  min-height: 38px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #344054;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  resize: vertical;
+}
+
+.miniGrid input:focus-visible,
+.miniGrid textarea:focus-visible {
+  outline: none;
+  border-color: #175cff;
+  box-shadow: 0 0 0 3px rgba(23, 92, 255, 0.18);
+}
+
+.miniGrid textarea {
+  min-height: 90px;
+}
+
+.miniFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.miniFooter button {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.miniFooter button.blueButton {
+  background: #175cff;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+/* Measurement modal (Inbody) */
+.measureModal {
+  width: min(620px, calc(100vw - 40px));
+  max-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.measureHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #079b67;
+  color: #ffffff;
+}
+
+.measureHeader h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.measureHeader button {
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.measureBody {
+  overflow: auto;
+  padding: 18px 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.measureSection {
+  margin: 0;
+  color: #079b67;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
+.measureSubsection {
+  margin: 4px 0 0;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.measureGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+.measureGrid label {
+  display: grid;
+  gap: 6px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.measureGrid b {
+  color: #e60012;
+}
+
+.measureGrid input {
+  min-height: 38px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #344054;
+  font: inherit;
+  font-size: 14px;
+}
+
+.measureGrid input:focus-visible {
+  outline: none;
+  border-color: #175cff;
+  box-shadow: 0 0 0 3px rgba(23, 92, 255, 0.18);
+}
+
+.measureFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.measureFooter button {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.measureFooter button.greenButton {
+  background: #079b67;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+/* Meal Plan tab */
+.mealMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 24px;
+}
+
+.mealGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mealCard {
+  border: 1px solid #e2e6ee;
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mealCard h4 {
+  margin: 0;
+  color: #101828;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mealTime {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.mealCard ul {
+  margin: 0;
+  padding-left: 16px;
+  color: #475467;
+  font-size: 13px;
+  display: grid;
+  gap: 4px;
+}
+
+.mealCard footer {
+  display: flex;
+  gap: 18px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e6ee;
+  font-size: 13px;
+}
+
+.mealCard footer span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: #475467;
+}
+
+.mealCard footer em {
+  font-style: normal;
+  font-weight: 700;
+}
+
+.calValue {
+  color: #175cff;
+}
+
+.proValue {
+  color: #00a651;
+}
+
+/* Nutrition chart */
+.nutritionChart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 4px 0;
+}
+
+.nutritionChart {
+  position: relative;
+  height: 320px;
+}
+
+.nutritionGrid {
+  position: absolute;
+  inset: 0 0 40px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0 8px;
+  color: #94a3b8;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.nutritionGrid span {
+  position: relative;
+}
+
+.nutritionGrid span::after {
+  content: "";
+  position: absolute;
+  left: 30px;
+  right: 0;
+  top: 7px;
+  height: 1px;
+  background: #edf0f4;
+}
+
+.nutritionBars {
+  position: absolute;
+  inset: 0 0 40px 40px;
+  display: flex;
+  align-items: end;
+  justify-content: space-around;
+  padding: 0 12px;
+}
+
+.nutritionDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.nutritionPair {
+  display: flex;
+  align-items: end;
+  gap: 4px;
+  height: calc(100% - 18px);
+}
+
+.nutritionCal,
+.nutritionPro {
+  width: 22px;
+  min-height: 4px;
+  border-radius: 4px 4px 0 0;
+}
+
+.nutritionCal {
+  background: #a78bfa;
+}
+
+.nutritionPro {
+  background: #34d399;
+}
+
+.nutritionDay em {
+  color: #667085;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.nutritionLegend {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 18px;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.nutritionLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nutritionLegend i {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* Add Meal Plan modal */
+.mealModal {
+  width: min(960px, calc(100vw - 40px));
+  max-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.mealModalHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 22px;
+  border-bottom: 1px solid #e2e6ee;
+  background: #ffffff;
+}
+
+.mealHeaderIcon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #d1fae5;
+  font-size: 22px;
+}
+
+.mealModalHeader h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.mealModalHeader p {
+  margin: 2px 0 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.mealModalHeader > button {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.mealModalBody {
+  overflow: auto;
+  padding: 18px 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.mealModalSection {
+  border: 1px solid #e2e6ee;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.mealModalSection h3 {
+  margin: 0;
+  color: #079b67;
+  font-size: 14px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mealModalSection label {
+  display: grid;
+  gap: 6px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mealModalSection b {
+  color: #e60012;
+}
+
+.mealModalSection input,
+.mealModalSection textarea {
+  min-height: 38px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  color: #344054;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.mealModalSection input:focus-visible,
+.mealModalSection textarea:focus-visible {
+  outline: none;
+  border-color: #079b67;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(7, 155, 103, 0.18);
+}
+
+.fourCol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mealEditCard {
+  border: 1px solid #e2e6ee;
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #ffffff;
+  display: grid;
+  gap: 12px;
+}
+
+.mealEditCard header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mealEditCard header strong {
+  color: #101828;
+  font-size: 14px;
+}
+
+.deleteIcon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.deleteIcon:hover {
+  background: #fee2e2;
+}
+
+.mealItemsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mealItemRow {
+  display: flex;
+  gap: 8px;
+}
+
+.mealItemRow input {
+  flex: 1;
+}
+
+.mealHint {
+  border: 1px solid #a7f3d0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 13px;
+}
+
+.mealHint strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #047857;
+}
+
+.mealHint ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+
+.mealModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.mealModalFooter button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.mealModalFooter button.greenButton {
+  background: #079b67;
+  color: #ffffff;
+  border-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mealModalFooter button.greenButton:hover {
+  background: #068157;
+}
+
+@media (max-width: 900px) {
+  .mealMetaGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mealGrid {
+    grid-template-columns: 1fr;
+  }
+  .miniGrid,
+  .measureGrid {
+    grid-template-columns: 1fr;
+  }
+  .fourCol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
