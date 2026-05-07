@@ -1201,56 +1201,332 @@ function AddGolfMeasurementModal({
   );
 }
 
+type TaEntry = {
+  code: string;
+  name: string;
+  phone: string;
+  email: string;
+  course: string;
+  schedule: string;
+  note: string;
+};
+
+const TA_DIRECTORY: Array<{ code: string; name: string; phone: string; email: string }> = [
+  { code: "NV-0012", name: "Nguyễn Văn An", phone: "0901234567", email: "an.nguyen@example.com" },
+  { code: "NV-0034", name: "Trần Thị Bình", phone: "0912345678", email: "binh.tran@example.com" },
+  { code: "NV-0056", name: "Lê Minh Anh", phone: "0923456712", email: "leminhanh@example.com" },
+  { code: "NV-0072", name: "Phạm Hoàng Nam", phone: "0901224578", email: "phnam@example.com" },
+];
+
+const COURSE_OPTIONS = [
+  "Lập trình Web căn bản",
+  "Golf Swing 3 tháng",
+  "Short Game Premium",
+  "Driving Range Foundation",
+];
+
 function TaTab() {
-  const tas: Array<{ code: string; name: string; phone: string; email: string; course: string; schedule: string; note: string; status: "active" | "off" }> = [
-    { code: "NV-0012", name: "Lê Minh Anh", phone: "0923456712", email: "leminhanh@epga.vn", course: "Golf Swing 3 tháng", schedule: "T2-T4-T6 · 07:00-09:00", note: "Hỗ trợ swing — KH tiến bộ", status: "active" },
-    { code: "NV-0027", name: "Phạm Hoàng Nam", phone: "0901224578", email: "phnam@epga.vn", course: "Short Game Premium", schedule: "Cuối tuần · 08:00-10:00", note: "Chuyên short game", status: "active" },
-    { code: "NV-0033", name: "Trần Quốc Bảo", phone: "0987654312", email: "tqbao@epga.vn", course: "Driving Range", schedule: "T3-T5 · 17:30-19:00", note: "Đã nghỉ việc", status: "off" },
-  ];
+  const [tas, setTas] = useState<TaEntry[]>([
+    { code: "NV-0012", name: "Nguyễn Văn An", phone: "0901234567", email: "an.nguyen@example.com", course: "", schedule: "T2-T4-T6 · 07:00-09:00", note: "Nhiệt tình, có kinh nghiệm hỗ trợ học viên" },
+    { code: "NV-0034", name: "Trần Thị Bình", phone: "0912345678", email: "binh.tran@example.com", course: "", schedule: "T3-T5-T7 · 14:00-16:00", note: "Chuyên môn React, hỗ trợ tốt các dự án thực tế" },
+  ]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+
+  const addTa = (entry: TaEntry) => {
+    setTas((current) => [...current, entry]);
+    setAssignOpen(false);
+  };
+  const updateTa = (index: number, patch: Partial<TaEntry>) => {
+    setTas((current) => current.map((t, i) => (i === index ? { ...t, ...patch } : t)));
+    setEditIndex(null);
+  };
+  const removeTa = (index: number) => {
+    if (confirm(`Bạn có chắc chắn muốn gỡ ${tas[index].name} khỏi khách hàng này?\n\nThao tác này chỉ xóa quan hệ, không xóa hồ sơ nhân viên.`)) {
+      setTas((current) => current.filter((_, i) => i !== index));
+    }
+  };
+
   return (
     <section className={styles.detailCard}>
-      <h3>
-        <span className={styles.taBadge}>{tas.filter((t) => t.status === "active").length} TA đang phụ trách</span>
-        <button className={styles.greenButton} type="button"><Plus size={16} />Gán TA mới</button>
-      </h3>
+      <div className={styles.tabSectionHeader}>
+        <span className={styles.darkBadge}>{tas.length} TA đang phụ trách</span>
+        <button className={styles.darkButton} onClick={() => setAssignOpen(true)} type="button">
+          <Plus size={14} />Gán TA mới
+        </button>
+      </div>
       <div className={styles.tableWrap}>
-        <table className={styles.table}>
+        <table className={styles.softTable}>
           <thead>
             <tr>
               <th>Tên TA</th>
-              <th>Mã NV</th>
-              <th>Liên hệ</th>
-              <th>Khoá học</th>
+              <th>Mã nhân viên</th>
+              <th>Thông tin liên hệ</th>
+              <th>Gói dịch vụ phụ trách</th>
               <th>Lịch làm việc</th>
-              <th>Ghi chú</th>
+              <th>Ghi chú / Đánh giá</th>
               <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
-            {tas.map((t) => (
-              <tr key={t.code}>
+            {tas.map((t, i) => (
+              <tr key={`${t.code}-${i}`}>
+                <td><strong>{t.name}</strong></td>
+                <td className={styles.cellMuted}>{t.code}</td>
                 <td>
-                  <div className={styles.taName}>
-                    <span>{t.name.charAt(0)}</span>
-                    <strong>{t.name}</strong>
-                    {t.status === "off" ? <span className={styles.taOff}>Đã nghỉ việc</span> : null}
+                  <div className={styles.contactCell}>
+                    <span><Phone size={12} /> {t.phone}</span>
+                    <span><Mail size={12} /> {t.email}</span>
                   </div>
                 </td>
-                <td className={styles.cellMuted}>{t.code}</td>
-                <td>{t.phone}<div className={styles.cellMuted}>{t.email}</div></td>
-                <td>{t.course}</td>
+                <td>
+                  {t.course ? (
+                    <span className={styles.coursePill}>{t.course}</span>
+                  ) : (
+                    <span className={styles.emptyPill} aria-hidden="true" />
+                  )}
+                </td>
                 <td>{t.schedule}</td>
                 <td className={styles.cellTruncate}>{t.note}</td>
                 <td className={styles.rowActions}>
-                  <button type="button"><Edit size={14} /></button>
-                  <button type="button"><X size={14} /></button>
+                  <button onClick={() => setEditIndex(i)} type="button" aria-label={`Sửa ${t.name}`}>
+                    <Edit size={14} />
+                  </button>
+                  <button onClick={() => removeTa(i)} type="button" aria-label={`Gỡ ${t.name}`} className={styles.dangerIconBtn}>
+                    <Trash2 size={14} />
+                  </button>
                 </td>
               </tr>
             ))}
+            {tas.length === 0 ? (
+              <tr>
+                <td colSpan={7} className={styles.emptyTableCell}>Chưa có TA nào được gán cho khách hàng.</td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>
+      {assignOpen ? <AssignTaModal onClose={() => setAssignOpen(false)} onSave={addTa} /> : null}
+      {editIndex !== null ? (
+        <EditTaModal
+          ta={tas[editIndex]}
+          onClose={() => setEditIndex(null)}
+          onSave={(patch) => updateTa(editIndex, patch)}
+        />
+      ) : null}
     </section>
+  );
+}
+
+function AssignTaModal({ onClose, onSave }: { onClose: () => void; onSave: (entry: TaEntry) => void }) {
+  const [taQuery, setTaQuery] = useState("");
+  const [selectedTa, setSelectedTa] = useState<typeof TA_DIRECTORY[number] | null>(null);
+  const [course, setCourse] = useState("");
+  const [schedule, setSchedule] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const suggestions = taQuery.trim()
+    ? TA_DIRECTORY.filter(
+        (t) =>
+          t.name.toLowerCase().includes(taQuery.toLowerCase()) ||
+          t.code.toLowerCase().includes(taQuery.toLowerCase())
+      )
+    : TA_DIRECTORY;
+
+  const pick = (ta: typeof TA_DIRECTORY[number]) => {
+    setSelectedTa(ta);
+    setTaQuery(`${ta.name} (${ta.code})`);
+    setPhone(ta.phone);
+    setEmail(ta.email);
+    setShowSuggestions(false);
+  };
+
+  const submit = () => {
+    if (!selectedTa) {
+      alert("Vui lòng chọn Trợ giảng từ danh sách.");
+      return;
+    }
+    if (!course) {
+      alert("Vui lòng chọn khoá học phụ trách.");
+      return;
+    }
+    onSave({
+      code: selectedTa.code,
+      name: selectedTa.name,
+      phone: phone || selectedTa.phone,
+      email: email || selectedTa.email,
+      course,
+      schedule: schedule || "—",
+      note,
+    });
+  };
+
+  return (
+    <div className={styles.nestedOverlay}>
+      <section className={styles.taModal}>
+        <header className={styles.taModalHeader}>
+          <div>
+            <h2>Gán Trợ giảng cho khách hàng</h2>
+            <p>Chọn trợ giảng và khoá học để gán cho khách hàng này</p>
+          </div>
+          <button onClick={onClose} type="button"><X size={18} /></button>
+        </header>
+        <div className={styles.taModalBody}>
+          <label className={styles.taField}>
+            <span>Chọn TA <b>*</b></span>
+            <div className={styles.autocompleteWrap}>
+              <input
+                onChange={(e) => {
+                  setTaQuery(e.target.value);
+                  setSelectedTa(null);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                placeholder="Tìm theo tên / mã nhân viên"
+                value={taQuery}
+              />
+              {showSuggestions && suggestions.length > 0 ? (
+                <ul className={styles.autocompleteList}>
+                  {suggestions.map((s) => (
+                    <li key={s.code}>
+                      <button onMouseDown={(e) => { e.preventDefault(); pick(s); }} type="button">
+                        <strong>{s.name}</strong> <span>{s.code}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </label>
+          <label className={styles.taField}>
+            <span>Khoá học phụ trách <b>*</b></span>
+            <select className={styles.selectInput} value={course} onChange={(e) => setCourse(e.target.value)}>
+              <option value="">Chọn khoá học</option>
+              {COURSE_OPTIONS.map((c) => <option key={c}>{c}</option>)}
+            </select>
+          </label>
+          <label className={styles.taField}>
+            <span>Lịch làm việc</span>
+            <input
+              onChange={(e) => setSchedule(e.target.value)}
+              placeholder="VD: T2-T4-T6 · 07:00-09:00"
+              value={schedule}
+            />
+          </label>
+          <div className={styles.taField}>
+            <span>Thông tin liên hệ</span>
+            <input
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Số điện thoại"
+              value={phone}
+            />
+            <input
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              value={email}
+            />
+          </div>
+          <label className={styles.taField}>
+            <span>Ghi chú / Đánh giá</span>
+            <textarea
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Ghi chú về TA hoặc đánh giá hiệu quả hỗ trợ"
+              rows={3}
+              value={note}
+            />
+          </label>
+        </div>
+        <footer className={styles.taModalFooter}>
+          <button onClick={onClose} type="button">Hủy</button>
+          <button className={styles.darkButton} onClick={submit} type="button">Lưu</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function EditTaModal({
+  ta,
+  onClose,
+  onSave,
+}: {
+  ta: TaEntry;
+  onClose: () => void;
+  onSave: (patch: Partial<TaEntry>) => void;
+}) {
+  const [course, setCourse] = useState(ta.course || COURSE_OPTIONS[0]);
+  const [schedule, setSchedule] = useState(ta.schedule);
+  const [phone, setPhone] = useState(ta.phone);
+  const [email, setEmail] = useState(ta.email);
+  const [note, setNote] = useState(ta.note);
+
+  const submit = () => {
+    onSave({ course, schedule, phone, email, note });
+  };
+
+  return (
+    <div className={styles.nestedOverlay}>
+      <section className={styles.taModal}>
+        <header className={styles.taModalHeader}>
+          <div>
+            <h2>Chỉnh sửa thông tin TA</h2>
+            <p>Cập nhật thông tin trợ giảng cho khách hàng</p>
+          </div>
+          <button onClick={onClose} type="button"><X size={18} /></button>
+        </header>
+        <div className={styles.taModalBody}>
+          <label className={styles.taField}>
+            <span>Chọn TA</span>
+            <input value={`${ta.name} (${ta.code})`} readOnly className={styles.lockedInput} />
+            <small className={styles.fieldHelper}>Không thể thay đổi người được gán</small>
+          </label>
+          <label className={styles.taField}>
+            <span>Khoá học phụ trách <b>*</b></span>
+            <select className={styles.selectInput} value={course} onChange={(e) => setCourse(e.target.value)}>
+              {COURSE_OPTIONS.map((c) => <option key={c}>{c}</option>)}
+            </select>
+          </label>
+          <label className={styles.taField}>
+            <span>Lịch làm việc</span>
+            <input
+              onChange={(e) => setSchedule(e.target.value)}
+              placeholder="VD: T2-T4-T6 · 07:00-09:00"
+              value={schedule}
+            />
+          </label>
+          <div className={styles.taField}>
+            <span>Thông tin liên hệ</span>
+            <input
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Số điện thoại"
+              value={phone}
+            />
+            <input
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              value={email}
+            />
+          </div>
+          <label className={styles.taField}>
+            <span>Ghi chú / Đánh giá</span>
+            <textarea
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Ghi chú về TA hoặc đánh giá hiệu quả hỗ trợ"
+              rows={3}
+              value={note}
+            />
+          </label>
+        </div>
+        <footer className={styles.taModalFooter}>
+          <button onClick={onClose} type="button">Hủy</button>
+          <button className={styles.darkButton} onClick={submit} type="button">Cập nhật</button>
+        </footer>
+      </section>
+    </div>
   );
 }
 
@@ -1842,18 +2118,52 @@ function AddMealPlanModal({
 
 function ProfilesTab() {
   const [showModal, setShowModal] = useState(false);
-  const profiles = [
-    { id: "PR001", course: "Beginner Golf - Khoá 12", level: "Beginner", handicap: "—", coach: "HLV Minh", goal: "Học swing cơ bản, làm quen sân", health: "Không có ghi chú đặc biệt", created: "15/01/2026" },
-  ];
+  const [profiles, setProfiles] = useState<Array<{
+    id: string; course: string; level: "Beginner" | "Experienced"; handicap: string; coach: string; goal: string; health: string; created: string;
+  }>>([]);
+
+  const handleAdd = () => {
+    setProfiles((current) => [
+      ...current,
+      {
+        id: `PR${String(current.length + 1).padStart(3, "0")}`,
+        course: "Beginner Golf - Khoá mới",
+        level: "Beginner",
+        handicap: "—",
+        coach: "HLV Minh",
+        goal: "Học swing cơ bản, làm quen sân",
+        health: "Không có ghi chú đặc biệt",
+        created: "7/4/2026",
+      },
+    ]);
+    setShowModal(false);
+  };
+
+  if (profiles.length === 0) {
+    return (
+      <>
+        <section className={styles.profileEmptyCard}>
+          <div className={styles.profileEmptyIcon}>📋</div>
+          <h3>Bạn chưa có profile nào</h3>
+          <p>Tạo profile mới để lưu lại thông tin kinh nghiệm golf của khách hàng</p>
+          <button className={styles.dangerOutline} onClick={() => setShowModal(true)} type="button">
+            <Plus size={16} />Thêm profile mới
+          </button>
+        </section>
+        {showModal ? <AddProfileModal onClose={() => setShowModal(false)} onSave={handleAdd} /> : null}
+      </>
+    );
+  }
+
   return (
     <>
       <section className={styles.detailCard}>
-        <h3>
-          <span className={styles.taBadge}>{profiles.length} profile</span>
+        <div className={styles.tabSectionHeader}>
+          <h3>{profiles.length} profile hội viên</h3>
           <button className={styles.greenButton} onClick={() => setShowModal(true)} type="button">
             <Plus size={16} />Thêm profile
           </button>
-        </h3>
+        </div>
         {profiles.map((p) => (
           <article className={styles.contractCard} key={p.id}>
             <div>
@@ -1872,18 +2182,22 @@ function ProfilesTab() {
                 <InfoBlock label="Lưu ý sức khoẻ">{p.health}</InfoBlock>
               </div>
             </div>
-            <button type="button">Xem chi tiết</button>
+            <button onClick={() => alert(`Xem chi tiết profile ${p.id}`)} type="button">Xem chi tiết</button>
           </article>
         ))}
       </section>
-      {showModal ? <AddProfileModal onClose={() => setShowModal(false)} /> : null}
+      {showModal ? <AddProfileModal onClose={() => setShowModal(false)} onSave={handleAdd} /> : null}
     </>
   );
 }
 
-function AddProfileModal({ onClose }: { onClose: () => void }) {
+function AddProfileModal({ onClose, onSave }: { onClose: () => void; onSave?: () => void }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [level, setLevel] = useState<"Beginner" | "Experienced">("Beginner");
+  const handleSave = () => {
+    if (onSave) onSave();
+    else onClose();
+  };
   return (
     <div className={styles.nestedOverlay}>
       <section className={styles.profileModal}>
@@ -1969,7 +2283,7 @@ function AddProfileModal({ onClose }: { onClose: () => void }) {
             {step === 1 ? (
               <button className={styles.greenButton} onClick={() => setStep(2)} type="button">Tiếp tục →</button>
             ) : (
-              <button className={styles.greenButton} onClick={onClose} type="button">Lưu profile</button>
+              <button className={styles.greenButton} onClick={handleSave} type="button">Lưu profile</button>
             )}
           </div>
         </footer>

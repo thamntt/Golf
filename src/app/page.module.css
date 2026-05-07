@@ -3556,3 +3556,302 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* === Trợ giảng TA tab — dark theme === */
+.darkBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.darkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 120ms ease;
+}
+
+.darkButton:hover {
+  background: #1e293b;
+}
+
+.contactCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contactCell span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #475467;
+  font-size: 13px;
+}
+
+.coursePill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #ebf2ff;
+  color: #175cff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.emptyPill {
+  display: inline-block;
+  width: 86px;
+  height: 22px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  border: 1px solid #e2e6ee;
+}
+
+.dangerIconBtn {
+  color: #dc2626 !important;
+}
+
+.dangerIconBtn:hover {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+  color: #dc2626 !important;
+}
+
+/* TA modal (Gán + Chỉnh sửa) */
+.taModal {
+  width: min(520px, calc(100vw - 40px));
+  max-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.taModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px 12px;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.taModalHeader h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.taModalHeader p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.taModalHeader > button {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.taModalBody {
+  overflow: auto;
+  padding: 18px 22px;
+  display: grid;
+  gap: 14px;
+}
+
+.taField {
+  display: grid;
+  gap: 8px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.taField b {
+  color: #e60012;
+}
+
+.taField input,
+.taField textarea {
+  min-height: 38px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #344054;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  resize: vertical;
+}
+
+.taField input:focus-visible,
+.taField textarea:focus-visible {
+  outline: none;
+  border-color: #175cff;
+  box-shadow: 0 0 0 3px rgba(23, 92, 255, 0.18);
+}
+
+.lockedInput {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  cursor: not-allowed;
+}
+
+.fieldHelper {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.autocompleteWrap {
+  position: relative;
+}
+
+.autocompleteList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid #e2e6ee;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.autocompleteList li {
+  margin: 0;
+}
+
+.autocompleteList button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: #344054;
+  font: inherit;
+  font-size: 13px;
+}
+
+.autocompleteList button:hover {
+  background: #f1f5f9;
+}
+
+.autocompleteList button strong {
+  color: #101828;
+  font-weight: 600;
+}
+
+.autocompleteList button span {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.taModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid #e2e6ee;
+  background: #ffffff;
+}
+
+.taModalFooter button {
+  min-height: 36px;
+  padding: 0 18px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.taModalFooter button.darkButton {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.taModalFooter button.darkButton:hover {
+  background: #1e293b;
+}
+
+/* Profile empty state */
+.profileEmptyCard {
+  border: 1px dashed #d9dee7;
+  border-radius: 16px;
+  padding: 48px 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.profileEmptyIcon {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  font-size: 26px;
+}
+
+.profileEmptyCard h3 {
+  margin: 0;
+  color: #101828;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.profileEmptyCard p {
+  margin: 0 0 12px;
+  color: #667085;
+  font-size: 13px;
+  max-width: 360px;
+}
