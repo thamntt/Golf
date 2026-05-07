@@ -4667,3 +4667,1004 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =============================================
+   Module 02 — Bảng Giá
+   ============================================= */
+
+.pricingHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.pricingSpacer {
+  flex: 1;
+}
+
+.zoneManageBtn,
+.timeslotManageBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  transition: filter 120ms ease;
+}
+
+.zoneManageBtn { background: #f97316; }
+.timeslotManageBtn { background: #8b5cf6; }
+.zoneManageBtn:hover, .timeslotManageBtn:hover { filter: brightness(0.92); }
+
+.zoneManageBtn span,
+.timeslotManageBtn span {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pricingPrimaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #175cff;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pricingPrimaryBtn:hover { background: #1450e0; }
+
+.pricingWarning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.warningIcon {
+  display: inline-flex;
+  color: #f59e0b;
+}
+
+.pricingWarning strong {
+  color: #78350f;
+  font-weight: 800;
+}
+
+/* ---- Tabs ---- */
+.pricingTabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 4px;
+  border-radius: 10px;
+  background: #f1f5f9;
+}
+
+.pricingTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  justify-content: center;
+  transition: all 120ms ease;
+}
+
+.pricingTab:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.pricingTabActive {
+  background: #ffffff;
+  color: #101828;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+.pricingTab > span {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pricingTabActive > span {
+  background: #ebf2ff;
+  color: #175cff;
+}
+
+/* ---- KPI strip ---- */
+.pricingKpi {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pricingKpiCard {
+  border: 1px solid #e2e6ee;
+  border-left: 4px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: #ffffff;
+  display: grid;
+  gap: 6px;
+}
+
+.pricingKpiCard span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.pricingKpiCard strong {
+  color: #101828;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.kpi_blue { border-left-color: #175cff; }
+.kpi_green { border-left-color: #079b67; }
+.kpi_amber { border-left-color: #f59e0b; }
+.kpi_purple { border-left-color: #8b5cf6; }
+
+/* ---- Toolbar ---- */
+.pricingToolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.pricingSearch {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475467;
+}
+
+.pricingSearch input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: #101828;
+  outline: none;
+}
+
+.pricingFilters {
+  display: flex;
+  gap: 8px;
+}
+
+.pricingFilters .selectInput {
+  min-width: 140px;
+}
+
+.pricingActions {
+  display: flex;
+  gap: 6px;
+}
+
+.pricingActions .iconButton {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.pricingActions .iconButton:hover {
+  border-color: #175cff;
+  color: #175cff;
+}
+
+/* ---- Status badge ---- */
+.pricingStatusActive,
+.pricingStatusPaused {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pricingStatusActive {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.pricingStatusPaused {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ---- Package table ---- */
+.packageName {
+  color: #101828;
+  font-weight: 700;
+}
+
+.servicePill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.branchPill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.priceCell {
+  color: #175cff;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.usageLink {
+  border: 0;
+  background: transparent;
+  color: #8b5cf6;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.usageLink:hover {
+  color: #6d28d9;
+}
+
+.tableActionPause {
+  color: #f59e0b;
+}
+
+.tableActions button.tableActionPause:hover {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.tableActionActivate {
+  color: #94a3b8;
+}
+
+.tableActions button.tableActionActivate:hover {
+  border-color: #079b67;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+/* ---- Ticket grid (Vé lẻ card view) ---- */
+.ticketGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ticketCard {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #e2e6ee;
+  border-radius: 12px;
+  background: #ffffff;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.ticketCard:hover {
+  border-color: #175cff;
+  box-shadow: 0 6px 16px rgba(11, 99, 255, 0.08);
+}
+
+.ticketCardPaused {
+  opacity: 0.7;
+}
+
+.ticketHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ticketHeader > div {
+  display: grid;
+  gap: 4px;
+}
+
+.ticketHeader strong {
+  color: #101828;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.ticketCode {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.toggleSwitch {
+  width: 40px;
+  height: 22px;
+  position: relative;
+  border: 0;
+  border-radius: 999px;
+  background: #cbd5e1;
+  cursor: pointer;
+  transition: background 120ms ease;
+  flex-shrink: 0;
+}
+
+.toggleOn {
+  background: #079b67;
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 120ms ease;
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(18px);
+}
+
+.ticketDesc {
+  margin: 0;
+  color: #475467;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ticketBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.durationPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tierGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tierCell {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.tierCell span {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tierCell strong {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.tier_green { border-color: #a7f3d0; background: #ecfdf5; }
+.tier_green strong { color: #065f46; }
+
+.tier_blue { border-color: #bfdbfe; background: #eff6ff; }
+.tier_blue strong { color: #1e40af; }
+
+.tier_amber { border-color: #fde68a; background: #fffbeb; }
+.tier_amber strong { color: #92400e; }
+
+.tier_red { border-color: #fecaca; background: #fef2f2; }
+.tier_red strong { color: #991b1b; }
+
+.ticketPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ticketPills span {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid #d9dee7;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ticketEffective {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.ticketFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e6ee;
+}
+
+.ticketUpdated {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* ---- Management modals (Zone / Timeslot) ---- */
+.pricingMgmtModal {
+  width: min(1100px, calc(100vw - 80px));
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32);
+}
+
+.pricingMgmtHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e6ee;
+  background: linear-gradient(180deg, #f8fafc, #ffffff);
+}
+
+.pricingMgmtHeader h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #101828;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.pricingMgmtHeader p {
+  margin-top: 6px;
+  color: #475467;
+  font-size: 13px;
+}
+
+.pricingMgmtHeader > button {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.pricingMgmtToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e6ee;
+  background: #f8fafc;
+}
+
+.pricingMgmtCount {
+  color: #475467;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pricingMgmtToolbar .pricingSearch {
+  min-width: 280px;
+  flex: 0 0 320px;
+}
+
+.pricingMgmtFooter {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-top: 1px solid #e2e6ee;
+  background: #f8fafc;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.zoneTypeBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #f0f9ff;
+  color: #075985;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.checkinPill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #f5f3ff;
+  color: #5b21b6;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ---- Color dot for timeslot ---- */
+.colorDot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.dot_blue { background: #3b82f6; }
+.dot_amber { background: #f59e0b; }
+.dot_red { background: #ef4444; }
+.dot_purple { background: #8b5cf6; }
+.dot_green { background: #10b981; }
+.dot_pink { background: #ec4899; }
+.dot_orange { background: #f97316; }
+.dot_gray { background: #64748b; }
+.dot_cyan { background: #06b6d4; }
+.dot_lime { background: #84cc16; }
+
+.colorPickerLabel {
+  display: grid;
+  gap: 8px;
+}
+
+.colorPickerLabel > span {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.colorPicker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.colorSwatch {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.15);
+}
+
+.colorSwatchActive {
+  border-color: #101828;
+  box-shadow: 0 0 0 2px #ffffff inset;
+}
+
+/* ---- Mode toggle (Cố định/Linh hoạt + Hoa hồng + Loại DV) ---- */
+.modeToggle {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.modeIdle,
+.modeActive {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 2px solid #d9dee7;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 120ms ease;
+}
+
+.modeIdle:hover {
+  border-color: #94a3b8;
+}
+
+.modeActive {
+  border-color: #175cff;
+  background: #ebf2ff;
+}
+
+.modeIdle strong,
+.modeActive strong {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.modeActive strong {
+  color: #175cff;
+}
+
+.modeIdle span,
+.modeActive span {
+  color: #667085;
+  font-size: 12px;
+}
+
+/* ---- Check pills (zone/timeslot multi-select) ---- */
+.checkGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.checkPill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.checkPill:has(input:checked) {
+  border-color: #175cff;
+  background: #ebf2ff;
+  color: #175cff;
+}
+
+.checkPill input {
+  cursor: pointer;
+}
+
+.checkPill > span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sectionHint {
+  color: #667085;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.transferableLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.transferableLabel input {
+  cursor: pointer;
+}
+
+/* ---- Pricing preview ---- */
+.pricingPreview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 18px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  background: #f0fdf4;
+}
+
+.pricingPreview > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #d1fae5;
+}
+
+.pricingPreview > div:last-child:nth-child(odd),
+.pricingPreview > div:last-child {
+  border-bottom: 0;
+}
+
+.pricingPreview span {
+  color: #475467;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pricingPreview strong {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.previewTotal {
+  color: #175cff !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+}
+
+.previewPerSession {
+  color: #079b67 !important;
+}
+
+/* ---- Tier form (4 tier price input) ---- */
+.tierForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.tierFormCell {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.tierFormCell > span {
+  grid-column: 1 / -1;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.tierFormCell input {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #d9dee7;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  font-weight: 700;
+  text-align: right;
+}
+
+.tierFormCell em {
+  color: #667085;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ---- Day pills (T2-CN) ---- */
+.dayPills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.dayPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475467;
+  position: relative;
+}
+
+.dayPill input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dayPill:has(input:checked) {
+  border-color: #175cff;
+  background: #ebf2ff;
+  color: #175cff;
+}
+
+/* ---- Holiday list ---- */
+.holidayList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.holidayChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #fde68a;
+  border-radius: 999px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.holidayChip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: #f59e0b;
+  cursor: pointer;
+  padding: 0;
+}
+
+.holidayChip button:hover {
+  color: #b45309;
+}
+
+.holidayAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 999px;
+  background: transparent;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.holidayAdd:hover {
+  border-color: #175cff;
+  color: #175cff;
+}
+
+@media (max-width: 1100px) {
+  .pricingKpi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ticketGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .pricingFilters {
+    flex-direction: column;
+    width: 100%;
+  }
+  .pricingFilters .selectInput {
+    width: 100%;
+  }
+  .checkGrid {
+    grid-template-columns: 1fr;
+  }
+  .tierForm {
+    grid-template-columns: 1fr;
+  }
+}
