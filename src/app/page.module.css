@@ -1395,6 +1395,7 @@
 
 .modalHeader,
 .detailHeader {
+  flex-shrink: 0;
   min-height: 76px;
   display: flex;
   align-items: center;
@@ -1402,6 +1403,14 @@
   gap: 16px;
   border-bottom: 1px solid #e2e6ee;
   padding: 18px 22px;
+}
+
+.detailTabs {
+  flex-shrink: 0;
+}
+
+.modalFooter {
+  flex-shrink: 0;
 }
 
 .modalHeader h2,
@@ -3856,4 +3865,495 @@
   color: #667085;
   font-size: 13px;
   max-width: 360px;
+}
+
+/* === Profile tab — detail view === */
+.profileViewTitle {
+  margin: 0;
+  color: #079b67;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.profileViewSubtitle {
+  margin: 18px 0 12px;
+  color: #175cff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.profileStepNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 24px 60px;
+  margin: 4px 0 12px;
+}
+
+.profileStepActive,
+.profileStepIdle {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  font: inherit;
+  flex-shrink: 0;
+}
+
+.profileStepActive > span,
+.profileStepIdle > span {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.profileStepActive > span {
+  background: #079b67;
+  color: #ffffff;
+}
+
+.profileStepIdle > span {
+  background: #cbd5e1;
+  color: #ffffff;
+}
+
+.profileStepActive em,
+.profileStepIdle em {
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.profileStepActive em {
+  color: #079b67;
+}
+
+.profileStepIdle em {
+  color: #94a3b8;
+}
+
+.profileStepConnector {
+  flex: 1;
+  height: 2px;
+  margin: 0 16px 22px;
+  background: #cbd5e1;
+  align-self: center;
+  max-width: 240px;
+}
+
+.profileViewSection {
+  padding: 8px 4px;
+}
+
+.profileViewRow {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.profileViewRow span {
+  color: #475467;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profileViewRow strong {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: pre-wrap;
+}
+
+.profileViewGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 36px;
+}
+
+.profileViewGrid2 .profileViewRow {
+  grid-template-columns: minmax(180px, 220px) 1fr;
+}
+
+.profileViewActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.dangerSolid {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #ef4444;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 120ms ease;
+}
+
+.dangerSolid:hover {
+  background: #dc2626;
+}
+
+/* === Add Profile modal — new design === */
+.profileModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 64px;
+  padding: 18px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.profileModalHeader h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.profileModalHeader > button {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.profileStepperBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 22px 24px 18px;
+  background: #ffffff;
+}
+
+.profileStepBubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.profileStepBubble > span {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #cbd5e1;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profileStepBubble em {
+  font-style: normal;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.profileStepBubbleActive > span {
+  background: #079b67;
+}
+
+.profileStepBubbleActive em {
+  color: #079b67;
+}
+
+.profileStepBubbleDone > span {
+  background: #079b67;
+}
+
+.profileStepperLine {
+  flex: 1;
+  height: 2px;
+  margin: 0 14px 22px;
+  background: #cbd5e1;
+  align-self: center;
+  max-width: 220px;
+}
+
+.profileStepperLineActive {
+  background: #079b67;
+}
+
+.profileModalBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 22px 28px 14px;
+}
+
+.upperGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 28px;
+}
+
+.upperLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upperLabel > span {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.upperLabel input,
+.upperLabel textarea {
+  border: 0;
+  border-bottom: 1px solid #cbd5e1;
+  border-radius: 0;
+  padding: 8px 0;
+  background: transparent;
+  color: #101828;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  resize: vertical;
+}
+
+.upperLabel input::placeholder,
+.upperLabel textarea::placeholder {
+  color: #cbd5e1;
+}
+
+.upperLabel input:focus-visible,
+.upperLabel textarea:focus-visible {
+  outline: none;
+  border-bottom-color: #079b67;
+}
+
+.upperLabel select.selectInput {
+  border: 0 !important;
+  border-bottom: 1px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  padding: 8px 24px 8px 0 !important;
+  background-color: transparent !important;
+}
+
+.upperFull {
+  grid-column: 1 / -1;
+}
+
+.profileFormTitle {
+  margin: 0;
+  grid-column: 1 / -1;
+  color: #079b67;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.profileExpTitle {
+  margin: 8px 0 0;
+  grid-column: 1 / -1;
+  color: #079b67;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.levelCardRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.levelCardActive,
+.levelCardIdle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 18px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.levelCardIdle:hover {
+  border-color: #94a3b8;
+}
+
+.levelCardActive {
+  border-color: #079b67;
+  background: #ffffff;
+  color: #079b67;
+  font-weight: 700;
+}
+
+.radioDot,
+.radioDotActive {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  flex-shrink: 0;
+  position: relative;
+  background: #ffffff;
+}
+
+.radioDotActive {
+  border-color: #079b67;
+}
+
+.radioDotActive::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #079b67;
+}
+
+.toggleGroup {
+  display: inline-flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.toggleActive,
+.toggleIdle {
+  min-height: 36px;
+  padding: 0 22px;
+  border: 0;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.toggleActive {
+  background: #079b67;
+  color: #ffffff;
+}
+
+.fitnessSegments {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fitnessSegOn,
+.fitnessSegOff {
+  width: 56px;
+  height: 12px;
+  border-radius: 4px;
+  border: 0;
+  cursor: pointer;
+}
+
+.fitnessSegOn {
+  background: #079b67;
+}
+
+.fitnessSegOff {
+  background: #e2e6ee;
+}
+
+.fitnessSegments strong {
+  margin-left: 8px;
+  color: #079b67;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profileModalFooter {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 24px;
+  border-top: 1px solid #e2e6ee;
+  background: #ffffff;
+}
+
+.profileModalFooter button {
+  min-height: 38px;
+  padding: 0 20px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.profileModalFooter button.greenButton {
+  background: #079b67;
+  color: #ffffff;
+  border-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profileModalFooter button.greenButton:hover {
+  background: #068157;
+}
+
+@media (max-width: 900px) {
+  .upperGrid {
+    grid-template-columns: 1fr;
+  }
+  .levelCardRow {
+    grid-template-columns: 1fr;
+  }
+  .profileViewGrid2 {
+    grid-template-columns: 1fr;
+  }
+  .profileViewRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .profileStepNav {
+    padding: 16px 0;
+  }
 }

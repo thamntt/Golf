@@ -2116,41 +2116,100 @@ function AddMealPlanModal({
   );
 }
 
+type ProfileLevel = "Beginner" | "Experienced";
+
+type Profile = {
+  // Step 1
+  courseCount: string;
+  coachEpga: string;
+  coachOther: string;
+  name: string;
+  gender: string;
+  dob: string;
+  phone: string;
+  email: string;
+  // Step 2 common
+  level: ProfileLevel;
+  handicap: string;
+  golfStartTime: string;
+  // Step 2 beginner
+  playingGoal: string;
+  handedness: "Phải" | "Trái";
+  otherSports: string;
+  clubs: string;
+  coachFreq: string;
+  selfFreq: string;
+  fitness: number; // 1-5
+  healthNotes: string;
+  // Step 2 experienced extra
+  golfDuration: string;
+  currentHandicap: string;
+  targetHandicap: string;
+  satisfiedPart: string;
+  improveAspects: string;
+  struggles: string;
+  detailedDesc: string;
+  iron7Distance: string;
+  driverDistance: string;
+};
+
+const DEFAULT_PROFILE: Profile = {
+  courseCount: "5",
+  coachEpga: "Nguyễn Văn A",
+  coachOther: "Trần Thị B",
+  name: "quyet test addr 2",
+  gender: "nam_",
+  dob: "-",
+  phone: "-",
+  email: "-",
+  level: "Beginner",
+  handicap: "5",
+  golfStartTime: "20/05/2026",
+  playingGoal: "Vui",
+  handedness: "Trái",
+  otherSports: "Bơi lội",
+  clubs: "Vip",
+  coachFreq: "2",
+  selfFreq: "1",
+  fitness: 4,
+  healthNotes: "đứt dây chằng",
+  golfDuration: "",
+  currentHandicap: "",
+  targetHandicap: "",
+  satisfiedPart: "",
+  improveAspects: "",
+  struggles: "",
+  detailedDesc: "",
+  iron7Distance: "",
+  driverDistance: "",
+};
+
 function ProfilesTab() {
   const [showModal, setShowModal] = useState(false);
-  const [profiles, setProfiles] = useState<Array<{
-    id: string; course: string; level: "Beginner" | "Experienced"; handicap: string; coach: string; goal: string; health: string; created: string;
-  }>>([]);
+  const [profile, setProfile] = useState<Profile | null>(DEFAULT_PROFILE);
+  const [activeStep, setActiveStep] = useState<1 | 2>(1);
 
-  const handleAdd = () => {
-    setProfiles((current) => [
-      ...current,
-      {
-        id: `PR${String(current.length + 1).padStart(3, "0")}`,
-        course: "Beginner Golf - Khoá mới",
-        level: "Beginner",
-        handicap: "—",
-        coach: "HLV Minh",
-        goal: "Học swing cơ bản, làm quen sân",
-        health: "Không có ghi chú đặc biệt",
-        created: "7/4/2026",
-      },
-    ]);
+  const handleSave = (next: Profile) => {
+    setProfile(next);
     setShowModal(false);
   };
 
-  if (profiles.length === 0) {
+  const handleDelete = () => {
+    if (confirm("Bạn có chắc muốn xóa profile này?")) setProfile(null);
+  };
+
+  if (!profile) {
     return (
       <>
         <section className={styles.profileEmptyCard}>
           <div className={styles.profileEmptyIcon}>📋</div>
           <h3>Bạn chưa có profile nào</h3>
           <p>Tạo profile mới để lưu lại thông tin kinh nghiệm golf của khách hàng</p>
-          <button className={styles.dangerOutline} onClick={() => setShowModal(true)} type="button">
+          <button className={styles.greenButton} onClick={() => setShowModal(true)} type="button">
             <Plus size={16} />Thêm profile mới
           </button>
         </section>
-        {showModal ? <AddProfileModal onClose={() => setShowModal(false)} onSave={handleAdd} /> : null}
+        {showModal ? <AddProfileModal onClose={() => setShowModal(false)} onSave={handleSave} initial={DEFAULT_PROFILE} /> : null}
       </>
     );
   }
@@ -2159,135 +2218,343 @@ function ProfilesTab() {
     <>
       <section className={styles.detailCard}>
         <div className={styles.tabSectionHeader}>
-          <h3>{profiles.length} profile hội viên</h3>
+          <h3 className={styles.profileViewTitle}>Thông tin Profile</h3>
           <button className={styles.greenButton} onClick={() => setShowModal(true)} type="button">
-            <Plus size={16} />Thêm profile
+            <Plus size={16} />Thêm mới
           </button>
         </div>
-        {profiles.map((p) => (
-          <article className={styles.contractCard} key={p.id}>
-            <div>
-              <h4>
-                {p.course}
-                <span className={p.level === "Beginner" ? styles.statusGreen : styles.statusDark}>{p.level}</span>
-              </h4>
-              <div className={styles.contractGrid}>
-                <InfoBlock label="Mã profile"><span className={styles.memberCode}>{p.id}</span></InfoBlock>
-                <InfoBlock label="Handicap WHS">{p.handicap}</InfoBlock>
-                <InfoBlock label="HLV phụ trách">{p.coach}</InfoBlock>
-                <InfoBlock label="Ngày tạo">{p.created}</InfoBlock>
-              </div>
-              <div className={styles.contractGrid}>
-                <InfoBlock label="Mục tiêu chơi golf">{p.goal}</InfoBlock>
-                <InfoBlock label="Lưu ý sức khoẻ">{p.health}</InfoBlock>
-              </div>
+
+        <div className={styles.profileStepNav}>
+          <button
+            className={activeStep === 1 ? styles.profileStepActive : styles.profileStepIdle}
+            onClick={() => setActiveStep(1)}
+            type="button"
+          >
+            <span>{activeStep > 1 ? "✓" : "1"}</span>
+            <em>Thông tin cơ bản</em>
+          </button>
+          <span className={styles.profileStepConnector} />
+          <button
+            className={activeStep === 2 ? styles.profileStepActive : styles.profileStepIdle}
+            onClick={() => setActiveStep(2)}
+            type="button"
+          >
+            <span>2</span>
+            <em>Thông tin kinh nghiệm về golf</em>
+          </button>
+        </div>
+
+        {activeStep === 1 ? (
+          <div className={styles.profileViewSection}>
+            <h4 className={styles.profileViewTitle}>Thông tin cơ bản</h4>
+            <ProfileViewRow label="Số khoá học" value={profile.courseCount} />
+            <ProfileViewRow label="HLV đã từng học tại EPGA" value={profile.coachEpga} />
+            <ProfileViewRow label="Học viên/HLV đã từng học ngoài EPGA" value={profile.coachOther} />
+            <ProfileViewRow label="Full Name/Họ và Tên:" value={profile.name} />
+            <ProfileViewRow label="Gender/Giới tính:" value={profile.gender} />
+            <ProfileViewRow label="Date of birth/Ngày sinh:" value={profile.dob} />
+            <ProfileViewRow label="Mobile/SĐT:" value={profile.phone} />
+            <ProfileViewRow label="Email" value={profile.email} />
+          </div>
+        ) : (
+          <div className={styles.profileViewSection}>
+            <h4 className={styles.profileViewTitle}>Golf Experience Assessment</h4>
+            <ProfileViewRow label="Trình độ:" value={profile.level === "Beginner" ? "Mới học Golf" : "Có kinh nghiệm"} />
+            <ProfileViewRow label="Handicap:" value={profile.handicap} />
+            <ProfileViewRow label="Thời gian chơi golf trước khi bắt đầu khóa học:" value={profile.golfStartTime} />
+
+            <h4 className={styles.profileViewSubtitle}>
+              {profile.level === "Beginner"
+                ? "Phần dành cho người mới/Beginner Section"
+                : "Người có kinh nghiệm/Experienced Section"}
+            </h4>
+            <div className={styles.profileViewGrid2}>
+              <ProfileViewRow label="Mục tiêu chơi golf/Playing goal:" value={profile.playingGoal} />
+              <ProfileViewRow label="Tay thuận/Handedness:" value={profile.handedness} />
+              <ProfileViewRow label="Bộ môn thể thao khác đã từng chơi:" value={profile.otherSports} />
+              <ProfileViewRow
+                label="Lưu ý (giới hạn cơ thể/chấn thương/tiền sử bệnh đặc biệt):"
+                value={`${profile.healthNotes}${profile.healthNotes ? "\nAttention (physical limitations/injuries/medical records):" : ""}`}
+              />
+              <ProfileViewRow label="Tần suất tập với HLV dự kiến/tuần:" value={profile.coachFreq} />
+              <ProfileViewRow label="Tần suất tự tập luyện dự kiến/Tuần:" value={profile.selfFreq} />
+              <ProfileViewRow label="Bộ gậy golf:" value={profile.clubs} />
+              <ProfileViewRow label="Mức độ thể lực hiện tại/Current fitness level:" value={`${profile.fitness * 20}/100`} />
             </div>
-            <button onClick={() => alert(`Xem chi tiết profile ${p.id}`)} type="button">Xem chi tiết</button>
-          </article>
-        ))}
+          </div>
+        )}
+
+        <div className={styles.profileViewActions}>
+          <button className={styles.greenButton} onClick={() => setShowModal(true)} type="button">
+            <Edit size={14} />Cập nhật
+          </button>
+          <button className={styles.dangerSolid} onClick={handleDelete} type="button">
+            <Trash2 size={14} />Xóa
+          </button>
+        </div>
       </section>
-      {showModal ? <AddProfileModal onClose={() => setShowModal(false)} onSave={handleAdd} /> : null}
+      {showModal ? <AddProfileModal onClose={() => setShowModal(false)} onSave={handleSave} initial={profile} /> : null}
     </>
   );
 }
 
-function AddProfileModal({ onClose, onSave }: { onClose: () => void; onSave?: () => void }) {
+function ProfileViewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className={styles.profileViewRow}>
+      <span>{label}</span>
+      <strong>{value || "-"}</strong>
+    </div>
+  );
+}
+
+function AddProfileModal({
+  onClose,
+  onSave,
+  initial,
+}: {
+  onClose: () => void;
+  onSave: (profile: Profile) => void;
+  initial: Profile;
+}) {
   const [step, setStep] = useState<1 | 2>(1);
-  const [level, setLevel] = useState<"Beginner" | "Experienced">("Beginner");
-  const handleSave = () => {
-    if (onSave) onSave();
-    else onClose();
+  const [form, setForm] = useState<Profile>(initial);
+  const update = <K extends keyof Profile>(key: K, value: Profile[K]) =>
+    setForm((current) => ({ ...current, [key]: value }));
+
+  const submit = () => {
+    if (!form.name.trim()) {
+      alert("Họ và tên là bắt buộc.");
+      setStep(1);
+      return;
+    }
+    onSave(form);
   };
+
   return (
     <div className={styles.nestedOverlay}>
       <section className={styles.profileModal}>
-        <header className={styles.profileHeader}>
+        <header className={styles.profileModalHeader}>
           <h2>Thêm mới Profile hội viên</h2>
           <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
-        <div className={styles.stepIndicator}>
-          <div className={`${styles.stepItem} ${step >= 1 ? styles.stepActive : ""} ${step > 1 ? styles.stepDone : ""}`}>
-            <span>1</span> Thông tin cơ bản
+        <div className={styles.profileStepperBar}>
+          <div className={`${styles.profileStepBubble} ${step >= 1 ? styles.profileStepBubbleActive : ""} ${step > 1 ? styles.profileStepBubbleDone : ""}`}>
+            <span>{step > 1 ? "✓" : "1"}</span>
+            <em>Thông tin cơ bản</em>
           </div>
-          <span className={styles.stepConnector} />
-          <div className={`${styles.stepItem} ${step >= 2 ? styles.stepActive : ""}`}>
-            <span>2</span> Thông tin kinh nghiệm về golf
+          <span className={`${styles.profileStepperLine} ${step >= 2 ? styles.profileStepperLineActive : ""}`} />
+          <div className={`${styles.profileStepBubble} ${step >= 2 ? styles.profileStepBubbleActive : ""}`}>
+            <span>2</span>
+            <em>Thông tin kinh nghiệm</em>
           </div>
         </div>
-        <div className={styles.profileBody}>
+        <div className={styles.profileModalBody}>
           {step === 1 ? (
-            <>
-              <h3 className={styles.profileSection}>Thông tin cơ bản</h3>
-              <div className={styles.formGrid}>
-                <FormField label="Số khoá học" placeholder="VD: 12" />
-                <FormField label="HLV đã từng học tại EPGA" placeholder="HLV đã học tại EPGA" />
-                <FormField label="Học viên/HLV đã từng học ngoài EPGA" placeholder="Học viên / HLV ngoài EPGA" />
-                <FormField label="Họ và tên" placeholder="Họ và tên đầy đủ" />
-                <SelectField label="Giới tính" name="profileGender" options={["Nam", "Nữ", "Khác"]} />
-                <FormField label="Ngày sinh" type="date" />
-                <FormField label="Số điện thoại" placeholder="0xxxxxxxxx" />
-                <FormField label="Email" placeholder="email@example.com" />
-              </div>
-            </>
+            <div className={styles.upperGrid}>
+              <UpperLabel label="Số khoá học" htmlFor="courseCount">
+                <input id="courseCount" placeholder="Nhập số khoá học" value={form.courseCount} onChange={(e) => update("courseCount", e.target.value)} />
+              </UpperLabel>
+              <UpperLabel label="HLV đã từng học tại EPGA" htmlFor="coachEpga">
+                <select id="coachEpga" className={styles.selectInput} value={form.coachEpga} onChange={(e) => update("coachEpga", e.target.value)}>
+                  <option value="">Chọn Huấn luyện viên</option>
+                  <option>Nguyễn Văn A</option>
+                  <option>Trần Quốc Toàn</option>
+                  <option>Lê Minh</option>
+                </select>
+              </UpperLabel>
+              <UpperLabel label="Học viên/HLV đã từng học ngoài EPGA" htmlFor="coachOther" full>
+                <input id="coachOther" placeholder="Thông tin đào tạo khác" value={form.coachOther} onChange={(e) => update("coachOther", e.target.value)} />
+              </UpperLabel>
+              <UpperLabel label="Full Name/Họ và tên" htmlFor="name">
+                <input id="name" placeholder="Nhập họ và tên" value={form.name} onChange={(e) => update("name", e.target.value)} />
+              </UpperLabel>
+              <UpperLabel label="Gender/Giới tính" htmlFor="gender">
+                <select id="gender" className={styles.selectInput} value={form.gender} onChange={(e) => update("gender", e.target.value)}>
+                  <option>Nam</option>
+                  <option>Nữ</option>
+                  <option>Khác</option>
+                </select>
+              </UpperLabel>
+              <UpperLabel label="Date of birth/Ngày sinh" htmlFor="dob">
+                <input id="dob" type="date" value={form.dob && form.dob !== "-" ? form.dob : ""} onChange={(e) => update("dob", e.target.value)} />
+              </UpperLabel>
+              <UpperLabel label="Mobile/SĐT" htmlFor="phone">
+                <input id="phone" placeholder="090 XXX XXXX" value={form.phone === "-" ? "" : form.phone} onChange={(e) => update("phone", e.target.value)} />
+              </UpperLabel>
+              <UpperLabel label="Email" htmlFor="email" full>
+                <input id="email" placeholder="example@golf.com" value={form.email === "-" ? "" : form.email} onChange={(e) => update("email", e.target.value)} />
+              </UpperLabel>
+            </div>
           ) : (
-            <>
-              <h3 className={styles.profileSection}>Golf Experience Assessment</h3>
-              <div className={styles.levelRadios}>
-                <button
-                  className={level === "Beginner" ? styles.levelActive : styles.levelIdle}
-                  onClick={() => setLevel("Beginner")}
-                  type="button"
-                >
-                  Người mới / Beginner
-                </button>
-                <button
-                  className={level === "Experienced" ? styles.levelActive : styles.levelIdle}
-                  onClick={() => setLevel("Experienced")}
-                  type="button"
-                >
-                  Người có kinh nghiệm / Experienced
-                </button>
-              </div>
-              <div className={styles.formGrid}>
-                <FormField label="Handicap" placeholder="Tôi không có hoặc số 0-54" />
-                <FormField label="Thời gian chơi golf trước khoá học" type="date" />
-              </div>
-              <h4 className={styles.profileSubsection}>
-                {level === "Beginner" ? "Người mới / Beginner" : "Người có kinh nghiệm / Experienced"}
-              </h4>
-              <div className={styles.formGrid}>
-                <FormField label="Mục tiêu chơi golf / Playing goal" placeholder="VD: Học swing cơ bản" />
-                <SelectField label="Tay thuận / Handedness" name="handedness" options={["Phải", "Trái"]} />
-                <FormField label="Bộ môn thể thao đã từng chơi" placeholder="VD: Cầu lông, Tennis" />
-                <FormField label="Tần suất tập với HLV / tuần" placeholder="VD: 2 buổi/tuần" />
-                <FormField label="Tần suất tự tập / tuần" placeholder="VD: 3 buổi/tuần" />
-                <FormField label="Bộ gậy đang dùng" placeholder="Hãng / loại gậy" />
-                <FormField label="Mức độ thể lực hiện tại" placeholder="Tốt / Trung bình / Cần cải thiện" />
-              </div>
-              <FormField
-                area
-                label="Lưu ý sức khoẻ (giới hạn cơ thể, chấn thương, tiền sử bệnh)"
-                placeholder="Mô tả chi tiết..."
-              />
-            </>
+            <div className={styles.upperGrid}>
+              <h3 className={styles.profileFormTitle}>Golf Experience Assessment</h3>
+              <UpperLabel label="Chọn trình độ" htmlFor="" full>
+                <div className={styles.levelCardRow}>
+                  <button
+                    className={form.level === "Beginner" ? styles.levelCardActive : styles.levelCardIdle}
+                    onClick={() => update("level", "Beginner")}
+                    type="button"
+                  >
+                    <span className={form.level === "Beginner" ? styles.radioDotActive : styles.radioDot} />
+                    Người mới bắt đầu/Beginner
+                  </button>
+                  <button
+                    className={form.level === "Experienced" ? styles.levelCardActive : styles.levelCardIdle}
+                    onClick={() => update("level", "Experienced")}
+                    type="button"
+                  >
+                    <span className={form.level === "Experienced" ? styles.radioDotActive : styles.radioDot} />
+                    Người có kinh nghiệm/Experienced
+                  </button>
+                </div>
+              </UpperLabel>
+              <UpperLabel label="Handicap (tùy chọn)" htmlFor="handicap">
+                <input id="handicap" placeholder={form.level === "Beginner" ? "Nhập số HCP hoặc 'Tôi không có'" : "Nhập số HCP"} value={form.handicap} onChange={(e) => update("handicap", e.target.value)} />
+              </UpperLabel>
+              <UpperLabel label="Thời gian chơi golf trước khi bắt đầu khóa học" htmlFor="golfStartTime">
+                <input id="golfStartTime" type="text" placeholder="Chọn ngày bắt đầu học" value={form.golfStartTime} onChange={(e) => update("golfStartTime", e.target.value)} />
+              </UpperLabel>
+
+              {form.level === "Beginner" ? (
+                <>
+                  <UpperLabel label="Mục tiêu chơi golf / Playing goal" htmlFor="playingGoal">
+                    <select id="playingGoal" className={styles.selectInput} value={form.playingGoal} onChange={(e) => update("playingGoal", e.target.value)}>
+                      <option value="">Chọn mục tiêu</option>
+                      <option>Vui</option>
+                      <option>Giảm cân</option>
+                      <option>Thi đấu</option>
+                      <option>Giao lưu công việc</option>
+                    </select>
+                  </UpperLabel>
+                  <UpperLabel label="Tay thuận / Handedness" htmlFor="">
+                    <div className={styles.toggleGroup}>
+                      <button
+                        className={form.handedness === "Phải" ? styles.toggleActive : styles.toggleIdle}
+                        onClick={() => update("handedness", "Phải")}
+                        type="button"
+                      >
+                        Phải
+                      </button>
+                      <button
+                        className={form.handedness === "Trái" ? styles.toggleActive : styles.toggleIdle}
+                        onClick={() => update("handedness", "Trái")}
+                        type="button"
+                      >
+                        Trái
+                      </button>
+                    </div>
+                  </UpperLabel>
+                  <UpperLabel label="Bộ môn thể thao khác / Other sports played" htmlFor="otherSports">
+                    <input id="otherSports" placeholder="VD: Tennis, Bơi lội..." value={form.otherSports} onChange={(e) => update("otherSports", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Bộ gậy golf / Golf clubs" htmlFor="clubs">
+                    <input id="clubs" placeholder="Nhập tên bộ gậy đang sử dụng" value={form.clubs} onChange={(e) => update("clubs", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Tần suất tập với HLV (buổi/tuần)" htmlFor="coachFreq">
+                    <input id="coachFreq" placeholder="Nhập số buổi" value={form.coachFreq} onChange={(e) => update("coachFreq", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Tần suất tự tập luyện (buổi/tuần)" htmlFor="selfFreq">
+                    <input id="selfFreq" placeholder="Nhập số buổi" value={form.selfFreq} onChange={(e) => update("selfFreq", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Mức độ thể lực hiện tại" htmlFor="" full>
+                    <div className={styles.fitnessSegments}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <button
+                          key={n}
+                          className={n <= form.fitness ? styles.fitnessSegOn : styles.fitnessSegOff}
+                          onClick={() => update("fitness", n)}
+                          type="button"
+                          aria-label={`Mức ${n} / 5`}
+                        />
+                      ))}
+                      <strong>{form.fitness}/5</strong>
+                    </div>
+                  </UpperLabel>
+                  <UpperLabel label="Lưu ý (về sức khỏe) / Physical limitations" htmlFor="healthNotes" full>
+                    <textarea id="healthNotes" rows={3} placeholder="Health notes or physical limitations..." value={form.healthNotes} onChange={(e) => update("healthNotes", e.target.value)} />
+                  </UpperLabel>
+                </>
+              ) : (
+                <>
+                  <h4 className={styles.profileExpTitle}>Người có kinh nghiệm/Experienced Details</h4>
+                  <UpperLabel label="Thời gian đã chơi Golf" htmlFor="golfDuration">
+                    <input id="golfDuration" placeholder="VD: 3 năm" value={form.golfDuration} onChange={(e) => update("golfDuration", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Mục tiêu chơi golf" htmlFor="playingGoal2">
+                    <input id="playingGoal2" placeholder="VD: Single Handicap" value={form.playingGoal} onChange={(e) => update("playingGoal", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Điểm chấp hiện tại" htmlFor="currentHandicap">
+                    <input id="currentHandicap" placeholder="Current handicap" value={form.currentHandicap} onChange={(e) => update("currentHandicap", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Điểm chấp mục tiêu" htmlFor="targetHandicap">
+                    <input id="targetHandicap" placeholder="Target handicap" value={form.targetHandicap} onChange={(e) => update("targetHandicap", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Bộ gậy golf" htmlFor="clubs2">
+                    <input id="clubs2" placeholder="Bộ gậy golf" value={form.clubs} onChange={(e) => update("clubs", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Hài lòng với phần game nào nhất" htmlFor="satisfiedPart">
+                    <input id="satisfiedPart" placeholder="Hài lòng với phần game nào nhất" value={form.satisfiedPart} onChange={(e) => update("satisfiedPart", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Khía cạnh muốn cải thiện" htmlFor="improveAspects" full>
+                    <textarea id="improveAspects" rows={3} placeholder="Aspects expected to be improved..." value={form.improveAspects} onChange={(e) => update("improveAspects", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Khía cạnh đang gặp khó khăn" htmlFor="struggles" full>
+                    <textarea id="struggles" rows={3} placeholder="What is your current struggle?" value={form.struggles} onChange={(e) => update("struggles", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Mô tả chi tiết" htmlFor="detailedDesc" full>
+                    <textarea id="detailedDesc" rows={3} placeholder="Detailed description..." value={form.detailedDesc} onChange={(e) => update("detailedDesc", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Lưu ý (về sức khỏe)" htmlFor="healthNotes2" full>
+                    <textarea id="healthNotes2" rows={3} placeholder="Health notes..." value={form.healthNotes} onChange={(e) => update("healthNotes", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Tần suất tập với HLV (buổi/tuần)" htmlFor="coachFreq2">
+                    <input id="coachFreq2" placeholder="Nhập số buổi" value={form.coachFreq} onChange={(e) => update("coachFreq", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Tần suất tự tập luyện (buổi/tuần)" htmlFor="selfFreq2">
+                    <input id="selfFreq2" placeholder="Nhập số buổi" value={form.selfFreq} onChange={(e) => update("selfFreq", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Khoảng cách gậy 7 sắt hiện tại" htmlFor="iron7Distance" full>
+                    <input id="iron7Distance" placeholder="Khoảng cách gậy 7 sắt hiện tại" value={form.iron7Distance} onChange={(e) => update("iron7Distance", e.target.value)} />
+                  </UpperLabel>
+                  <UpperLabel label="Khoảng cách gậy driver hiện tại" htmlFor="driverDistance" full>
+                    <input id="driverDistance" placeholder="Khoảng cách gậy driver hiện tại" value={form.driverDistance} onChange={(e) => update("driverDistance", e.target.value)} />
+                  </UpperLabel>
+                </>
+              )}
+            </div>
           )}
         </div>
-        <footer className={styles.profileFooter}>
-          {step === 2 ? (
-            <button onClick={() => setStep(1)} type="button">← Quay lại</button>
+        <footer className={styles.profileModalFooter}>
+          <button onClick={onClose} type="button">Đóng</button>
+          {step === 1 ? (
+            <button className={styles.greenButton} onClick={() => setStep(2)} type="button">Lưu →</button>
           ) : (
-            <span />
+            <>
+              <button onClick={() => setStep(1)} type="button">← Quay lại</button>
+              <button className={styles.greenButton} onClick={submit} type="button">Lưu →</button>
+            </>
           )}
-          <div>
-            <button onClick={onClose} type="button">Đóng</button>
-            {step === 1 ? (
-              <button className={styles.greenButton} onClick={() => setStep(2)} type="button">Tiếp tục →</button>
-            ) : (
-              <button className={styles.greenButton} onClick={handleSave} type="button">Lưu profile</button>
-            )}
-          </div>
         </footer>
       </section>
     </div>
+  );
+}
+
+function UpperLabel({
+  children,
+  full,
+  htmlFor,
+  label,
+}: {
+  children: React.ReactNode;
+  full?: boolean;
+  htmlFor?: string;
+  label: string;
+}) {
+  return (
+    <label className={`${styles.upperLabel} ${full ? styles.upperFull : ""}`} htmlFor={htmlFor}>
+      <span>{label}</span>
+      {children}
+    </label>
   );
 }
