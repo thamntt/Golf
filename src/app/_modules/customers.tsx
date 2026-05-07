@@ -498,6 +498,11 @@ export default function CustomersScreen() {
             setDetailOpen(false);
             setSelectedCustomer(null);
           }}
+          onEdit={() => {
+            if (!selectedCustomer) return;
+            setDetailOpen(false);
+            setEditOpen(true);
+          }}
         />
       ) : null}
     </>
@@ -853,11 +858,13 @@ function CustomerDetailModal({
   customer,
   onChangeTab,
   onClose,
+  onEdit,
 }: {
   activeTab: string;
   customer: Customer | null;
   onChangeTab: (tab: string) => void;
   onClose: () => void;
+  onEdit: () => void;
 }) {
   const tabs = ["Thông tin cơ bản", "Hợp đồng", "Lịch sử giao dịch", "Lịch sử checkin", "Kết quả tập luyện", "Inbody", "Meal Plan", "Trợ giảng TA", "Profile"];
   const displayName = customer?.name ?? "Nguyễn Văn A";
@@ -876,7 +883,9 @@ function CustomerDetailModal({
             </div>
           </div>
           <div>
-            <button className={styles.blueButton} type="button"><Edit size={17} />Chỉnh sửa</button>
+            <button className={styles.blueButton} onClick={onEdit} type="button">
+              <Edit size={17} />Chỉnh sửa
+            </button>
             <button onClick={onClose} type="button"><X size={22} /></button>
           </div>
         </header>
