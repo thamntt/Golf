@@ -62,16 +62,18 @@ const COLOR_PRESETS = [
   { value: "#0d9488", label: "Teal" },
 ] as const;
 
-// Slots 30 phút từ 06:00 → 21:30 cho lịch tuần
+// Slots 15 phút từ 06:00 → 21:45 cho lịch tuần, đồng bộ với lịch HLV.
 const generateHourSlots = (): string[] => {
   const slots: string[] = [];
   for (let h = 6; h <= 21; h += 1) {
-    slots.push(`${String(h).padStart(2, "0")}:00`);
-    slots.push(`${String(h).padStart(2, "0")}:30`);
+    for (const m of [0, 15, 30, 45]) {
+      slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    }
   }
   return slots;
 };
 const HOUR_SLOTS = generateHourSlots();
+const CLASS_CALENDAR_SLOT_HEIGHT = 34;
 
 // =====================================================================================
 // SECTION B — Types
@@ -862,9 +864,18 @@ function CalendarTab({
       <div className={styles.classesCalendarGrid}>
         <div className={styles.classesCalendarTimeCol}>
           <div className={styles.classesCalendarHead}>Giờ</div>
-          {HOUR_SLOTS.map((slot) => (
-            <div className={styles.classesCalendarTimeCell} key={slot}>{slot}</div>
-          ))}
+          {HOUR_SLOTS.map((slot) => {
+            const isHourMark = slot.endsWith(":00");
+            const isHalfMark = slot.endsWith(":30");
+            return (
+              <div
+                className={`${styles.classesCalendarTimeCell} ${isHourMark ? styles.classesCalendarTimeHour : isHalfMark ? styles.classesCalendarTimeHalf : styles.classesCalendarTimeMinor}`}
+                key={slot}
+              >
+                {isHourMark ? <strong>{slot}</strong> : <span>{slot}</span>}
+              </div>
+            );
+          })}
         </div>
         {weekDates.map((date, dayIdx) => {
           const isToday = formatVn(date) === TODAY;
@@ -875,13 +886,14 @@ function CalendarTab({
                 <span>{formatVn(date)}</span>
               </div>
               {HOUR_SLOTS.map((slot) => {
+                const isHourMark = slot.endsWith(":00");
                 const cellSessions = sessionsThisWeek.filter(
                   (s) => s.dayOfWeek === dayIdx && s.startTime === slot && s.date === formatVn(date),
                 );
                 if (cellSessions.length === 0) {
                   return (
                     <button
-                      className={styles.classesCalendarCell}
+                      className={`${styles.classesCalendarCell} ${isHourMark ? styles.classesCalendarCellHour : ""}`}
                       key={`${dayIdx}-${slot}`}
                       onClick={onBookSlot}
                       type="button"
@@ -889,13 +901,13 @@ function CalendarTab({
                   );
                 }
                 return (
-                  <div className={styles.classesCalendarCell} key={`${dayIdx}-${slot}`}>
+                  <div className={`${styles.classesCalendarCell} ${isHourMark ? styles.classesCalendarCellHour : ""}`} key={`${dayIdx}-${slot}`}>
                     {cellSessions.map((s) => {
                       const cls = classes.find((c) => c.id === s.classId);
                       const ct = cls ? classTypes.find((t) => t.id === cls.classTypeId) : undefined;
                       const coach = cls ? COACHES.find((c) => c.id === cls.coachId) : undefined;
                       const remaining = (cls?.capacity ?? 0) - s.enrolled.length;
-                      const heightSlots = Math.max(1, Math.round(minutesBetween(s.startTime, s.endTime) / 30));
+                      const heightSlots = Math.max(1, Math.ceil(minutesBetween(s.startTime, s.endTime) / 15));
                       return (
                         <button
                           className={styles.classesSessionCard}
@@ -904,7 +916,7 @@ function CalendarTab({
                           style={{
                             background: ct ? `${ct.color}1a` : "#f3f4f6",
                             borderLeftColor: ct?.color ?? "#7c3aed",
-                            height: `${heightSlots * 36 - 4}px`,
+                            height: `${heightSlots * CLASS_CALENDAR_SLOT_HEIGHT - 6}px`,
                           }}
                           type="button"
                         >
