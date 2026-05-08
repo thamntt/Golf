@@ -632,7 +632,11 @@ function CalendarGrid({
   return (
     <section className={styles.coachCalendarCard}>
       <div className={styles.coachCalendarScroll}>
-        <table className={styles.coachCalendarTable} style={{ gridTemplateColumns: `80px repeat(${coaches.length}, minmax(180px, 1fr))` }}>
+        <table className={styles.coachCalendarTable} style={{ minWidth: `${92 + coaches.length * 220}px` }}>
+          <colgroup>
+            <col style={{ width: 92 }} />
+            {coaches.map((c) => <col key={c.id} style={{ width: 220 }} />)}
+          </colgroup>
           <thead>
             <tr>
               <th className={styles.coachTimeCol}><Clock size={12} /> Giờ</th>
