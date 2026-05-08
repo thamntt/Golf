@@ -658,11 +658,6 @@ export default function CheckinScreen() {
             <PlusCircle size={16} /> Check-in thủ công
           </button>
         ) : null}
-        {tab === "devices" ? (
-          <button className={styles.checkinPrimary} onClick={() => setDeviceFormOpen({ mode: "create" })} type="button">
-            <PlusCircle size={16} /> Thêm thiết bị
-          </button>
-        ) : null}
       </div>
 
       {tab === "list" ? (

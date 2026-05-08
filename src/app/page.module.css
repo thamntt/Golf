@@ -15563,31 +15563,35 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 
 /* Manual checkin modal */
 .checkinManualModal {
-  max-width: 1100px;
-  width: 96vw;
-  max-height: 92vh;
+  max-width: 1120px;
+  width: min(1120px, calc(100vw - 36px));
+  max-height: min(92vh, 860px);
   display: flex;
   flex-direction: column;
+  background: #f8fafc;
 }
 .checkinManualBody {
   flex: 1;
   overflow-y: auto;
-  padding: 18px 22px;
+  padding: 18px;
+  background: #f8fafc;
 }
 .checkinSearchPanel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   padding: 18px;
-  background: #f8fafc;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
 }
 .checkinSearchBig {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 18px;
-  background: #fff;
+  padding: 14px 16px;
+  background: #f8fafc;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
 }
@@ -15600,18 +15604,18 @@ button.classesCalendarCell:hover { background: #f8fafc; }
   background: transparent;
 }
 .checkinSearchResults {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 .checkinSearchResult {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.15s;
   text-align: left;
@@ -15623,6 +15627,8 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 .checkinAvatar {
   width: 40px;
   height: 40px;
+  flex: 0 0 40px;
+  aspect-ratio: 1;
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: #fff;
   border-radius: 50%;
@@ -15631,6 +15637,10 @@ button.classesCalendarCell:hover { background: #f8fafc; }
   justify-content: center;
   font-weight: 700;
   font-size: 16px;
+  line-height: 1;
+  overflow: hidden;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 .checkinSearchResult > div {
   flex: 1;
@@ -15643,30 +15653,39 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 
 .checkinManualGrid {
   display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 18px;
+  grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
 }
 .checkinManualLeft {
-  background: #fff;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 18px;
+  border-radius: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
 }
 .checkinAvatarLarge {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #0f766e 0%, #2563eb 100%);
   color: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
-  font-weight: 700;
-  margin: 0 auto;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0 auto 2px;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+  overflow: hidden;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 .checkinManualLeft h4 {
   margin: 0;
@@ -15683,10 +15702,10 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 }
 .checkinChangeMember {
   align-self: center;
-  padding: 4px 12px;
-  background: #f1f5f9;
-  border: 0;
-  color: #475569;
+  padding: 6px 12px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
   font-size: 11px;
   font-weight: 600;
   border-radius: 999px;
@@ -15702,32 +15721,35 @@ button.classesCalendarCell:hover { background: #f8fafc; }
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   background: #fef2f2;
   color: #b91c1c;
   border: 1px solid #fecaca;
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 12px;
 }
 .checkinOkBadge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 9px 12px;
   background: #f0fdf4;
   color: #15803d;
   border: 1px solid #bbf7d0;
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 600;
-  align-self: flex-start;
+  align-self: stretch;
+  justify-content: center;
 }
 .checkinManualSection {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid #f1f5f9;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
 }
 .checkinManualSection h5 {
   margin: 0;
@@ -15745,13 +15767,15 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 }
 .checkinManualField span { font-weight: 600; color: #475569; }
 .checkinManualField select {
-  padding: 7px 10px;
+  padding: 9px 10px;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 13px;
+  background: #ffffff;
 }
 .checkinBorrowGroup {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 8px;
 }
@@ -15765,29 +15789,32 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 }
 .checkinBorrowItem input { width: 14px; height: 14px; accent-color: #2563eb; }
 .checkinBorrowGroup select {
-  flex: 1;
-  padding: 5px 8px;
+  width: 100%;
+  padding: 7px 8px;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
+  background: #ffffff;
 }
 .checkinAddonGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 .checkinAddonCard {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 8px;
-  background: #f8fafc;
+  min-height: 52px;
+  padding: 9px 10px;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 10px;
 }
 .checkinAddonCardActive {
   background: #eff6ff;
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 .checkinAddonCard label {
   display: flex;
@@ -15819,11 +15846,11 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 .checkinPaymentRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 10px;
+  padding: 10px;
   background: #fff7ed;
   border: 1px solid #fed7aa;
-  border-radius: 6px;
+  border-radius: 10px;
   margin-top: 6px;
 }
 .checkinPaymentRow strong { font-size: 12px; color: #9a3412; }
@@ -15845,21 +15872,23 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 .checkinManualRight {
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
+  min-height: 100%;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
 }
 .checkinManualTabs {
   display: flex;
   gap: 4px;
-  padding: 8px;
-  background: #f8fafc;
+  padding: 10px;
+  background: #f1f5f9;
   border-bottom: 1px solid #e2e8f0;
-  border-radius: 12px 12px 0 0;
+  border-radius: 14px 14px 0 0;
 }
 .checkinManualTabs button {
   flex: 1;
-  padding: 7px 10px;
+  padding: 9px 10px;
   border: 0;
   background: transparent;
   font-size: 12px;
@@ -15872,20 +15901,30 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 .checkinManualTabActive {
   background: #fff !important;
   color: #2563eb !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 .checkinPackageInfo {
-  padding: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 .checkinPkgGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 14px;
+  gap: 12px;
   margin: 0;
 }
-.checkinPkgGrid > div { display: flex; flex-direction: column; gap: 2px; }
+.checkinPkgGrid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 62px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
 .checkinPkgGrid dt {
   font-size: 11px;
   color: #94a3b8;
@@ -15918,7 +15957,7 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 }
 .checkinPkgLinks button:hover { background: #dbeafe; }
 .checkinNote {
-  padding: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -15933,18 +15972,19 @@ button.classesCalendarCell:hover { background: #f8fafc; }
   color: #854d0e;
 }
 .checkinHistory {
-  padding: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 .checkinHistory > div {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: #f8fafc;
-  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
 }
 .checkinHistory strong { font-size: 12px; color: #0f172a; }
 .checkinHistory span { font-size: 11px; color: #64748b; }
@@ -16612,6 +16652,7 @@ button.classesCalendarCell:hover { background: #f8fafc; }
 @media (max-width: 768px) {
   .checkinKpiGrid { grid-template-columns: repeat(2, 1fr); }
   .checkinManualGrid { grid-template-columns: 1fr; }
+  .checkinSearchResults { grid-template-columns: 1fr; }
   .checkinDeviceGrid { grid-template-columns: 1fr; }
   .checkinConfigPane { grid-template-columns: 1fr; }
   .checkinBioKpi { grid-template-columns: repeat(2, 1fr); }
