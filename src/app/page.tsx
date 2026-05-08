@@ -47,7 +47,6 @@ const navLabel: Partial<Record<ModuleKey, string>> = {
 export default function Home() {
   const [active, setActive] = useState<ModuleKey>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
-  const activeLabel = navLabel[active] ?? navItems.find((item) => item.key === active)?.label ?? "Dashboard";
 
   return (
     <div className={`${styles.shell} ${collapsed ? styles.collapsedShell : ""}`}>
@@ -94,10 +93,6 @@ export default function Home() {
             </div>
           ))}
         </nav>
-        <div className={styles.sidebarFooter}>
-          <span>Đang mở</span>
-          <strong>{activeLabel}</strong>
-        </div>
       </aside>
 
       <main className={styles.main}>
