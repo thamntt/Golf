@@ -319,53 +319,67 @@ function StatCard({ caption, icon: Icon, label, value }: { caption: string; icon
 
 function BusinessPanel({ logoUploaded, onLogo, onOpen }: { logoUploaded: boolean; onLogo: () => void; onOpen: (kind: ModalKind, title: string, note?: string) => void }) {
   return (
-    <div className={styles.settingsBusinessGrid}>
-      <section className={styles.settingsCard}>
-        <PanelHead icon={Building2} title="Logo doanh nghiệp" subtitle="Dùng cho hợp đồng, hóa đơn, phiếu thu và thẻ hội viên." />
+    <div className={styles.settingsBusinessShell}>
+      <section className={styles.settingsBusinessProfile}>
+        <div className={styles.settingsBusinessGradient}>
+          <span>Hồ sơ doanh nghiệp</span>
+          <strong>NextVision Golf Center</strong>
+          <p>Thông tin này được dùng đồng bộ cho hợp đồng, hóa đơn điện tử, phiếu thu, bill thanh toán và header mẫu in.</p>
+        </div>
         <div className={styles.settingsLogoBox}>
           <div className={styles.settingsLogoPreview}>{logoUploaded ? "NG" : "N"}</div>
+          <div>
+            <strong>Logo doanh nghiệp</strong>
+            <span>PNG/JPG/GIF, tối đa 2MB. Khuyến nghị 200x200px.</span>
+          </div>
           <button onClick={onLogo} type="button"><Upload size={18} />Tải logo</button>
-          <p>PNG/JPG/GIF, tối đa 2MB. Khuyến nghị 200x200 để không bị kéo dài trên phiếu in.</p>
+        </div>
+        <div className={styles.settingsBusinessChecklist}>
+          {["Email hợp lệ", "MST 10 hoặc 13 số", "Thông tin in đồng bộ", "Audit log khi lưu"].map((item) => (
+            <span key={item}><Check size={14} />{item}</span>
+          ))}
         </div>
       </section>
-      <section className={styles.settingsCard}>
-        <PanelHead icon={FileText} title="Thông tin cơ bản" subtitle="Thông tin pháp lý hiển thị trên chứng từ." />
-        <div className={styles.settingsFormGrid}>
-          <TextField label="Tên doanh nghiệp" value="NextVision Golf Center" />
-          <TextField label="Mã số thuế" value="0318 888 999" />
-          <TextField label="Tên viết tắt" value="NextGolf" />
-          <TextField label="Chi nhánh mặc định" value="Bến Nghé" />
-        </div>
-      </section>
-      <section className={styles.settingsCard}>
-        <PanelHead icon={MonitorCog} title="Thông tin liên hệ" subtitle="Dùng cho thông báo, mẫu in và hóa đơn điện tử." />
-        <div className={styles.settingsFormGrid}>
-          <TextField label="Hotline" value="028 3822 1900" />
-          <TextField label="Email" value="support@nextgolf.vn" />
-          <TextField label="Website" value="nextgolf.vn" />
-          <TextField label="Múi giờ" value="GMT+7 Asia/Saigon" />
-          <TextField area label="Địa chỉ" value="12 Nguyễn Huệ, Quận 1, TP.HCM" />
-        </div>
-      </section>
-      <section className={styles.settingsCard}>
-        <PanelHead icon={ClipboardCheck} title="Mô tả vận hành" subtitle="Ghi chú nội bộ để đồng bộ quy chuẩn giữa các chi nhánh." />
-        <textarea className={styles.settingsTextarea} defaultValue="Trung tâm golf indoor/outdoor, quản lý hội viên, HLV, line tập, lớp học, thiết bị check-in và thanh toán tại quầy." />
-      </section>
-      <section className={styles.settingsCard}>
-        <PanelHead icon={Layers3} title="Sơ đồ tổ chức" subtitle="Ảnh OrgChart trong tài liệu được đưa thành màn cấu hình cơ cấu quản trị." action="Cập nhật sơ đồ" onAction={() => onOpen("template", "Cập nhật sơ đồ tổ chức")} />
-        <div className={styles.settingsOrgChart}>
-          <div>Tổng giám đốc</div>
+
+      <section className={styles.settingsBusinessForm}>
+        <div className={styles.settingsBusinessTopline}>
           <div>
-            <span>Vận hành</span>
-            <span>Kinh doanh</span>
-            <span>Đào tạo HLV</span>
+            <span><Building2 size={16} /> Thông tin doanh nghiệp</span>
+            <h3>Cấu hình nhận diện trung tâm</h3>
+            <p>Các trường dưới đây có thể chỉnh trực tiếp như form thật, sau khi lưu sẽ áp dụng cho chứng từ và mẫu in mới.</p>
           </div>
-          <div>
-            <span>Lễ tân</span>
-            <span>Sales</span>
-            <span>HLV</span>
-            <span>Kế toán</span>
+          <div className={styles.settingsBusinessActions}>
+            <button onClick={() => onOpen("preview", "Xem trước Hợp đồng chuẩn")} type="button"><Eye size={16} />Xem mẫu in</button>
+            <button onClick={() => onOpen("template", "Lưu thông tin doanh nghiệp")} type="button"><Save size={16} />Lưu thông tin</button>
           </div>
+        </div>
+
+        <div className={styles.settingsBusinessSections}>
+          <section className={`${styles.settingsBusinessSection} ${styles.settingsBusinessSectionBlue}`}>
+            <header><FileText size={18} /><div><strong>Thông tin cơ bản</strong><span>Thông tin pháp lý hiển thị trên chứng từ</span></div></header>
+            <div className={styles.settingsFormGrid}>
+              <TextField label="Tên doanh nghiệp *" value="NextVision Golf Center" />
+              <TextField label="Mã số thuế" value="0318888999" />
+              <TextField label="Tên viết tắt" value="NextGolf" />
+              <TextField label="Chi nhánh mặc định" value="Bến Nghé" />
+            </div>
+          </section>
+
+          <section className={`${styles.settingsBusinessSection} ${styles.settingsBusinessSectionGreen}`}>
+            <header><MonitorCog size={18} /><div><strong>Thông tin liên hệ</strong><span>Dùng trên phiếu thu, hóa đơn và thông báo hệ thống</span></div></header>
+            <div className={styles.settingsFormGrid}>
+              <TextField label="Số điện thoại *" value="028 3822 1900" />
+              <TextField label="Email *" value="support@nextgolf.vn" />
+              <TextField label="Website" value="https://nextgolf.vn" />
+              <TextField label="Múi giờ" value="GMT+7 Asia/Saigon" />
+              <TextField area label="Địa chỉ *" value="12 Nguyễn Huệ, Quận 1, TP.HCM" />
+            </div>
+          </section>
+
+          <section className={`${styles.settingsBusinessSection} ${styles.settingsBusinessSectionViolet}`}>
+            <header><ClipboardCheck size={18} /><div><strong>Mô tả</strong><span>Giới thiệu ngắn về sân tập, dịch vụ và đội ngũ HLV</span></div></header>
+            <textarea className={styles.settingsTextarea} defaultValue="Trung tâm golf indoor/outdoor, quản lý hội viên, HLV, line tập, lớp học, thiết bị check-in và thanh toán tại quầy." />
+          </section>
         </div>
       </section>
     </div>
@@ -374,32 +388,58 @@ function BusinessPanel({ logoUploaded, onLogo, onOpen }: { logoUploaded: boolean
 
 function PaymentPanel({ onToast }: { onToast: (message: string) => void }) {
   return (
-    <div className={styles.settingsSplit}>
-      <section className={styles.settingsCard}>
-        <PanelHead icon={CreditCard} title="Phương thức thanh toán" subtitle="Bật/tắt kênh thu tiền theo quy trình quầy lễ tân." action="Thêm phương thức" onAction={() => onToast("Đã mở luồng thêm phương thức thanh toán")} />
-        <div className={styles.settingsPaymentList}>
-          {paymentMethods.map((method) => (
-            <article key={method.name}>
+    <div className={styles.settingsOpsLayout}>
+      <section className={styles.settingsOpsHero}>
+        <div>
+          <span><CreditCard size={16} /> Thanh toán & đối soát</span>
+          <h3>Thiết lập kênh thu tiền tại quầy</h3>
+          <p>Quản lý tiền mặt, chuyển khoản, POS, ví điện tử và nội dung QR hiển thị trên phiếu thu, bill thanh toán.</p>
+        </div>
+        <button onClick={() => onToast("Đã mở luồng thêm phương thức thanh toán")} type="button"><Plus size={16} />Thêm phương thức</button>
+      </section>
+
+      <section className={`${styles.settingsCard} ${styles.settingsPaymentPanel}`}>
+        <PanelHead icon={CreditCard} title="Phương thức thanh toán" subtitle="Bật/tắt kênh thu tiền theo quy trình quầy lễ tân." />
+        <div className={styles.settingsPaymentMethods}>
+          {paymentMethods.map((method, index) => (
+            <article className={method.active ? styles.settingsPaymentActive : ""} key={method.name}>
+              <span>{index + 1}</span>
               <div>
                 <strong>{method.name}</strong>
-                <span>Phí {method.fee} · Đối soát {method.settlement}</span>
+                <small>Phí {method.fee} · Đối soát {method.settlement} · {method.active ? "Đang nhận thanh toán" : "Đang tạm khóa"}</small>
               </div>
-              <button className={method.active ? styles.settingsToggleOn : styles.settingsToggleOff} onClick={() => onToast(`${method.name}: trạng thái đã được ghi nhận`)} type="button">
-                <span />
-              </button>
+              <button className={method.active ? styles.settingsToggleOn : styles.settingsToggleOff} onClick={() => onToast(`${method.name}: trạng thái đã được ghi nhận`)} type="button"><span /></button>
             </article>
           ))}
         </div>
       </section>
-      <section className={styles.settingsCard}>
-        <PanelHead icon={Banknote} title="Tài khoản nhận tiền" subtitle="Thông tin in trên phiếu thu và màn xác nhận chuyển khoản." />
-        <div className={styles.settingsFormGrid}>
-          <TextField label="Ngân hàng" value="Vietcombank" />
-          <TextField label="Số tài khoản" value="1029 888 999" />
-          <TextField label="Chủ tài khoản" value="CONG TY NEXTVISION GOLF" />
-          <TextField label="Nội dung mặc định" value="{MaPhieuThu} {TenHoiVien}" />
-        </div>
-      </section>
+
+      <div className={styles.settingsOpsGrid}>
+        <section className={styles.settingsCard}>
+          <PanelHead icon={Banknote} title="Tài khoản nhận tiền" subtitle="Thông tin in trên phiếu thu và màn xác nhận chuyển khoản." />
+          <div className={styles.settingsFormGrid}>
+            <TextField label="Ngân hàng" value="Vietcombank" />
+            <TextField label="Số tài khoản" value="1029 888 999" />
+            <TextField label="Chủ tài khoản" value="CONG TY NEXTVISION GOLF" />
+            <TextField label="Nội dung mặc định" value="{MaPhieuThu} {TenHoiVien}" />
+            <TextField label="Mã QR nhận tiền" value="VCB-1029888999" />
+            <TextField label="Chi nhánh nhận tiền" value="Bến Nghé" />
+          </div>
+        </section>
+        <section className={styles.settingsCard}>
+          <PanelHead icon={ClipboardCheck} title="Quy tắc vận hành" subtitle="Áp dụng cho hợp đồng, vé lẻ, teetime, check-in và sổ quỹ." />
+          <div className={styles.settingsRuleList}>
+            <label><input defaultChecked type="checkbox" /> Tự sinh phiếu thu khi thanh toán thành công</label>
+            <label><input defaultChecked type="checkbox" /> Cho phép chia nhiều phương thức trong một giao dịch</label>
+            <label><input defaultChecked type="checkbox" /> Bắt buộc xác nhận chuyển khoản trước khi in bill</label>
+            <label><input type="checkbox" /> Tự động gửi bill qua email/Zalo sau thanh toán</label>
+          </div>
+          <div className={styles.settingsActionRow}>
+            <button onClick={() => onToast("Đã kiểm tra cấu hình thanh toán")} type="button"><TestTube2 size={17} />Kiểm tra</button>
+            <button onClick={() => onToast("Đã lưu cấu hình thanh toán")} type="button"><Save size={17} />Lưu cấu hình</button>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
@@ -425,7 +465,6 @@ function ThemeSettingsBlock({ showToast }: { showToast: (message: string) => voi
     </section>
   );
 }
-
 function GeneralPanel({
   digits,
   rounding,
@@ -444,7 +483,16 @@ function GeneralPanel({
   vatMode: "before" | "after";
 }) {
   return (
-    <div className={styles.settingsSplit}>
+    <div className={styles.settingsOpsLayout}>
+      <section className={styles.settingsOpsHero}>
+        <div>
+          <span><Gauge size={16} /> VAT & Giá</span>
+          <h3>Cấu hình cách tính giá toàn hệ thống</h3>
+          <p>Áp dụng cho hợp đồng mới, vé lẻ, dịch vụ đi kèm, phiếu thu và hóa đơn điện tử. Hợp đồng đã lưu không bị thay đổi ngược.</p>
+        </div>
+        <button onClick={() => showToast("Đã lưu cấu hình VAT và giá")} type="button"><Save size={16} />Lưu cài đặt</button>
+      </section>
+      <div className={styles.settingsSplit}>
       <section className={styles.settingsCard}>
         <PanelHead icon={Gauge} title="Cấu hình tính thuế VAT" subtitle="Áp dụng cho hợp đồng mới, hóa đơn dịch vụ và phiếu thu phát sinh sau thời điểm lưu." />
         <div className={styles.settingsVatOptions}>
@@ -464,8 +512,13 @@ function GeneralPanel({
         <div className={styles.settingsFormGrid}>
           <TextField label="VAT mặc định (%)" value="8" />
           <TextField label="Nhãn thuế" value="VAT" />
+          <TextField label="Hiển thị chi tiết VAT" value="Bật" />
+          <TextField label="Làm tròn VAT" value="Bật" />
         </div>
-        <InfoNote>Thay đổi VAT được ghi audit log và không cập nhật ngược hợp đồng đã phát hành.</InfoNote>
+        <div className={styles.settingsVatExample}>
+          <article><span>Giảm trước VAT</span><strong>1.430.000đ</strong><small>VAT tính trên giá đã giảm</small></article>
+          <article><span>Giảm sau VAT</span><strong>1.450.000đ</strong><small>VAT tính trên giá gốc</small></article>
+        </div>
       </section>
       <section className={styles.settingsCard}>
         <PanelHead icon={CircleDollarSign} title="Làm tròn giá" subtitle="Quy chuẩn hiển thị tiền trên báo cáo, phiếu thu và hóa đơn." />
@@ -486,9 +539,19 @@ function GeneralPanel({
           <strong>Ví dụ hiển thị</strong>
           <span>{rounding ? Number(1250000.257).toLocaleString("vi-VN", { maximumFractionDigits: digits, minimumFractionDigits: digits }) : "1.250.000,257"} đ</span>
         </div>
+      </section>
+      </div>
+      <section className={styles.settingsCard}>
+        <PanelHead icon={ClipboardCheck} title="Tóm tắt cài đặt hiện tại" subtitle="Preview realtime để kế toán và lễ tân hiểu đúng cách hệ thống tính tiền." />
+        <div className={styles.settingsSummaryGrid}>
+          <MiniStat label="Thứ tự giảm giá" value={vatMode === "before" ? "Trước VAT" : "Sau VAT"} />
+          <MiniStat label="Thuế suất mặc định" value="8%" />
+          <MiniStat label="Nhãn thuế" value="VAT" />
+          <MiniStat label="Chi tiết phiếu thu" value="Bật" />
+        </div>
         <div className={styles.settingsActionRow}>
-          <button onClick={() => showToast("Đã khôi phục cấu hình VAT mặc định")} type="button"><RefreshCcw size={17} />Khôi phục</button>
-          <button onClick={() => showToast("Đã lưu cấu hình VAT và làm tròn giá")} type="button"><Save size={17} />Lưu thay đổi</button>
+          <button onClick={() => showToast("Đã khôi phục cấu hình VAT mặc định")} type="button"><RefreshCcw size={17} />Đặt lại mặc định</button>
+          <button onClick={() => showToast("Đã lưu cấu hình VAT và làm tròn giá")} type="button"><Save size={17} />Lưu cài đặt VAT</button>
         </div>
       </section>
       <ThemeSettingsBlock showToast={showToast} />
@@ -498,7 +561,15 @@ function GeneralPanel({
 
 function BranchPanel({ onOpen }: { onOpen: (kind: ModalKind, title: string, note?: string) => void }) {
   return (
-    <div className={styles.settingsStack}>
+    <div className={styles.settingsOpsLayout}>
+      <section className={styles.settingsOpsHero}>
+        <div>
+          <span><Layers3 size={16} /> Quản lý chi nhánh</span>
+          <h3>Vận hành nhiều cơ sở golf</h3>
+          <p>Theo dõi địa chỉ, người quản lý, giờ mở cửa, số hội viên và trạng thái hoạt động từng chi nhánh.</p>
+        </div>
+        <button onClick={() => onOpen("branch", "Thêm chi nhánh mới")} type="button"><Plus size={16} />Thêm chi nhánh</button>
+      </section>
       <div className={styles.settingsMiniStats}>
         <MiniStat label="Tổng chi nhánh" value="03" />
         <MiniStat label="Đang hoạt động" value="02" />
@@ -506,12 +577,14 @@ function BranchPanel({ onOpen }: { onOpen: (kind: ModalKind, title: string, note
         <MiniStat label="TB hội viên/CN" value="309" />
       </div>
       <section className={styles.settingsCard}>
-        <PanelHead icon={Layers3} title="Quản lý chi nhánh" subtitle="Theo dõi địa điểm, quản lý, giờ mở cửa và trạng thái vận hành." action="Thêm chi nhánh" onAction={() => onOpen("branch", "Thêm chi nhánh")} />
+        <PanelHead icon={Layers3} title="Danh sách chi nhánh" subtitle="Click vào card hoặc dùng nút thao tác để chỉnh sửa chi nhánh." />
         <div className={styles.settingsToolbarLine}>
           <Search size={18} />
-          <input placeholder="Tìm theo tên, mã, người quản lý..." />
+          <input placeholder="Tìm theo tên, mã, địa chỉ, người quản lý..." />
+          <button type="button">Cả ngày</button>
           <button type="button">Tất cả</button>
           <button type="button">Đang hoạt động</button>
+          <button type="button">Tạm ngưng</button>
         </div>
         <div className={styles.settingsBranchGrid}>
           {branches.map((branch) => (
@@ -727,8 +800,17 @@ function PrintPanel({ filter, onFilter, onOpen }: { filter: string; onFilter: (v
   const filtered = filter === "Tất cả" ? templates : templates.filter((template) => template.type === filter);
   const filterCount = (item: string) => item === "Tất cả" ? templates.length : templates.filter((template) => template.type === item).length;
   return (
+    <div className={styles.settingsOpsLayout}>
+    <section className={styles.settingsOpsHero}>
+      <div>
+        <span><Printer size={16} /> Cấu hình mẫu in</span>
+        <h3>Template in ấn dùng toàn hệ thống</h3>
+        <p>Quản lý mẫu hợp đồng, hóa đơn, thẻ hội viên, phiếu thu và bill thanh toán. Mỗi loại có một mẫu mặc định.</p>
+      </div>
+      <button onClick={() => onOpen("template", "Tạo mẫu in mới")} type="button"><Plus size={16} />Tạo mẫu in</button>
+    </section>
     <section className={styles.settingsCard}>
-      <PanelHead icon={Printer} title="Cấu hình mẫu in" subtitle="Quản lý template hợp đồng, hóa đơn, thẻ hội viên, phiếu thu và bill thanh toán." action="Tạo mẫu in mới" onAction={() => onOpen("template", "Tạo mẫu in mới")} />
+      <PanelHead icon={Printer} title="Danh sách mẫu in" subtitle="Lọc theo loại, xem trước, cấu hình hoặc xóa mẫu không phải mặc định." />
       <div className={styles.settingsFilterTabs}>
         {filters.map((item) => (
           <button className={filter === item ? styles.settingsFilterActive : undefined} key={item} onClick={() => onFilter(item)} type="button">{item} ({filterCount(item)})</button>
@@ -762,6 +844,7 @@ function PrintPanel({ filter, onFilter, onOpen }: { filter: string; onFilter: (v
         </div>
       )}
     </section>
+    </div>
   );
 }
 
@@ -778,8 +861,22 @@ function InvoicePanel({
   setProvider: (value: string) => void;
   showToast: (message: string) => void;
 }) {
+  const providerFields = provider === "BKAV"
+    ? ["Partner GUID", "Partner Token", "Invoice form", "Loại hóa đơn", "Loại ký số", "API endpoint"]
+    : provider === "MISA"
+      ? ["Mã số thuế", "Username", "Password", "App ID", "API Key", "Loại ký số"]
+      : ["Mã số thuế", "Username", "Password", "API Key", "API Secret", "Môi trường"];
   return (
-    <div className={styles.settingsSplit}>
+    <div className={styles.settingsOpsLayout}>
+      <section className={styles.settingsOpsHero}>
+        <div>
+          <span><ReceiptText size={16} /> Hóa đơn điện tử</span>
+          <h3>Kết nối nhà cung cấp HĐĐT</h3>
+          <p>Cấu hình thông tin xác thực, ký hiệu hóa đơn và quy tắc phát hành tự động cho hợp đồng, vé lẻ, bill dịch vụ.</p>
+        </div>
+        <button onClick={() => { setConnected(true); showToast(`Kết nối ${provider} thành công trong môi trường demo`); }} type="button"><TestTube2 size={16} />Test kết nối</button>
+      </section>
+      <div className={styles.settingsSplit}>
       <section className={styles.settingsCard}>
         <PanelHead icon={ReceiptText} title="Nhà cung cấp hóa đơn điện tử" subtitle="Cần test kết nối thành công trước khi lưu thông tin phát hành." />
         <div className={styles.settingsProviderGrid}>
@@ -788,35 +885,31 @@ function InvoicePanel({
               <ReceiptText size={22} />
               <strong>{item}</strong>
               <span>{item === "Viettel" ? "Đang dùng phổ biến" : "Tích hợp API"}</span>
-            </button>
-          ))}
+          </button>
+        ))}
         </div>
-        <div className={styles.settingsProviderChecklist}>
-          {providers.map((item) => (
-            <span className={provider === item ? styles.settingsProviderCurrent : undefined} key={`${item}-screen`}>
-              Màn {item === "VNPT" ? "VNPT" : item}
-            </span>
-          ))}
-        </div>
-        <div className={styles.settingsActionRow}>
-          <button onClick={() => { setConnected(true); showToast(`Kết nối ${provider} thành công trong môi trường demo`); }} type="button"><TestTube2 size={17} />Test kết nối</button>
-          <button disabled={!connected} onClick={() => showToast(`Đã lưu cấu hình HĐĐT ${provider}`)} type="button"><Save size={17} />Lưu HĐĐT</button>
+        <div className={styles.settingsProviderStatus}>
+          <strong>{provider}</strong>
+          <span>{connected ? "Đã test kết nối. Có thể lưu cấu hình phát hành." : "Chưa test kết nối. Nút lưu sẽ khóa cho đến khi test thành công."}</span>
         </div>
       </section>
       <section className={styles.settingsCard}>
         <PanelHead icon={LockKeyhole} title="Thông tin phát hành" subtitle="Thông tin nhạy cảm được mã hóa khi lưu trên máy chủ." />
         <div className={styles.settingsFormGrid}>
-          <TextField label="Mã số thuế" value="0318 888 999" />
-          <TextField label="Tài khoản API" value="nextgolf_api" />
+          {providerFields.map((field, index) => (
+            <TextField key={field} label={field} value={index === 0 ? "0318888999" : index === 1 ? "nextgolf_api" : ""} />
+          ))}
           <TextField label="Mẫu số" value="1/001" />
           <TextField label="Ký hiệu" value="C26TNG" />
+          <TextField label="Tự động phát hành" value="Bật sau khi thanh toán đủ" />
+          <TextField label="Email nhận lỗi" value="accounting@nextgolf.vn" />
         </div>
-        <div className={styles.settingsControlRow}>
-          <span>Tự động phát hành khi hợp đồng đã thanh toán</span>
-          <button className={styles.settingsToggleOn} type="button"><span /></button>
+        <div className={styles.settingsActionRow}>
+          <button onClick={() => showToast("Đã mở nhật ký phát hành HĐĐT")} type="button"><FileText size={17} />Nhật ký</button>
+          <button disabled={!connected} onClick={() => showToast(`Đã lưu cấu hình HĐĐT ${provider}`)} type="button"><Save size={17} />Lưu HĐĐT</button>
         </div>
-        <InfoNote>{connected ? `${provider} đã sẵn sàng phát hành.` : "Chưa test kết nối. Nút lưu sẽ bị khóa cho đến khi test thành công."}</InfoNote>
       </section>
+      </div>
     </div>
   );
 }
@@ -833,7 +926,15 @@ function RolePanel({
   showToast: (message: string) => void;
 }) {
   return (
-    <div className={styles.settingsStack}>
+    <div className={styles.settingsOpsLayout}>
+      <section className={styles.settingsOpsHero}>
+        <div>
+          <span><ShieldCheck size={16} /> Phân quyền & Agent</span>
+          <h3>Quản trị vai trò, quyền và sơ đồ tổ chức</h3>
+          <p>Thiết lập ma trận quyền theo module, mời Agent qua SSO, theo dõi trạng thái tài khoản và phân cấp quản lý.</p>
+        </div>
+        <button onClick={() => onOpen("role", "Mời Agent mới")} type="button"><Plus size={16} />Mời Agent</button>
+      </section>
       <div className={styles.settingsMiniStats}>
         <MiniStat label="Vai trò" value="05" />
         <MiniStat label="Tài khoản" value="32" />
@@ -888,34 +989,46 @@ function RolePanel({
 
 function CodePanel({ onOpen, showToast }: { onOpen: (kind: ModalKind, title: string, note?: string) => void; showToast: (message: string) => void }) {
   return (
-    <section className={styles.settingsCard}>
-      <PanelHead icon={KeyRound} title="Cấu hình sinh mã" subtitle="Thiết lập tiền tố, ký tự phân tách và độ dài mã cho các nghiệp vụ chính." action="Thêm cấu hình" onAction={() => onOpen("template", "Thêm cấu hình sinh mã")} />
-      <InfoNote>Mã đã phát sinh không đổi. Cấu hình mới chỉ áp dụng cho hồ sơ tạo sau khi lưu.</InfoNote>
-      <div className={styles.settingsCodeGrid}>
-        {codeConfigs.map((config) => (
-          <article key={config.label}>
-            <header>
-              <strong>{config.label}</strong>
-              <span>{config.preview}</span>
-            </header>
-            <div className={styles.settingsFormGrid}>
-              <TextField label="Tiền tố" value={config.prefix} />
-              <TextField label="Phân tách" value={config.separator || "Không dùng"} />
-              <TextField label="Số bắt đầu" value={config.start} />
-              <TextField label="Số chữ số" value={String(config.digits)} />
-            </div>
-            <footer>
-              <button onClick={() => showToast(`Đã reset cấu hình ${config.label}`)} type="button"><RefreshCcw size={15} />Reset</button>
-              <button onClick={() => onOpen("confirm", `Xóa cấu hình ${config.label}`, "Chỉ xóa khi chưa có nghiệp vụ đang dùng mã này.")} type="button"><Trash2 size={15} />Xóa</button>
-            </footer>
-          </article>
-        ))}
-      </div>
-      <div className={styles.settingsActionRow}>
-        <button onClick={() => showToast("Đã kiểm tra xung đột mã")} type="button"><ClipboardCheck size={17} />Kiểm tra trùng mã</button>
-        <button onClick={() => showToast("Đã lưu cấu hình sinh mã")} type="button"><Save size={17} />Lưu tất cả</button>
-      </div>
-    </section>
+    <div className={styles.settingsOpsLayout}>
+      <section className={styles.settingsOpsHero}>
+        <div>
+          <span><KeyRound size={16} /> Cấu hình sinh mã</span>
+          <h3>Quy tắc định danh tự động</h3>
+          <p>Mã hội viên, hợp đồng, hóa đơn, lịch PT và lớp học được sinh theo tiền tố, ký tự phân tách và số thứ tự.</p>
+        </div>
+        <button onClick={() => onOpen("template", "Thêm cấu hình sinh mã")} type="button"><Plus size={16} />Thêm cấu hình</button>
+      </section>
+      <section className={styles.settingsCard}>
+        <InfoNote>Mã đã phát sinh không đổi. Cấu hình mới chỉ áp dụng cho hồ sơ tạo sau khi lưu.</InfoNote>
+        <div className={styles.settingsCodeGrid}>
+          {codeConfigs.map((config) => (
+            <article key={config.label} className={styles.settingsCodeCard}>
+              <header>
+                <div>
+                  <strong>{config.label}</strong>
+                  <small>4 mã kế tiếp: {config.preview} · {config.prefix}{config.separator}{String(Number(config.start) + 1).padStart(config.digits, "0")}</small>
+                </div>
+                <span>{config.preview}</span>
+              </header>
+              <div className={styles.settingsFormGrid}>
+                <TextField label="Tiền tố" value={config.prefix} />
+                <TextField label="Phân tách" value={config.separator || "Không dùng"} />
+                <TextField label="Số bắt đầu" value={config.start} />
+                <TextField label="Số chữ số" value={String(config.digits)} />
+              </div>
+              <footer>
+                <button onClick={() => showToast(`Đã reset cấu hình ${config.label}`)} type="button"><RefreshCcw size={15} />Reset</button>
+                <button onClick={() => onOpen("confirm", `Xóa cấu hình ${config.label}`, "Chỉ xóa khi chưa có nghiệp vụ đang dùng mã này.")} type="button"><Trash2 size={15} />Xóa</button>
+              </footer>
+            </article>
+          ))}
+        </div>
+        <div className={styles.settingsActionRow}>
+          <button onClick={() => showToast("Đã kiểm tra xung đột mã")} type="button"><ClipboardCheck size={17} />Kiểm tra trùng mã</button>
+          <button onClick={() => showToast("Đã lưu cấu hình sinh mã")} type="button"><Save size={17} />Lưu tất cả</button>
+        </div>
+      </section>
+    </div>
   );
 }
 

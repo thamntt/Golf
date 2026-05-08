@@ -1,7 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { BriefcaseBusiness, ChevronDown, Menu } from "lucide-react";
+import {
+  Bell,
+  BriefcaseBusiness,
+  ChevronDown,
+  CreditCard,
+  Globe2,
+  HelpCircle,
+  LogOut,
+  Menu,
+  Monitor,
+  Moon,
+  Settings as SettingsIcon,
+  Sun,
+  Type,
+  User,
+} from "lucide-react";
 import styles from "./page.module.css";
 import { navItems } from "./_shared/data";
 import type { ModuleKey } from "./_shared/types";
@@ -47,6 +62,7 @@ const navLabel: Partial<Record<ModuleKey, string>> = {
 export default function Home() {
   const [active, setActive] = useState<ModuleKey>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   return (
     <div className={`${styles.shell} ${collapsed ? styles.collapsedShell : ""}`}>
@@ -108,7 +124,49 @@ export default function Home() {
               <ChevronDown size={16} />
             </button>
             <span className={styles.role}>Admin</span>
-            <span className={styles.avatar}>A</span>
+            <button
+              aria-expanded={accountMenuOpen}
+              aria-label="Mở cài đặt tài khoản"
+              className={styles.avatar}
+              onClick={() => setAccountMenuOpen((value) => !value)}
+              type="button"
+            >
+              A
+            </button>
+            {accountMenuOpen ? (
+              <div className={styles.accountMenu}>
+                <section className={styles.accountMenuHero}>
+                  <span className={styles.accountAvatar}>N</span>
+                  <div>
+                    <strong>Nguyễn Văn A</strong>
+                    <small>nguyenvana@gymmaster.vn</small>
+                    <p><b>Quản lý</b><b>Premium</b></p>
+                  </div>
+                </section>
+
+                <section className={styles.accountMenuList}>
+                  <button type="button"><User size={18} /><span><strong>Hồ sơ của tôi</strong><small>Xem và chỉnh sửa thông tin</small></span></button>
+                  <button onClick={() => { setActive("settings"); setAccountMenuOpen(false); }} type="button"><SettingsIcon size={18} /><span><strong>Cài đặt</strong><small>Quản lý tùy chọn hệ thống</small></span></button>
+                  <button type="button"><CreditCard size={18} /><span><strong>Thanh toán & Gói</strong><small>Quản lý đăng ký của bạn</small></span></button>
+                  <button type="button"><Bell size={18} /><span><strong>Thông báo</strong><small>Cấu hình thông báo</small></span><em>3</em></button>
+                  <button type="button"><HelpCircle size={18} /><span><strong>Trợ giúp & Hỗ trợ</strong><small>Tài liệu và hướng dẫn</small></span></button>
+                </section>
+
+                <section className={styles.accountPrefs}>
+                  <label><Globe2 size={16} />Ngôn ngữ</label>
+                  <div className={styles.accountSegment}><button className={styles.accountSegmentActive} type="button">🇻🇳 Tiếng Việt</button><button type="button">🇬🇧 English</button></div>
+                  <label><Moon size={16} />Giao diện</label>
+                  <div className={styles.accountTheme}><button className={styles.accountThemeActive} type="button"><Sun size={16} />Sáng</button><button type="button"><Moon size={16} />Tối</button><button type="button"><Monitor size={16} />Hệ thống</button></div>
+                  <label><Type size={16} />Kích thước chữ</label>
+                  <div className={styles.accountSegment}><button type="button">Nhỏ</button><button className={styles.accountSegmentActive} type="button">Trung bình</button><button type="button">Lớn</button></div>
+                </section>
+
+                <section className={styles.accountLogout}>
+                  <button type="button"><LogOut size={18} /><span><strong>Đăng xuất</strong><small>Thoát khỏi tài khoản</small></span></button>
+                </section>
+                <footer>GymMaster Pro v2.0 · © 2024</footer>
+              </div>
+            ) : null}
           </div>
         </header>
 

@@ -254,6 +254,7 @@
 }
 
 .userTools {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -291,6 +292,7 @@
 .avatar {
   width: 40px;
   height: 40px;
+  border: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -299,6 +301,220 @@
   color: #ffffff;
   font-size: 16px;
   font-weight: 700;
+  cursor: pointer;
+}
+
+.accountMenu {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  z-index: 80;
+  width: 360px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.86);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 26px 80px rgba(15, 23, 42, 0.22);
+}
+
+.accountMenuHero {
+  display: flex;
+  gap: 14px;
+  padding: 20px;
+  background: linear-gradient(135deg, #2563eb 0%, #8b5cf6 55%, #d946ef 100%);
+  color: #ffffff;
+}
+
+.accountAvatar {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #16a34a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.accountMenuHero strong,
+.accountMenuHero small,
+.accountMenuHero p,
+.accountMenuList strong,
+.accountMenuList small,
+.accountLogout strong,
+.accountLogout small {
+  display: block;
+}
+
+.accountMenuHero strong {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.accountMenuHero small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.accountMenuHero p {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 0;
+}
+
+.accountMenuHero b {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.accountMenuList,
+.accountPrefs,
+.accountLogout {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.accountMenuList button,
+.accountLogout button {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px;
+  background: transparent;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+}
+
+.accountMenuList button:hover,
+.accountLogout button:hover {
+  background: #f8fafc;
+}
+
+.accountMenuList button > svg,
+.accountLogout button > svg {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  padding: 10px;
+  border-radius: 11px;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.accountMenuList button:nth-child(2) > svg { background: #faf5ff; color: #9333ea; }
+.accountMenuList button:nth-child(3) > svg { background: #f0fdf4; color: #16a34a; }
+.accountMenuList button:nth-child(4) > svg { background: #fff7ed; color: #ea580c; }
+.accountMenuList button:nth-child(5) > svg { background: #eef2ff; color: #4f46e5; }
+
+.accountMenuList strong,
+.accountLogout strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.accountMenuList small,
+.accountLogout small {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.accountMenuList em {
+  position: absolute;
+  right: 10px;
+  min-width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.accountPrefs {
+  display: grid;
+  gap: 10px;
+}
+
+.accountPrefs label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.accountSegment,
+.accountTheme {
+  display: grid;
+  gap: 8px;
+}
+
+.accountSegment {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.accountSegment:last-child,
+.accountTheme {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.accountSegment button,
+.accountTheme button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.accountSegment .accountSegmentActive,
+.accountTheme .accountThemeActive {
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: #ffffff;
+}
+
+.accountLogout button,
+.accountLogout button > svg {
+  color: #ef4444;
+}
+
+.accountLogout button > svg {
+  background: #fff1f2;
+}
+
+.accountMenu footer {
+  padding: 12px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
 }
 
 .content {
@@ -19044,25 +19260,95 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .settingsBusinessGrid {
   grid-template-columns: 340px minmax(0, 1fr);
 }
+.settingsBusinessShell {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.settingsBusinessProfile,
+.settingsBusinessForm {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+.settingsBusinessProfile {
+  position: sticky;
+  top: 16px;
+}
+.settingsBusinessGradient {
+  padding: 22px;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(20, 184, 166, 0.9)),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.32), transparent 32%);
+  color: #ffffff;
+}
+.settingsBusinessGradient span,
+.settingsBusinessGradient strong,
+.settingsBusinessGradient p {
+  display: block;
+}
+.settingsBusinessGradient span {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.88;
+}
+.settingsBusinessGradient strong {
+  margin-top: 12px;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.08;
+}
+.settingsBusinessGradient p {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 13px;
+  line-height: 1.55;
+}
 .settingsLogoBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  padding: 22px;
   text-align: center;
 }
 .settingsLogoPreview {
-  width: 116px;
-  height: 116px;
-  border: 1px dashed #93c5fd;
-  border-radius: 22px;
-  background: linear-gradient(135deg, #eff6ff, #dcfce7);
-  color: #1d4ed8;
+  width: 132px;
+  height: 132px;
+  border: 1px solid #bfdbfe;
+  border-radius: 28px;
+  background:
+    linear-gradient(135deg, #ffffff, #eff6ff 58%, #dcfce7),
+    radial-gradient(circle at 30% 20%, rgba(37, 99, 235, 0.22), transparent 42%);
+  color: #0f766e;
   display: grid;
   place-items: center;
-  font-size: 34px;
+  font-size: 38px;
   font-weight: 900;
   overflow: hidden;
+  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.16);
+}
+.settingsLogoBox strong,
+.settingsLogoBox span {
+  display: block;
+}
+.settingsLogoBox strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+.settingsLogoBox span {
+  max-width: 260px;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
 }
 .settingsLogoBox button {
   min-height: 38px;
@@ -19076,6 +19362,140 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   color: #ffffff;
   font-weight: 900;
   cursor: pointer;
+}
+.settingsBusinessChecklist {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 0 22px 22px;
+}
+.settingsBusinessChecklist span {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #dcfce7;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 12px;
+  font-weight: 900;
+}
+.settingsBusinessTopline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc, #eff6ff);
+}
+.settingsBusinessTopline span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.settingsBusinessTopline h3 {
+  margin: 8px 0 6px;
+  color: #0f172a;
+  font-size: 23px;
+  font-weight: 900;
+}
+.settingsBusinessTopline p {
+  max-width: 640px;
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.settingsBusinessActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+}
+.settingsBusinessActions button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #dbeafe;
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.settingsBusinessActions button:last-child {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+.settingsBusinessSections {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+.settingsBusinessSection {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background: #ffffff;
+}
+.settingsBusinessSection header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.settingsBusinessSection header > svg {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  padding: 9px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.74);
+}
+.settingsBusinessSection header strong,
+.settingsBusinessSection header span {
+  display: block;
+}
+.settingsBusinessSection header strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+.settingsBusinessSection header span {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+.settingsBusinessSection .settingsFormGrid,
+.settingsBusinessSection > .settingsTextarea {
+  padding: 16px;
+}
+.settingsBusinessSectionBlue header {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
+}
+.settingsBusinessSectionGreen header {
+  background: linear-gradient(135deg, #ecfdf5, #dcfce7);
+  color: #047857;
+}
+.settingsBusinessSectionViolet header {
+  background: linear-gradient(135deg, #f5f3ff, #fae8ff);
+  color: #7e22ce;
 }
 .settingsLogoBox p,
 .settingsConfirmText {
@@ -19131,6 +19551,124 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+.settingsOpsLayout {
+  display: grid;
+  gap: 14px;
+}
+.settingsOpsHero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, #eff6ff, #ffffff 55%, #ecfeff),
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.16), transparent 36%);
+}
+.settingsOpsHero span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.settingsOpsHero h3 {
+  margin: 8px 0 6px;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 900;
+}
+.settingsOpsHero p {
+  max-width: 760px;
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.settingsOpsHero button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 14px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+}
+.settingsOpsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.settingsPaymentMethods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.settingsPaymentMethods article {
+  min-height: 86px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  padding: 12px;
+  background: #ffffff;
+}
+.settingsPaymentMethods article > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 900;
+}
+.settingsPaymentMethods .settingsPaymentActive {
+  border-color: #93c5fd;
+  background: #f8fbff;
+}
+.settingsPaymentMethods strong,
+.settingsPaymentMethods small {
+  display: block;
+}
+.settingsPaymentMethods strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+.settingsPaymentMethods small {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.settingsRuleList {
+  display: grid;
+  gap: 10px;
+}
+.settingsRuleList label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  padding: 11px 12px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
 }
 .settingsPaymentList,
 .settingsRoleList {
@@ -19231,6 +19769,40 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 }
 .settingsVatActive svg {
   color: #2563eb;
+}
+.settingsVatExample {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.settingsVatExample article {
+  padding: 13px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.settingsVatExample span,
+.settingsVatExample strong,
+.settingsVatExample small {
+  display: block;
+}
+.settingsVatExample span,
+.settingsVatExample small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+.settingsVatExample strong {
+  margin: 5px 0;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 900;
+}
+.settingsSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
 .settingsInfoNote {
   display: flex;
@@ -19621,6 +20193,29 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   background: #dcfce7;
   color: #15803d;
 }
+.settingsProviderStatus {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+.settingsProviderStatus strong,
+.settingsProviderStatus span {
+  display: block;
+}
+.settingsProviderStatus strong {
+  color: #1d4ed8;
+  font-size: 16px;
+  font-weight: 900;
+}
+.settingsProviderStatus span {
+  margin-top: 4px;
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
 .settingsRoleLayout {
   display: grid;
   grid-template-columns: 360px minmax(0, 1fr);
@@ -19708,6 +20303,18 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   color: #ffffff;
   font-size: 12px;
   font-weight: 900;
+}
+.settingsCodeGrid header small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+.settingsCodeCard {
+  background:
+    linear-gradient(135deg, #ffffff, #f8fafc),
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.12), transparent 34%) !important;
 }
 .settingsCodeGrid .settingsFormGrid {
   margin-top: 12px;
