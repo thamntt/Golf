@@ -19,8 +19,8 @@ import type { Customer, NavItem } from "./types";
 
 export const navItems: NavItem[] = [
   { key: "dashboard", label: "Dashboard", Icon: BarChart3 },
-  { key: "employees", label: "NhÃ¢n viÃªn", Icon: UserCog },
   { key: "customers", label: "Khách Hàng", Icon: Users },
+  { key: "employees", label: "Nhân viên", Icon: UserCog },
   { key: "pricing", label: "Bảng Giá", Icon: SlidersHorizontal },
   { key: "contracts", label: "Hợp Đồng", Icon: FileText },
   { key: "tickets", label: "Vé Lẻ", Icon: Ticket },
