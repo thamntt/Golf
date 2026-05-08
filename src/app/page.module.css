@@ -15800,14 +15800,25 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .cashbookHeroActions button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 15px;
+  min-height: 40px;
+  padding: 9px 16px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 10px;
   color: #fff;
+  font: inherit;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
   cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+.cashbookHeroActions button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
 }
 .cashbookHeroActions button:first-child {
   background: linear-gradient(135deg, #059669 0%, #16a34a 100%);
