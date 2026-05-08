@@ -21,15 +21,45 @@ import CommissionScreen from "./_modules/commission";
 import SettingsScreen from "./_modules/settings";
 import ReportsScreen from "./_modules/reports";
 
+const navSections: { items: ModuleKey[]; title: string }[] = [
+  { title: "Tổng quan", items: ["dashboard", "reports"] },
+  { title: "Vận hành sân", items: ["teetime", "line", "coach", "classes", "checkin"] },
+  { title: "Kinh doanh", items: ["customers", "employees", "pricing", "contracts", "tickets"] },
+  { title: "Tài chính", items: ["cashbook", "commission"] },
+  { title: "Hệ thống", items: ["settings"] },
+];
+
+const navLabel: Partial<Record<ModuleKey, string>> = {
+  customers: "Khách Hàng",
+  employees: "Nhân viên",
+  pricing: "Bảng Giá",
+  contracts: "Hợp Đồng",
+  tickets: "Vé Lẻ",
+  line: "Golf Line Tập",
+  coach: "Lịch HLV",
+  classes: "Lịch Lớp",
+  cashbook: "Sổ Quỹ",
+  commission: "Hoa Hồng Sale",
+  settings: "Cài Đặt",
+  reports: "Báo cáo",
+};
+
 export default function Home() {
   const [active, setActive] = useState<ModuleKey>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
+  const activeLabel = navLabel[active] ?? navItems.find((item) => item.key === active)?.label ?? "Dashboard";
 
   return (
     <div className={`${styles.shell} ${collapsed ? styles.collapsedShell : ""}`}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
-          <h1>Golf Manager</h1>
+          <div className={styles.sidebarBrand}>
+            <span>GM</span>
+            <div>
+              <h1>Golf Manager</h1>
+              <small>NextVision Suite</small>
+            </div>
+          </div>
           <button
             aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
             onClick={() => setCollapsed((value) => !value)}
@@ -40,22 +70,34 @@ export default function Home() {
         </div>
 
         <nav className={styles.navigation} aria-label="Menu quản trị">
-          {navItems.map((item) => {
-            const Icon = item.Icon;
-            return (
-              <button
-                className={active === item.key ? styles.activeNav : undefined}
-                key={item.key}
-                onClick={() => setActive(item.key)}
-                type="button"
-                title={collapsed ? item.label : undefined}
-              >
-                <Icon size={19} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+          {navSections.map((section) => (
+            <div className={styles.navSection} key={section.title}>
+              <div className={styles.navGroup}>{section.title}</div>
+              {section.items.map((key) => {
+                const item = navItems.find((navItem) => navItem.key === key);
+                if (!item) return null;
+                const Icon = item.Icon;
+                const label = navLabel[item.key] ?? item.label;
+                return (
+                  <button
+                    className={active === item.key ? styles.activeNav : undefined}
+                    key={item.key}
+                    onClick={() => setActive(item.key)}
+                    type="button"
+                    title={collapsed ? label : undefined}
+                  >
+                    <span className={styles.navIcon}><Icon size={18} /></span>
+                    <span className={styles.navLabel}>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </nav>
+        <div className={styles.sidebarFooter}>
+          <span>Đang mở</span>
+          <strong>{activeLabel}</strong>
+        </div>
       </aside>
 
       <main className={styles.main}>
