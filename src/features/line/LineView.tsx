@@ -24,8 +24,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 // =====================================================================================
 // SECTION A — Constants & types
@@ -281,7 +281,7 @@ function nextLineTicketId(items: LineTicket[]): string {
 
 type TabKey = "list" | "diagram";
 
-export default function LineScreen() {
+export default function LineView() {
   const [tab, setTab] = useState<TabKey>("diagram");
   const [lines, setLines] = useState<Line[]>(INITIAL_LINES);
   const [services, setServices] = useState<ServiceItem[]>(INITIAL_SERVICES);
@@ -296,7 +296,7 @@ export default function LineScreen() {
 
   return (
     <>
-      <Screen
+      <FeaturePage
         title="Golf Line Tập"
         subtitle="Danh sách Line · Sơ đồ Line realtime · In vé lẻ · Dịch vụ bán kèm · Gia hạn giờ"
       >
@@ -326,7 +326,7 @@ export default function LineScreen() {
             flash={flash}
           />
         ) : null}
-      </Screen>
+      </FeaturePage>
       {toast ? <div className={styles.contractToast}>{toast}</div> : null}
     </>
   );

@@ -1,11 +1,11 @@
 "use client";
 
-import styles from "../page.module.css";
-import { Screen, SimpleMetric, Toolbar } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage, SimpleMetric, Toolbar } from "@/shared/components";
 
-export default function ReportsScreen() {
+export default function ReportsView() {
   return (
-    <Screen title="Báo cáo" subtitle="Doanh thu, check-in, hợp đồng, vé lẻ, hoa hồng và công nợ">
+    <FeaturePage title="Báo cáo" subtitle="Doanh thu, check-in, hợp đồng, vé lẻ, hoa hồng và công nợ">
       <Toolbar primary="Xuất báo cáo" filters={["Doanh thu", "Check-in", "Hợp đồng", "Vé lẻ", "Hoa hồng", "Công nợ"]} />
       <div className={styles.reportGrid}>
         <SimpleMetric label="Doanh thu tháng" value="486M" />
@@ -19,6 +19,6 @@ export default function ReportsScreen() {
           ))}
         </div>
       </section>
-    </Screen>
+    </FeaturePage>
   );
 }

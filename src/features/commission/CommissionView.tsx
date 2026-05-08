@@ -16,8 +16,8 @@ import {
   WalletCards,
   X,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 type CommissionType = "sales" | "coach";
 type TabKey = "matrix" | "history";
@@ -194,7 +194,7 @@ const rateLabel = (value: number) => `${Number.isInteger(value) ? value : value.
 
 const cloneRates = (rates: MatrixRates): MatrixRates => JSON.parse(JSON.stringify(rates)) as MatrixRates;
 
-export default function CommissionScreen() {
+export default function CommissionView() {
   const [tab, setTab] = useState<TabKey>("matrix");
   const [type, setType] = useState<CommissionType>("sales");
   const [groups, setGroups] = useState<CustomerGroup[]>(initialGroups);
@@ -307,7 +307,7 @@ export default function CommissionScreen() {
   };
 
   return (
-    <Screen title="Quản Lý Hoa Hồng" subtitle="Cấu hình hoa hồng theo nhóm khách hàng và nhóm dịch vụ">
+    <FeaturePage title="Quản Lý Hoa Hồng" subtitle="Cấu hình hoa hồng theo nhóm khách hàng và nhóm dịch vụ">
       <div className={styles.commissionKpiGrid}>
         <KpiCard tone="green" icon={<Banknote size={22} />} label="Tổng HH tháng này" value={compactMoney(monthTotal)} note="+12% so với tháng trước" />
         <KpiCard tone="blue" icon={<BarChart3 size={22} />} label="Tổng doanh số" value={compactMoney(salesTotal)} note="85 hợp đồng" />
@@ -536,7 +536,7 @@ export default function CommissionScreen() {
 
       {detail ? <PayoutDetailModal onClose={() => setDetail(null)} onPay={markPaid} payout={detail} /> : null}
       {toast ? <div className={styles.contractToast}>{toast}</div> : null}
-    </Screen>
+    </FeaturePage>
   );
 }
 

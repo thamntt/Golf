@@ -42,8 +42,8 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Screen } from "../_shared/components";
-import styles from "../page.module.css";
+import { FeaturePage } from "@/shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
 
 type TabKey =
   | "business"
@@ -165,10 +165,10 @@ const paymentMethods = [
   { name: "Ví điện tử", fee: "1.2%", settlement: "T+1", active: false },
 ];
 
-export default function SettingsScreen() {
+export default function SettingsView() {
   const [activeTab, setActiveTab] = useState<TabKey>("business");
   const [modal, setModal] = useState<ModalState>({ kind: null });
-  const [toast, setToast] = useState("Cấu hình chưa có thay đổi");
+  const [toast, setToast] = useState("");
   const [logoUploaded, setLogoUploaded] = useState(false);
   const [vatMode, setVatMode] = useState<"before" | "after">("before");
   const [rounding, setRounding] = useState(true);
@@ -191,7 +191,6 @@ export default function SettingsScreen() {
     status: true,
   });
 
-  const activeTitle = useMemo(() => tabs.find((tab) => tab.key === activeTab)?.label ?? "Cài đặt", [activeTab]);
   const filteredDevices = useMemo(() => {
     const keyword = deviceSearch.trim().toLowerCase();
     return devices.filter((device) => {
@@ -210,7 +209,7 @@ export default function SettingsScreen() {
   const showToast = (message: string) => {
     setToast(message);
     window.clearTimeout(Number(window.sessionStorage.getItem("settings-toast")));
-    const timer = window.setTimeout(() => setToast("Cấu hình chưa có thay đổi"), 3000);
+    const timer = window.setTimeout(() => setToast(""), 3000);
     window.sessionStorage.setItem("settings-toast", String(timer));
   };
 
@@ -218,16 +217,12 @@ export default function SettingsScreen() {
   const closeModal = () => setModal({ kind: null });
 
   return (
-    <Screen title="Cài Đặt Hệ Thống" subtitle="Quản lý cấu hình vận hành, chi nhánh, thiết bị và mẫu nghiệp vụ của trung tâm golf.">
+    <FeaturePage title="Cài Đặt Hệ Thống" subtitle="Quản lý cấu hình vận hành, chi nhánh, thiết bị và mẫu nghiệp vụ của trung tâm golf.">
       <section className={styles.settingsHero}>
         <div>
           <span className={styles.settingsEyebrow}><Settings size={16} /> NextVision Golf Center</span>
           <h3>Cấu hình hệ thống</h3>
           <p>Thiết lập thông tin doanh nghiệp, VAT, phân quyền, thiết bị check-in và các quy tắc dùng chung cho toàn bộ module.</p>
-        </div>
-        <div className={styles.settingsHeroActions}>
-          <button onClick={() => showToast("Đã kiểm tra cấu hình liên quan")} type="button"><ClipboardCheck size={18} />Kiểm tra</button>
-          <button onClick={() => showToast(`Đã lưu nhóm ${activeTitle}`)} type="button"><Save size={18} />Lưu cấu hình</button>
         </div>
       </section>
 
@@ -252,7 +247,7 @@ export default function SettingsScreen() {
 
       <section className={styles.settingsPanel}>
         {activeTab === "business" ? (
-          <BusinessPanel logoUploaded={logoUploaded} onLogo={() => { setLogoUploaded(true); showToast("Đã chọn logo demo, kiểm tra tỉ lệ 1:1 trước khi lưu"); }} onOpen={openModal} />
+          <BusinessPanel logoUploaded={logoUploaded} onLogo={() => { setLogoUploaded(true); showToast("Đã chọn logo demo, kiểm tra tỉ lệ 1:1 trước khi lưu"); }} />
         ) : null}
         {activeTab === "payment" ? <PaymentPanel onToast={showToast} /> : null}
         {activeTab === "print" ? <PrintPanel filter={printFilter} onFilter={setPrintFilter} onOpen={openModal} /> : null}
@@ -294,13 +289,15 @@ export default function SettingsScreen() {
         {activeTab === "promotions" ? <PromotionPanel onOpen={openModal} showToast={showToast} /> : null}
       </section>
 
-      <div className={styles.contractToast}>
-        <Sparkles size={18} />
-        <span>{toast}</span>
-      </div>
+      {toast ? (
+        <div className={styles.contractToast}>
+          <Sparkles size={18} />
+          <span>{toast}</span>
+        </div>
+      ) : null}
 
       {modal.kind ? <SettingsModal modal={modal} onClose={closeModal} onDone={(message) => { closeModal(); showToast(message); }} /> : null}
-    </Screen>
+    </FeaturePage>
   );
 }
 
@@ -317,7 +314,7 @@ function StatCard({ caption, icon: Icon, label, value }: { caption: string; icon
   );
 }
 
-function BusinessPanel({ logoUploaded, onLogo, onOpen }: { logoUploaded: boolean; onLogo: () => void; onOpen: (kind: ModalKind, title: string, note?: string) => void }) {
+function BusinessPanel({ logoUploaded, onLogo }: { logoUploaded: boolean; onLogo: () => void }) {
   return (
     <div className={styles.settingsBusinessShell}>
       <section className={styles.settingsBusinessProfile}>
@@ -348,10 +345,6 @@ function BusinessPanel({ logoUploaded, onLogo, onOpen }: { logoUploaded: boolean
             <h3>Cấu hình nhận diện trung tâm</h3>
             <p>Các trường dưới đây có thể chỉnh trực tiếp như form thật, sau khi lưu sẽ áp dụng cho chứng từ và mẫu in mới.</p>
           </div>
-          <div className={styles.settingsBusinessActions}>
-            <button onClick={() => onOpen("preview", "Xem trước Hợp đồng chuẩn")} type="button"><Eye size={16} />Xem mẫu in</button>
-            <button onClick={() => onOpen("template", "Lưu thông tin doanh nghiệp")} type="button"><Save size={16} />Lưu thông tin</button>
-          </div>
         </div>
 
         <div className={styles.settingsBusinessSections}>
@@ -360,8 +353,6 @@ function BusinessPanel({ logoUploaded, onLogo, onOpen }: { logoUploaded: boolean
             <div className={styles.settingsFormGrid}>
               <TextField label="Tên doanh nghiệp *" value="NextVision Golf Center" />
               <TextField label="Mã số thuế" value="0318888999" />
-              <TextField label="Tên viết tắt" value="NextGolf" />
-              <TextField label="Chi nhánh mặc định" value="Bến Nghé" />
             </div>
           </section>
 
@@ -371,7 +362,6 @@ function BusinessPanel({ logoUploaded, onLogo, onOpen }: { logoUploaded: boolean
               <TextField label="Số điện thoại *" value="028 3822 1900" />
               <TextField label="Email *" value="support@nextgolf.vn" />
               <TextField label="Website" value="https://nextgolf.vn" />
-              <TextField label="Múi giờ" value="GMT+7 Asia/Saigon" />
               <TextField area label="Địa chỉ *" value="12 Nguyễn Huệ, Quận 1, TP.HCM" />
             </div>
           </section>
@@ -395,7 +385,6 @@ function PaymentPanel({ onToast }: { onToast: (message: string) => void }) {
           <h3>Thiết lập kênh thu tiền tại quầy</h3>
           <p>Quản lý tiền mặt, chuyển khoản, POS, ví điện tử và nội dung QR hiển thị trên phiếu thu, bill thanh toán.</p>
         </div>
-        <button onClick={() => onToast("Đã mở luồng thêm phương thức thanh toán")} type="button"><Plus size={16} />Thêm phương thức</button>
       </section>
 
       <section className={`${styles.settingsCard} ${styles.settingsPaymentPanel}`}>
@@ -435,7 +424,6 @@ function PaymentPanel({ onToast }: { onToast: (message: string) => void }) {
             <label><input type="checkbox" /> Tự động gửi bill qua email/Zalo sau thanh toán</label>
           </div>
           <div className={styles.settingsActionRow}>
-            <button onClick={() => onToast("Đã kiểm tra cấu hình thanh toán")} type="button"><TestTube2 size={17} />Kiểm tra</button>
             <button onClick={() => onToast("Đã lưu cấu hình thanh toán")} type="button"><Save size={17} />Lưu cấu hình</button>
           </div>
         </section>
@@ -490,7 +478,6 @@ function GeneralPanel({
           <h3>Cấu hình cách tính giá toàn hệ thống</h3>
           <p>Áp dụng cho hợp đồng mới, vé lẻ, dịch vụ đi kèm, phiếu thu và hóa đơn điện tử. Hợp đồng đã lưu không bị thay đổi ngược.</p>
         </div>
-        <button onClick={() => showToast("Đã lưu cấu hình VAT và giá")} type="button"><Save size={16} />Lưu cài đặt</button>
       </section>
       <div className={styles.settingsSplit}>
       <section className={styles.settingsCard}>
@@ -568,7 +555,6 @@ function BranchPanel({ onOpen }: { onOpen: (kind: ModalKind, title: string, note
           <h3>Vận hành nhiều cơ sở golf</h3>
           <p>Theo dõi địa chỉ, người quản lý, giờ mở cửa, số hội viên và trạng thái hoạt động từng chi nhánh.</p>
         </div>
-        <button onClick={() => onOpen("branch", "Thêm chi nhánh mới")} type="button"><Plus size={16} />Thêm chi nhánh</button>
       </section>
       <div className={styles.settingsMiniStats}>
         <MiniStat label="Tổng chi nhánh" value="03" />
@@ -577,7 +563,7 @@ function BranchPanel({ onOpen }: { onOpen: (kind: ModalKind, title: string, note
         <MiniStat label="TB hội viên/CN" value="309" />
       </div>
       <section className={styles.settingsCard}>
-        <PanelHead icon={Layers3} title="Danh sách chi nhánh" subtitle="Click vào card hoặc dùng nút thao tác để chỉnh sửa chi nhánh." />
+        <PanelHead icon={Layers3} title="Danh sách chi nhánh" subtitle="Click vào card hoặc dùng nút thao tác để chỉnh sửa chi nhánh." action="Thêm chi nhánh" onAction={() => onOpen("branch", "Thêm chi nhánh mới")} />
         <div className={styles.settingsToolbarLine}>
           <Search size={18} />
           <input placeholder="Tìm theo tên, mã, địa chỉ, người quản lý..." />
@@ -807,10 +793,9 @@ function PrintPanel({ filter, onFilter, onOpen }: { filter: string; onFilter: (v
         <h3>Template in ấn dùng toàn hệ thống</h3>
         <p>Quản lý mẫu hợp đồng, hóa đơn, thẻ hội viên, phiếu thu và bill thanh toán. Mỗi loại có một mẫu mặc định.</p>
       </div>
-      <button onClick={() => onOpen("template", "Tạo mẫu in mới")} type="button"><Plus size={16} />Tạo mẫu in</button>
     </section>
     <section className={styles.settingsCard}>
-      <PanelHead icon={Printer} title="Danh sách mẫu in" subtitle="Lọc theo loại, xem trước, cấu hình hoặc xóa mẫu không phải mặc định." />
+      <PanelHead icon={Printer} title="Danh sách mẫu in" subtitle="Lọc theo loại, xem trước, cấu hình hoặc xóa mẫu không phải mặc định." action="Tạo mẫu in mới" onAction={() => onOpen("template", "Tạo mẫu in mới")} />
       <div className={styles.settingsFilterTabs}>
         {filters.map((item) => (
           <button className={filter === item ? styles.settingsFilterActive : undefined} key={item} onClick={() => onFilter(item)} type="button">{item} ({filterCount(item)})</button>
@@ -874,7 +859,6 @@ function InvoicePanel({
           <h3>Kết nối nhà cung cấp HĐĐT</h3>
           <p>Cấu hình thông tin xác thực, ký hiệu hóa đơn và quy tắc phát hành tự động cho hợp đồng, vé lẻ, bill dịch vụ.</p>
         </div>
-        <button onClick={() => { setConnected(true); showToast(`Kết nối ${provider} thành công trong môi trường demo`); }} type="button"><TestTube2 size={16} />Test kết nối</button>
       </section>
       <div className={styles.settingsSplit}>
       <section className={styles.settingsCard}>
@@ -905,6 +889,7 @@ function InvoicePanel({
           <TextField label="Email nhận lỗi" value="accounting@nextgolf.vn" />
         </div>
         <div className={styles.settingsActionRow}>
+          <button onClick={() => { setConnected(true); showToast(`Kết nối ${provider} thành công trong môi trường demo`); }} type="button"><TestTube2 size={17} />Test kết nối</button>
           <button onClick={() => showToast("Đã mở nhật ký phát hành HĐĐT")} type="button"><FileText size={17} />Nhật ký</button>
           <button disabled={!connected} onClick={() => showToast(`Đã lưu cấu hình HĐĐT ${provider}`)} type="button"><Save size={17} />Lưu HĐĐT</button>
         </div>
@@ -933,7 +918,6 @@ function RolePanel({
           <h3>Quản trị vai trò, quyền và sơ đồ tổ chức</h3>
           <p>Thiết lập ma trận quyền theo module, mời Agent qua SSO, theo dõi trạng thái tài khoản và phân cấp quản lý.</p>
         </div>
-        <button onClick={() => onOpen("role", "Mời Agent mới")} type="button"><Plus size={16} />Mời Agent</button>
       </section>
       <div className={styles.settingsMiniStats}>
         <MiniStat label="Vai trò" value="05" />
@@ -969,7 +953,7 @@ function RolePanel({
         </section>
       </section>
       <section className={styles.settingsCard}>
-        <PanelHead icon={UsersRound} title="Tài khoản nhân sự" subtitle="Màn AgentList, AgentEdit và AgentDelete trong tài liệu được gom ở đây để quản trị tài khoản đăng nhập." action="Tạo tài khoản" onAction={() => onOpen("role", "Tạo tài khoản nhân sự")} />
+        <PanelHead icon={UsersRound} title="Tài khoản nhân sự" subtitle="Màn AgentList, AgentEdit và AgentDelete trong tài liệu được gom ở đây để quản trị tài khoản đăng nhập." action="Mời Agent" onAction={() => onOpen("role", "Mời Agent mới")} />
         <div className={styles.settingsAgentList}>
           {["Lan Anh - Lễ tân", "Minh Khang - Sales", "Hoàng Long - Quản lý CN", "Bảo Châu - HLV"].map((agent, index) => (
             <article key={agent}>
@@ -996,7 +980,6 @@ function CodePanel({ onOpen, showToast }: { onOpen: (kind: ModalKind, title: str
           <h3>Quy tắc định danh tự động</h3>
           <p>Mã hội viên, hợp đồng, hóa đơn, lịch PT và lớp học được sinh theo tiền tố, ký tự phân tách và số thứ tự.</p>
         </div>
-        <button onClick={() => onOpen("template", "Thêm cấu hình sinh mã")} type="button"><Plus size={16} />Thêm cấu hình</button>
       </section>
       <section className={styles.settingsCard}>
         <InfoNote>Mã đã phát sinh không đổi. Cấu hình mới chỉ áp dụng cho hồ sơ tạo sau khi lưu.</InfoNote>

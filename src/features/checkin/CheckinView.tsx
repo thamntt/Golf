@@ -30,8 +30,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 // =====================================================================================
 // SECTION A — Constants
@@ -407,7 +407,7 @@ const MEMBER_DIRECTORY: { code: string; name: string; phone: string; contractCod
 
 type Tab = "list" | "devices" | "config" | "biometric";
 
-export default function CheckinScreen() {
+export default function CheckinView() {
   const [tab, setTab] = useState<Tab>("list");
   const [logs, setLogs] = useState<CheckInLog[]>(INITIAL_LOGS);
   const [devices, setDevices] = useState<Device[]>(INITIAL_DEVICES);
@@ -621,7 +621,7 @@ export default function CheckinScreen() {
   };
 
   return (
-    <Screen title="Check-in / Checkout" subtitle="Quản lý realtime lượt vào/ra, thiết bị sinh trắc và cấu hình check-in toàn hệ thống">
+    <FeaturePage title="Check-in / Checkout" subtitle="Quản lý realtime lượt vào/ra, thiết bị sinh trắc và cấu hình check-in toàn hệ thống">
       <div className={styles.checkinTopBar}>
         <div className={styles.checkinTabs}>
           <button
@@ -794,7 +794,7 @@ export default function CheckinScreen() {
           onClose={() => setReceipt(null)}
         />
       ) : null}
-    </Screen>
+    </FeaturePage>
   );
 }
 

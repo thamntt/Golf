@@ -35,8 +35,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 // =====================================================================================
 // SECTION A — Constants
@@ -532,7 +532,7 @@ function getTicketRefDate(t: Ticket): string {
 // SECTION E — Top-level component
 // =====================================================================================
 
-export default function TicketsScreen() {
+export default function TicketsView() {
   const [tab, setTab] = useState<TabKey>("tickets");
   const [tickets, setTickets] = useState<Ticket[]>(INITIAL_TICKETS);
   const [vouchers, setVouchers] = useState<Voucher[]>(INITIAL_VOUCHERS);
@@ -564,7 +564,7 @@ export default function TicketsScreen() {
 
   return (
     <>
-      <Screen
+      <FeaturePage
         title="Vé Lẻ"
         subtitle="Bán vé sử dụng đơn lẻ · Vé nhóm · Quản lý voucher · Dịch vụ đi kèm"
       >
@@ -629,7 +629,7 @@ export default function TicketsScreen() {
             flash={flash}
           />
         ) : null}
-      </Screen>
+      </FeaturePage>
 
       {toast ? <div className={styles.contractToast}>{toast}</div> : null}
     </>

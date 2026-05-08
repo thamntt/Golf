@@ -38,8 +38,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 // =====================================================================================
 // SECTION A — Constants & Types
@@ -644,7 +644,7 @@ function statusLabel(status: ContractStatus): string {
 // SECTION D — Top-level component
 // =====================================================================================
 
-export default function ContractsScreen() {
+export default function ContractsView() {
   const [activeTab, setActiveTab] = useState<ContractTab>("list");
   const [contracts, setContracts] = useState<Contract[]>(INITIAL_CONTRACTS);
   const [renewals, setRenewals] = useState<Renewal[]>(INITIAL_RENEWALS);
@@ -725,7 +725,7 @@ export default function ContractsScreen() {
 
   return (
     <>
-      <Screen
+      <FeaturePage
         title="Hợp Đồng"
         subtitle="Quản lý vòng đời hợp đồng hội viên: ký mới · gia hạn · nâng cấp · bảo lưu · chuyển nhượng · chuyển đổi"
       >
@@ -834,7 +834,7 @@ export default function ContractsScreen() {
             flash={flash}
           />
         ) : null}
-      </Screen>
+      </FeaturePage>
 
       {toast ? (
         <div className={styles.contractToast}>{toast}</div>

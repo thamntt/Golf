@@ -20,8 +20,8 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { FormField, Screen, SelectField } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FormField, FeaturePage, SelectField } from "@/shared/components";
 
 type ZoneType = "Driving Range" | "Putting Green" | "Bay Indoor" | "Sân 9 lỗ" | "Sân 18 lỗ";
 
@@ -161,7 +161,7 @@ const INITIAL_TICKETS: SingleTicket[] = [
 
 type ActiveTab = "contract" | "single";
 
-export default function PricingScreen() {
+export default function PricingView() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("contract");
   const [zones, setZones] = useState<Zone[]>(INITIAL_ZONES);
   const [timeslots, setTimeslots] = useState<TimeSlot[]>(INITIAL_TIMESLOTS);
@@ -255,7 +255,7 @@ export default function PricingScreen() {
 
   return (
     <>
-      <Screen
+      <FeaturePage
         title="Bảng Giá"
         subtitle="Khu vực · Khung giờ · Bảng giá Hợp đồng · Bảng giá Vé lẻ"
       >
@@ -384,7 +384,7 @@ export default function PricingScreen() {
             tickets={filteredTickets}
           />
         )}
-      </Screen>
+      </FeaturePage>
 
       {zoneModalOpen ? (
         <ZoneManagementModal

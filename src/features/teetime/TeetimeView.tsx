@@ -27,8 +27,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 // =====================================================================================
 // SECTION A — Constants & seed data
@@ -286,7 +286,7 @@ function isPastSlot(date: string, time: string): boolean {
 // SECTION C — Top-level component
 // =====================================================================================
 
-export default function TeetimeScreen() {
+export default function TeetimeView() {
   const [config, setConfig] = useState<TeetimeConfig>(INITIAL_CONFIG);
   const [bookings, setBookings] = useState<TeetimeBooking[]>(INITIAL_BOOKINGS);
   const [customers, setCustomers] = useState<CustomerLite[]>(INITIAL_CUSTOMERS);
@@ -428,7 +428,7 @@ export default function TeetimeScreen() {
 
   return (
     <>
-      <Screen
+      <FeaturePage
         title="Golf Teetime"
         subtitle="Lưới khung giờ phát bóng — đặt lịch chơi golf cho hội viên & khách lẻ"
       >
@@ -514,7 +514,7 @@ export default function TeetimeScreen() {
           <span><span className={styles.teetimeLegendDot} style={{ background: "#dc2626" }} /> Hết slot</span>
           <span><span className={styles.teetimeLegendDot} style={{ background: "#94a3b8" }} /> Đã qua giờ</span>
         </div>
-      </Screen>
+      </FeaturePage>
 
       {toast ? <div className={styles.contractToast}>{toast}</div> : null}
 

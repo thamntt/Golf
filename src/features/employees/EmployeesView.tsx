@@ -23,8 +23,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 type EmployeeRole = "Vận hành" | "Sale" | "HLV" | "Caddie" | "Trợ giảng HLV" | "Trợ lý HLV";
 type EmployeeStatus = "Đang làm" | "Tạm nghỉ" | "Đã nghỉ việc";
@@ -190,7 +190,7 @@ const statusTone: Record<EmployeeStatus, string> = {
   "Đã nghỉ việc": "employeeStatusOff",
 };
 
-export default function EmployeesScreen() {
+export default function EmployeesView() {
   const [employees, setEmployees] = useState<Employee[]>(seedEmployees);
   const [query, setQuery] = useState("");
   const [branchFilter, setBranchFilter] = useState("Tất cả chi nhánh");
@@ -259,7 +259,7 @@ export default function EmployeesScreen() {
 
   return (
     <>
-      <Screen title="Nhân viên" subtitle="Quản lý hồ sơ nhân sự, vai trò vận hành golf, lịch làm việc và dữ liệu dùng cho HLV / Caddie / Sale">
+      <FeaturePage title="Nhân viên" subtitle="Quản lý hồ sơ nhân sự, vai trò vận hành golf, lịch làm việc và dữ liệu dùng cho HLV / Caddie / Sale">
         <div className={styles.employeeHero}>
           <div>
             <span className={styles.employeeEyebrow}><UserCog size={14} /> HR Operations</span>
@@ -369,7 +369,7 @@ export default function EmployeesScreen() {
             </table>
           </div>
         </section>
-      </Screen>
+      </FeaturePage>
 
       {formOpen ? (
         <EmployeeFormModal

@@ -25,8 +25,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 // =====================================================================================
 // SECTION A — Constants
@@ -270,7 +270,7 @@ function isSessionOverlap(a: { startTime: string; endTime: string }, b: { startT
 // SECTION E — Top-level component
 // =====================================================================================
 
-export default function CoachScreen() {
+export default function CoachScheduleView() {
   const [date, setDate] = useState("08/05/2026");
   const [branch, setBranch] = useState<string>("NextVision");
   const [coachFilter, setCoachFilter] = useState<string>("all");
@@ -411,7 +411,7 @@ export default function CoachScreen() {
 
   return (
     <>
-      <Screen
+      <FeaturePage
         title="Lịch HLV"
         subtitle="Calendar lịch tập 1-1 · HLV × slot 15 phút · book linh hoạt / tháng / hội viên"
       >
@@ -492,7 +492,7 @@ export default function CoachScreen() {
           onClickEmpty={(coachId, time) => setQuickBookOpen({ coachId, startTime: time })}
           onClickSession={setDetailSession}
         />
-      </Screen>
+      </FeaturePage>
 
       {toast ? <div className={styles.contractToast}>{toast}</div> : null}
 

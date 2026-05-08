@@ -3,11 +3,11 @@
 import { Fragment, type ReactNode } from "react";
 import { Download, Filter, Plus, Search, Upload } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import styles from "../page.module.css";
+import styles from "@/shared/styles/feature-styles.module.css";
 import { recentBookings } from "./data";
 import type { ModuleKey } from "./types";
 
-export function Screen({ children, subtitle, title }: { children: ReactNode; subtitle: string; title: string }) {
+export function FeaturePage({ children, subtitle, title }: { children: ReactNode; subtitle: string; title: string }) {
   return (
     <section className={styles.screen}>
       <div className={styles.titleBlock}>

@@ -21,8 +21,8 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 type CashTab = "receipt" | "payment" | "debt";
 type PaymentMethod = "Tiền mặt" | "Chuyển khoản" | "POS-Thẻ" | "MoMo" | "ZaloPay" | "Tiền gửi";
@@ -194,7 +194,7 @@ const nextCode = (prefix: "PT" | "PC", list: Array<{ id: string }>) => {
   return `${prefix}-2404-${String(max + 1).padStart(4, "0")}`;
 };
 
-export default function CashbookScreen() {
+export default function CashbookView() {
   const [tab, setTab] = useState<CashTab>("receipt");
   const [receipts, setReceipts] = useState<Receipt[]>(receiptsSeed);
   const [payments, setPayments] = useState<PaymentVoucher[]>(paymentsSeed);
@@ -297,7 +297,7 @@ export default function CashbookScreen() {
 
   return (
     <>
-      <Screen title="Sổ Quỹ" subtitle="Quản lý phiếu thu, phiếu chi, công nợ và chứng từ tự sinh từ hợp đồng / vé lẻ / hoa hồng">
+      <FeaturePage title="Sổ Quỹ" subtitle="Quản lý phiếu thu, phiếu chi, công nợ và chứng từ tự sinh từ hợp đồng / vé lẻ / hoa hồng">
         <div className={styles.cashbookHero}>
           <div>
             <span><Wallet size={15} /> Cash Control</span>
@@ -381,7 +381,7 @@ export default function CashbookScreen() {
         {tab === "debt" ? (
           <DebtTable items={filteredDebts} onCollect={collectDebt} />
         ) : null}
-      </Screen>
+      </FeaturePage>
 
       {formOpen?.type === "receipt" ? (
         <ReceiptForm

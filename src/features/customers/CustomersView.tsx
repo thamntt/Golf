@@ -25,7 +25,7 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
-import styles from "../page.module.css";
+import styles from "@/shared/styles/feature-styles.module.css";
 import {
   BiometricBadges,
   CustomerStatus,
@@ -33,9 +33,9 @@ import {
   InfoBlock,
   InfoLine,
   SelectField,
-} from "../_shared/components";
-import { customerRows } from "../_shared/data";
-import type { Customer } from "../_shared/types";
+} from "@/shared/components";
+import { customerRows } from "@/shared/data";
+import type { Customer } from "@/shared/types";
 
 type AdvFilter = {
   expiry: string;
@@ -87,7 +87,7 @@ function ddmmyyyyToISO(input: string | undefined): string {
   return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 }
 
-export default function CustomersScreen() {
+export default function CustomersView() {
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);

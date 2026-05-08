@@ -14,9 +14,9 @@ import {
   WalletCards,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import styles from "../page.module.css";
-import { BookingTable, CardTitle, Row, Screen } from "../_shared/components";
-import type { ModuleKey } from "../_shared/types";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { BookingTable, CardTitle, Row, FeaturePage } from "@/shared/components";
+import type { ModuleKey } from "@/shared/types";
 
 type TrendDirection = "up" | "down" | "new";
 
@@ -99,7 +99,7 @@ export default function Dashboard({ onOpen }: { onOpen: (key: ModuleKey) => void
   ];
 
   return (
-    <Screen title="Dashboard" subtitle={text.branchSubtitle}>
+    <FeaturePage title="Dashboard" subtitle={text.branchSubtitle}>
       <section className={styles.dashboardHero}>
         <div>
           <span>{text.overview}</span>
@@ -221,6 +221,6 @@ export default function Dashboard({ onOpen }: { onOpen: (key: ModuleKey) => void
           </section>
         </aside>
       </div>
-    </Screen>
+    </FeaturePage>
   );
 }

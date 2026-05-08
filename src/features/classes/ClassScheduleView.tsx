@@ -20,8 +20,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import styles from "../page.module.css";
-import { Screen } from "../_shared/components";
+import styles from "@/shared/styles/feature-styles.module.css";
+import { FeaturePage } from "@/shared/components";
 
 // =====================================================================================
 // SECTION A — Constants
@@ -371,7 +371,7 @@ const INITIAL_SESSIONS: ClassSession[] = SEED_SESSIONS_BASE.map((session) => {
 
 type Tab = "list" | "calendar";
 
-export default function ClassesScreen() {
+export default function ClassScheduleView() {
   const [tab, setTab] = useState<Tab>("list");
   const [classes, setClasses] = useState<GolfClass[]>(INITIAL_CLASSES);
   const [classTypes, setClassTypes] = useState<ClassType[]>(INITIAL_CLASS_TYPES);
@@ -460,7 +460,7 @@ export default function ClassesScreen() {
   };
 
   return (
-    <Screen title="Lịch Lớp" subtitle="Quản lý các lớp học nhóm — danh sách lớp, lịch tuần và đặt lịch cho học viên">
+    <FeaturePage title="Lịch Lớp" subtitle="Quản lý các lớp học nhóm — danh sách lớp, lịch tuần và đặt lịch cho học viên">
       {/* ============ TOOLBAR / TABS ============ */}
       <div className={styles.classesTopBar}>
         <div className={styles.classesTabs}>
@@ -763,7 +763,7 @@ export default function ClassesScreen() {
           }}
         />
       ) : null}
-    </Screen>
+    </FeaturePage>
   );
 }
 
