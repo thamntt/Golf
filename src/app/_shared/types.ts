@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 export type ModuleKey =
   | "dashboard"
   | "customers"
+  | "employees"
   | "pricing"
   | "contracts"
   | "tickets"

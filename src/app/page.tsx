@@ -7,6 +7,7 @@ import { navItems } from "./_shared/data";
 import type { ModuleKey } from "./_shared/types";
 import Dashboard from "./_modules/dashboard";
 import CustomersScreen from "./_modules/customers";
+import EmployeesScreen from "./_modules/employees";
 import PricingScreen from "./_modules/pricing";
 import ContractsScreen from "./_modules/contracts";
 import TicketsScreen from "./_modules/tickets";
@@ -77,6 +78,7 @@ export default function Home() {
         <div className={styles.content}>
           {active === "dashboard" && <Dashboard onOpen={setActive} />}
           {active === "customers" && <CustomersScreen />}
+          {active === "employees" && <EmployeesScreen />}
           {active === "pricing" && <PricingScreen />}
           {active === "contracts" && <ContractsScreen />}
           {active === "tickets" && <TicketsScreen />}

@@ -15282,6 +15282,475 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 }
 
 /* =============================================================================
+   MODULE NHAN VIEN
+   ============================================================================= */
+
+.employeeHero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 58%, #f0fdf4 100%);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 18px;
+  box-shadow: 0 18px 45px -34px rgba(15, 23, 42, 0.5), 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.employeeHero h3 {
+  margin: 6px 0 4px;
+  font-size: 20px;
+  font-weight: 850;
+  color: #0f172a;
+}
+.employeeHero p {
+  margin: 0;
+  max-width: 720px;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+.employeeEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.employeePrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #059669 0%, #16a34a 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 22px -14px rgba(22, 163, 74, 0.75);
+}
+.employeePrimary:hover { transform: translateY(-1px); }
+
+.employeeToolbar,
+.employeeFilters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.employeeToolbar {
+  border-radius: 16px 16px 0 0;
+}
+.employeeFilters {
+  border-top: 0;
+  border-radius: 0 0 16px 16px;
+  margin-bottom: 14px;
+}
+.employeeFilters > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+}
+.employeeSearch {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1 1 360px;
+  min-width: 280px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+.employeeSearch svg { color: #94a3b8; }
+.employeeSearch input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 13px;
+  color: #0f172a;
+}
+.employeeCount {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.employeeTable th:first-child,
+.employeeTable td:first-child {
+  width: 42px;
+  text-align: center;
+}
+.employeeTable input[type="checkbox"],
+.employeeCheckGrid input[type="checkbox"],
+.employeeWorkMode input,
+.employeeRadioRow input,
+.employeeShiftCell input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #2563eb;
+}
+.employeeCode {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.employeeCode:hover { text-decoration: underline; }
+.employeeIdentity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 210px;
+}
+.employeeIdentity > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 850;
+  flex: 0 0 auto;
+}
+.employeeIdentity strong {
+  display: block;
+  font-size: 13px;
+  color: #0f172a;
+}
+.employeeIdentity small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.employeeContact {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #475569;
+  white-space: nowrap;
+}
+.employeeRoleList {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-width: 128px;
+}
+.employeeRoleList span,
+.employeeRoleList em {
+  padding: 4px 8px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 999px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+.employeeRoleList em {
+  background: #f1f5f9;
+  color: #64748b;
+}
+.employeeStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.employeeStatusActive { background: #dcfce7; color: #15803d; }
+.employeeStatusPause { background: #fef3c7; color: #b45309; }
+.employeeStatusOff { background: #fee2e2; color: #b91c1c; }
+
+.employeeModal {
+  width: min(980px, 96vw);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 28px 64px -12px rgba(2, 6, 23, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+.employeeModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+.employeeModalHeader h2 {
+  margin: 0 0 5px;
+  font-size: 18px;
+  color: #059669;
+  font-weight: 850;
+}
+.employeeModalHeader p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+.employeeModalHeader > button {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+}
+.employeeModalBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+  background: #fafbfc;
+}
+.employeePhotoBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.employeePhotoCircle {
+  width: 126px;
+  height: 126px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  color: #94a3b8;
+  overflow: hidden;
+}
+.employeePhotoCircle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.employeePhotoBlock > div:last-child {
+  display: flex;
+  gap: 8px;
+}
+.employeePhotoBlock button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.employeePhotoBlock button:last-child {
+  background: #16a34a;
+  color: #fff;
+  border-color: #16a34a;
+}
+
+.employeeFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+.employeeField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.employeeField > span {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 750;
+}
+.employeeField b { color: #dc2626; }
+.employeeField input,
+.employeeField select,
+.employeeField textarea,
+.employeeSelectAdd select {
+  width: 100%;
+  min-height: 40px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 13px;
+}
+.employeeField textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+.employeeField input:focus-visible,
+.employeeField select:focus-visible,
+.employeeField textarea:focus-visible,
+.employeeSelectAdd select:focus-visible {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.employeeRadioRow {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 4px;
+}
+.employeeRadioRow label,
+.employeeCheckGrid label,
+.employeeWorkMode label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 650;
+}
+.employeeSelectAdd {
+  display: grid;
+  grid-template-columns: 1fr 42px;
+  gap: 8px;
+}
+.employeeSelectAdd button {
+  width: 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+}
+.employeeCheckGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin-top: 16px;
+}
+.employeeWorkMode {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.employeeSchedule {
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+.employeeScheduleHead,
+.employeeScheduleRow {
+  display: grid;
+  grid-template-columns: 92px repeat(3, minmax(220px, 1fr));
+  min-width: 760px;
+}
+.employeeScheduleHead {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+.employeeScheduleHead span,
+.employeeScheduleHead strong {
+  padding: 12px;
+  text-align: center;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 850;
+}
+.employeeScheduleRow {
+  border-bottom: 1px solid #f1f5f9;
+}
+.employeeScheduleRow:last-child { border-bottom: 0; }
+.employeeScheduleRow > strong {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  color: #334155;
+  font-size: 12px;
+}
+.employeeShiftCell {
+  display: grid;
+  grid-template-columns: 20px 1fr 16px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-left: 1px solid #f1f5f9;
+}
+.employeeShiftCell input[type="time"] {
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  font-size: 12px;
+}
+.employeeShiftCell input:disabled {
+  background: #f8fafc;
+  color: #cbd5e1;
+}
+.employeeShiftCell svg { color: #94a3b8; }
+.employeeFulltimeBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  color: #1e40af;
+}
+.employeeFulltimeBox strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #1e3a8a;
+}
+.employeeFulltimeBox span {
+  font-size: 12px;
+  color: #475569;
+}
+
+@media (max-width: 860px) {
+  .employeeHero { align-items: stretch; flex-direction: column; }
+  .employeePrimary { width: 100%; }
+  .employeeFormGrid,
+  .employeeCheckGrid { grid-template-columns: 1fr; }
+  .employeeModal { width: 96vw; }
+}
+
+/* =============================================================================
    M09 — CHECK-IN / CHECKOUT
    ============================================================================= */
 
