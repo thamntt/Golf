@@ -1426,19 +1426,26 @@ function RolePanel({
 }
 
 function CodePanel({ onOpen }: { onOpen: (kind: ModalKind, title: string, note?: string) => void }) {
-  const [configs, setConfigs] = useState<CodeConfig[]>(initialCodeConfigs);
+  const cloneInitialCodeConfigs = () => initialCodeConfigs.map((config) => ({ ...config }));
+  const [configs, setConfigs] = useState<CodeConfig[]>(cloneInitialCodeConfigs);
   const [dirty, setDirty] = useState(false);
+  const [resetFeedback, setResetFeedback] = useState<{ entity: string; time: string }>({ entity: "", time: "" });
   const updateConfig = (entity: string, patch: Partial<CodeConfig>) => {
     setConfigs((items) => items.map((item) => item.entity === entity ? { ...item, ...patch } : item));
     setDirty(true);
+    setResetFeedback({ entity: "", time: "" });
   };
-  const resetCounter = (entity: string) => {
-    setConfigs((items) => items.map((item) => item.entity === entity ? { ...item, start: initialCodeConfigs.find((config) => config.entity === entity)?.start ?? "1" } : item));
-    setDirty(true);
+  const resetConfig = (entity: string) => {
+    const source = initialCodeConfigs.find((config) => config.entity === entity);
+    if (!source) return;
+    setConfigs((items) => items.map((item) => item.entity === entity ? { ...source } : item));
+    setDirty(false);
+    setResetFeedback({ entity, time: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) });
   };
   const resetAll = () => {
-    setConfigs(initialCodeConfigs);
+    setConfigs(cloneInitialCodeConfigs());
     setDirty(false);
+    setResetFeedback({ entity: "ALL", time: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) });
   };
   return (
     <div className={styles.settingsOpsLayout}>
@@ -1446,14 +1453,14 @@ function CodePanel({ onOpen }: { onOpen: (kind: ModalKind, title: string, note?:
         <PanelHead icon={KeyRound} title="Cấu hình sinh mã tự động" subtitle="" action="Thêm cấu hình mới" onAction={() => onOpen("code", "Thêm mới cấu hình sinh mã")} />
         <div className={styles.settingsCodeGrid}>
           {configs.map((config) => (
-            <article key={config.label} className={styles.settingsCodeCard}>
+            <article key={config.label} className={`${styles.settingsCodeCard} ${resetFeedback.entity === config.entity || resetFeedback.entity === "ALL" ? styles.settingsCodeCardReset : ""}`}>
               <header>
                 <div>
                   <strong>{config.label}</strong>
                   <small>{config.entity}</small>
                 </div>
                 <div className={styles.settingsCodeHeaderActions}>
-                  <button onClick={() => resetCounter(config.entity)} type="button"><RefreshCcw size={14} />Reset</button>
+                  <button onClick={() => resetConfig(config.entity)} type="button"><RefreshCcw size={14} />{resetFeedback.entity === config.entity || resetFeedback.entity === "ALL" ? "Đã reset" : "Reset"}</button>
                   <button onClick={() => onOpen("confirm", `Xóa cấu hình ${config.label}`, `Sau khi xóa, ${config.label.toLowerCase()} không thể tự sinh mã mới cho đến khi có cấu hình thay thế.`)} type="button"><Trash2 size={14} />Xóa</button>
                 </div>
               </header>
@@ -1462,6 +1469,12 @@ function CodePanel({ onOpen }: { onOpen: (kind: ModalKind, title: string, note?:
                 <strong>{formatGeneratedCode(config)}</strong>
                 <small>Mã tiếp theo sẽ là: {formatGeneratedCode(config)}</small>
               </div>
+              {resetFeedback.entity === config.entity || resetFeedback.entity === "ALL" ? (
+                <div className={styles.settingsCodeResetNotice}>
+                  <Check size={15} />
+                  <span>Đã khôi phục cấu hình ban đầu lúc {resetFeedback.time}.</span>
+                </div>
+              ) : null}
               <div className={styles.settingsFormGrid}>
                 <TextField label="Tiền tố" onChange={(value) => updateConfig(config.entity, { prefix: value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) })} value={config.prefix} />
                 <TextField label="Ký tự phân tách" onChange={(value) => updateConfig(config.entity, { separator: normalizeSeparator(value) })} options={codeSeparatorOptions} value={config.separator || "Không dùng"} />
@@ -1679,7 +1692,11 @@ function SettingsModal({
             <button onClick={onClose} type="button">Hủy</button>
             <button disabled={Boolean(validation?.errors.length)} onClick={() => {
               if (!validateBeforeSave()) return;
-              modal.kind === "logoEditor" ? onApplyLogo() : onDone(modal.kind === "confirm" ? "Đã ghi nhận thao tác kiểm soát dữ liệu" : "Đã lưu thông tin cấu hình");
+              if (modal.kind === "logoEditor") {
+                onApplyLogo();
+                return;
+              }
+              onDone(modal.kind === "confirm" ? "Đã ghi nhận thao tác kiểm soát dữ liệu" : "Đã lưu thông tin cấu hình");
             }} type="button">
               {modal.kind === "confirm" ? "Xác nhận" : modal.kind === "logoEditor" ? "Áp dụng logo" : modal.kind === "promotion" && modal.title?.startsWith("Tạo") ? "Tạo khuyến mãi" : modal.kind === "promotion" && modal.title?.startsWith("Chỉnh") ? "Cập nhật khuyến mãi" : modal.kind === "branch" && modal.title?.startsWith("Thêm") ? "Tạo chi nhánh" : modal.kind === "branch" && modal.title?.startsWith("Sửa") ? "Cập nhật" : modal.kind === "role" && modal.title?.startsWith("Mời") ? "Gửi lời mời" : modal.kind === "role" && modal.title?.startsWith("Sửa") ? "Cập nhật" : "Lưu"}
             </button>
