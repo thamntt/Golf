@@ -8,6 +8,8 @@ import {
   CreditCard,
   Globe2,
   HelpCircle,
+  Eye,
+  EyeOff,
   LogOut,
   Menu,
   Monitor,
@@ -17,7 +19,7 @@ import {
   Type,
   User,
 } from "lucide-react";
-import { navItems } from "@/shared/data";
+import { navItems, systemBranches } from "@/shared/data";
 import type { ModuleKey } from "@/shared/types";
 import DashboardView from "@/features/dashboard/DashboardView";
 import CustomersView from "@/features/customers/CustomersView";
@@ -59,18 +61,14 @@ const navLabel: Partial<Record<ModuleKey, string>> = {
   reports: "Báo cáo",
 };
 
-const branches = [
-  { name: "NextVision", address: "Bến Nghé · 06:00-22:00", status: "Đang hoạt động" },
-  { name: "Võ Thị Sáu", address: "Quận 3 · 05:30-22:30", status: "Đang hoạt động" },
-  { name: "Thảo Điền", address: "TP. Thủ Đức · 07:00-21:30", status: "Bảo trì nhẹ" },
-];
+const branches = systemBranches;
 
 export default function AppShell() {
   const [authMode, setAuthMode] = useState<"login" | "branch" | "app">("login");
   const [active, setActive] = useState<ModuleKey>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [branchMenuOpen, setBranchMenuOpen] = useState(false);
-  const [activeBranch, setActiveBranch] = useState("NextVision");
+  const [activeBranch, setActiveBranch] = useState(systemBranches[0].shortName);
   const [branchReloading, setBranchReloading] = useState(false);
   const [branchDataVersion, setBranchDataVersion] = useState(0);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -78,6 +76,13 @@ export default function AppShell() {
   const [accountTheme, setAccountTheme] = useState<"light" | "dark" | "system">("light");
   const [accountFontSize, setAccountFontSize] = useState<"small" | "medium" | "large">("medium");
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("admin@nextgolf.vn");
+  const [loginPassword, setLoginPassword] = useState("nextvision2026");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
 
   const switchBranch = (branchName: string) => {
     setBranchMenuOpen(false);
@@ -88,6 +93,24 @@ export default function AppShell() {
       setBranchDataVersion((version) => version + 1);
       setBranchReloading(false);
     }, 700);
+  };
+
+  const submitLogin = () => {
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail.trim());
+    if (!emailValid) {
+      setLoginError("Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
+      return;
+    }
+    if (loginPassword.length < 8) {
+      setLoginError("Mật khẩu phải có tối thiểu 8 ký tự.");
+      return;
+    }
+    if (loginEmail.trim().toLowerCase() !== "admin@nextgolf.vn" || loginPassword !== "nextvision2026") {
+      setLoginError("Sai tài khoản hoặc mật khẩu. Chỉ tài khoản được Admin cấp mới đăng nhập được.");
+      return;
+    }
+    setLoginError("");
+    setAuthMode("branch");
   };
 
   if (authMode === "login") {
@@ -101,13 +124,43 @@ export default function AppShell() {
               <p>Truy cập hệ thống vận hành hội viên, check-in, lớp học và tài chính. Tài khoản được Admin tạo hoặc mời trong phần Phân quyền/Agent.</p>
             </div>
           </div>
+          <div className={styles.authTestAccount}>
+            <strong>Tài khoản test</strong>
+            <span>Email: admin@nextgolf.vn</span>
+            <span>Mật khẩu: nextvision2026</span>
+          </div>
           <form className={styles.authForm}>
-            <label><span>Email / tài khoản</span><input defaultValue="admin@nextgolf.vn" type="email" /></label>
-            <label><span>Mật khẩu</span><input defaultValue="nextvision2026" type="password" /></label>
-            <button onClick={(event) => { event.preventDefault(); setAuthMode("branch"); }} type="submit">Đăng nhập</button>
+            <label><span>Email / tài khoản</span><input onChange={(event) => setLoginEmail(event.target.value)} type="email" value={loginEmail} /></label>
+            <label>
+              <span>Mật khẩu</span>
+              <div className={styles.authPasswordField}>
+                <input onChange={(event) => setLoginPassword(event.target.value)} type={showPassword ? "text" : "password"} value={loginPassword} />
+                <button aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"} onClick={() => setShowPassword((value) => !value)} type="button">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button>
+              </div>
+            </label>
+            {loginError ? <div className={styles.authError}>{loginError}</div> : null}
+            <button onClick={(event) => { event.preventDefault(); submitLogin(); }} type="submit">Đăng nhập</button>
+            <button className={styles.authLinkButton} onClick={() => { setForgotOpen(true); setForgotEmail(loginEmail); setForgotSent(false); }} type="button">Quên mật khẩu?</button>
           </form>
           <footer>Tài khoản mới được cấp bởi quản trị viên trong hệ thống.</footer>
         </section>
+        {forgotOpen ? (
+          <section className={styles.authModalOverlay}>
+            <div className={styles.authResetModal}>
+              <h2>Khôi phục mật khẩu</h2>
+              <p>Nhập email đã được Admin cấp. Hệ thống sẽ gửi liên kết đặt lại mật khẩu nếu tài khoản tồn tại và đang hoạt động.</p>
+              <label><span>Email nhận liên kết</span><input onChange={(event) => setForgotEmail(event.target.value)} type="email" value={forgotEmail} /></label>
+              {forgotSent ? <div className={styles.authSuccess}>Đã gửi hướng dẫn đặt lại mật khẩu tới email hợp lệ trong môi trường demo.</div> : null}
+              <div>
+                <button onClick={() => setForgotOpen(false)} type="button">Hủy</button>
+                <button onClick={() => {
+                  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail.trim())) setForgotSent(true);
+                  else setLoginError("Email khôi phục không hợp lệ.");
+                }} type="button">Gửi hướng dẫn</button>
+              </div>
+            </div>
+          </section>
+        ) : null}
       </main>
     );
   }
@@ -125,9 +178,9 @@ export default function AppShell() {
           </div>
           <div className={styles.authBranchList}>
             {branches.map((branch) => (
-              <button className={activeBranch === branch.name ? styles.authBranchActive : undefined} key={branch.name} onClick={() => setActiveBranch(branch.name)} type="button">
+              <button className={activeBranch === branch.shortName ? styles.authBranchActive : undefined} key={branch.code} onClick={() => setActiveBranch(branch.shortName)} type="button">
                 <strong>{branch.name}</strong>
-                <span>{branch.address}</span>
+                <span>{branch.displayAddress}</span>
                 <small>{branch.status}</small>
               </button>
             ))}
@@ -145,7 +198,7 @@ export default function AppShell() {
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarBrand}>
-            <span>GM</span>
+            <button aria-label={collapsed ? "Mở rộng menu" : "Trang quản trị Golf Manager"} className={styles.brandMark} onClick={() => collapsed ? setCollapsed(false) : undefined} type="button">GM</button>
             <div>
               <h1>Golf Manager</h1>
               <small>NextVision Suite</small>
@@ -193,9 +246,9 @@ export default function AppShell() {
             {branchMenuOpen ? (
               <div className={styles.branchMenu}>
                 {branches.map((branch) => (
-                  <button className={activeBranch === branch.name ? styles.branchMenuActive : undefined} key={branch.name} onClick={() => switchBranch(branch.name)} type="button">
+                  <button className={activeBranch === branch.shortName ? styles.branchMenuActive : undefined} key={branch.code} onClick={() => switchBranch(branch.shortName)} type="button">
                     <strong>{branch.name}</strong>
-                    <span>{branch.address}</span>
+                    <span>{branch.displayAddress}</span>
                     <small>{branch.status}</small>
                   </button>
                 ))}

@@ -19465,12 +19465,29 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .settingsStatCard {
+  position: relative;
+  overflow: hidden;
   gap: 12px;
-  padding: 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.06);
+  min-height: 108px;
+  padding: 18px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2563eb, #14b8a6);
+  color: #ffffff;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
+}
+.settingsStatCard:nth-child(1) { background: linear-gradient(135deg, #2563eb, #7c3aed); }
+.settingsStatCard:nth-child(2) { background: linear-gradient(135deg, #059669, #22c55e); }
+.settingsStatCard:nth-child(3) { background: linear-gradient(135deg, #f59e0b, #ea580c); }
+.settingsStatCard:nth-child(4) { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+.settingsStatCard::after {
+  content: "";
+  position: absolute;
+  inset: auto -22px -34px auto;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
 }
 .settingsStatCard > span,
 .settingsPanelHead > span {
@@ -19489,44 +19506,73 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   display: block;
   margin: auto;
 }
+.settingsStatCard > span {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
 .settingsStatCard small,
 .settingsStatCard p {
   display: block;
   margin: 0;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.86);
   font-size: 12px;
   font-weight: 800;
 }
 .settingsStatCard strong {
   display: block;
   margin: 3px 0;
-  color: #0f172a;
+  color: #ffffff;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 950;
 }
 .settingsTabBar {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #ffffff;
+  overflow-y: hidden;
+  margin-bottom: 18px;
+  padding: 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(20, 184, 166, 0.07)), #ffffff;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.07);
 }
 .settingsTabBar button {
-  min-height: 40px;
+  min-height: 44px;
   flex: 0 0 auto;
+  justify-content: center;
   gap: 8px;
-  border: 0;
-  border-radius: 10px;
-  padding: 9px 12px;
-  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 13px;
+  background: rgba(255, 255, 255, 0.72);
   color: #475569;
   font-weight: 900;
   cursor: pointer;
+  white-space: nowrap;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.settingsTabBar button:hover {
+  transform: translateY(-1px);
+  border-color: #bfdbfe;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
 }
 .settingsTabBar .settingsTabActive {
-  background: #2563eb;
+  border-color: transparent;
+  background: linear-gradient(135deg, #2563eb, #14b8a6);
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.25);
+}
+.settingsTabBar .settingsTabActive:hover,
+.settingsTabBar .settingsTabActive:focus,
+.settingsTabBar .settingsTabActive:focus-visible {
+  border-color: transparent;
+  background: linear-gradient(135deg, #2563eb, #14b8a6);
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.25);
+}
+.settingsTabBar .settingsTabActive svg {
   color: #ffffff;
 }
 .settingsPanel,
@@ -19536,11 +19582,23 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   gap: 14px;
 }
 .settingsCard {
-  padding: 18px;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+  padding: 20px;
+  border: 1px solid rgba(203, 213, 225, 0.85);
+  border-radius: 18px;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(20, 184, 166, 0.14), rgba(168, 85, 247, 0.10)) border-box;
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.07);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+.settingsCard:hover,
+.settingsBranchCard:hover,
+.settingsTemplateCard:hover,
+.settingsCodeGrid article:hover,
+.settingsPaymentMethods article:hover {
+  transform: translateY(-2px);
+  border-color: #bfdbfe;
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.10);
 }
 .settingsPanelHead {
   gap: 12px;
@@ -19572,14 +19630,42 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .settingsAgentList button {
   min-height: 36px;
   gap: 7px;
-  border: 1px solid #dbeafe;
-  border-radius: 9px;
-  padding: 8px 12px;
-  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 11px;
+  padding: 8px 13px;
+  background: linear-gradient(180deg, #ffffff, #eff6ff);
   color: #1d4ed8;
   font-size: 13px;
   font-weight: 900;
   cursor: pointer;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+.settingsPanelHead > button:hover,
+.settingsActionRow button:hover,
+.settingsToolbarLine button:hover,
+.settingsFilterTabs button:hover,
+.settingsBranchCard footer button:hover,
+.settingsTemplateCard footer button:hover,
+.settingsCodeGrid footer button:hover,
+.settingsPromoGrid footer button:hover,
+.settingsAgentList button:hover {
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.13);
+}
+.settingsPanelHead > button,
+.settingsActionRow button:last-child {
+  border-color: transparent;
+  background: linear-gradient(135deg, #2563eb, #14b8a6);
+  color: #ffffff;
+}
+.settingsToolbarActive,
+.settingsModalTabActive {
+  border-color: #2563eb !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12), 0 8px 18px rgba(37, 99, 235, 0.10) !important;
 }
 .settingsBusinessGrid {
   grid-template-columns: 340px minmax(0, 1fr);
@@ -19592,10 +19678,10 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 }
 .settingsBusinessProfile,
 .settingsBusinessForm {
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 20px;
   background: #ffffff;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 20px 52px rgba(15, 23, 42, 0.08);
   overflow: hidden;
 }
 .settingsBusinessProfile {
@@ -19686,6 +19772,27 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   color: #ffffff;
   font-weight: 900;
   cursor: pointer;
+}
+.settingsHiddenFile {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.settingsLogoActions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.settingsLogoPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
 }
 .settingsBusinessChecklist {
   display: grid;
@@ -19821,6 +19928,49 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   background: linear-gradient(135deg, #f5f3ff, #fae8ff);
   color: #7e22ce;
 }
+.settingsBusinessSaveBar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
+}
+.settingsBusinessSaveBar span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+.settingsBusinessSaveBar div {
+  display: inline-flex;
+  gap: 9px;
+}
+.settingsBusinessSaveBar button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #dbeafe;
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.settingsBusinessSaveBar button:last-child {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
 .settingsLogoBox p,
 .settingsConfirmText {
   margin: 0;
@@ -19846,6 +19996,7 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-weight: 900;
 }
 .settingsFormGrid input,
+.settingsFormGrid select,
 .settingsFormGrid textarea,
 .settingsTextarea,
 .settingsToolbarLine input {
@@ -19858,9 +20009,15 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-size: 14px;
 }
 .settingsFormGrid input,
+.settingsFormGrid select,
 .settingsToolbarLine input {
   min-height: 40px;
   padding: 0 12px;
+}
+.settingsFormGrid input[type="time"] {
+  min-height: 40px;
+  height: 40px;
+  line-height: 40px;
 }
 .settingsFormGrid textarea,
 .settingsTextarea {
@@ -19875,6 +20032,16 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+.settingsEInvoiceLayout {
+  align-items: start;
+}
+.settingsEInvoiceLayout > .settingsCard {
+  align-self: start;
+}
+.settingsEInvoiceLayout > .settingsCard:first-child {
+  position: sticky;
+  top: 14px;
 }
 .settingsOpsLayout {
   display: grid;
@@ -20128,6 +20295,37 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
+.settingsSummaryGrid article {
+  min-height: 82px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.12), transparent 38%),
+    linear-gradient(135deg, #ffffff, #f8fafc);
+}
+.settingsSummaryGrid article span,
+.settingsSummaryGrid article strong {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+.settingsSummaryGrid article span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+}
+.settingsSummaryGrid article strong {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 950;
+}
 .settingsInfoNote {
   display: flex;
   gap: 9px;
@@ -20211,21 +20409,43 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 }
 .settingsMiniStats article {
   padding: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 13px;
-  background: #ffffff;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2563eb, #14b8a6);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.13);
+}
+.settingsMiniStats i {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  z-index: 1;
+}
+.settingsMiniStats i svg {
+  display: block;
 }
 .settingsMiniStats span {
-  color: #64748b;
+  position: relative;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.84);
   font-size: 12px;
   font-weight: 900;
 }
 .settingsMiniStats strong {
+  position: relative;
+  z-index: 1;
   display: block;
   margin-top: 5px;
-  color: #0f172a;
+  color: #ffffff;
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 950;
 }
 .settingsToolbarLine {
   gap: 9px;
@@ -20236,53 +20456,129 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 }
 .settingsToolbarLine input {
   flex: 1;
+  min-width: 220px;
+}
+.settingsSelectCompact {
+  width: 148px;
+  flex: 0 0 148px;
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
 }
 .settingsBranchGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 14px;
 }
 .settingsBranchCard {
+  position: relative;
   padding: 15px;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
-  background: #ffffff;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(140deg, rgba(59, 130, 246, 0.32), rgba(20, 184, 166, 0.14)) border-box;
+  cursor: pointer;
+  overflow: hidden;
 }
-.settingsBranchCard strong,
+.settingsBranchHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: -15px -15px 2px;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+}
+.settingsBranchHeader > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.16);
+}
+.settingsBranchHeader > div:nth-child(2) {
+  min-width: 0;
+}
+.settingsBranchHeader strong,
 .settingsTemplateCard strong,
 .settingsPromoGrid strong {
   display: block;
-  margin-top: 8px;
+  margin-top: 0;
   color: #0f172a;
   font-size: 16px;
   font-weight: 900;
 }
-.settingsBranchCard small,
+.settingsBranchHeader small,
 .settingsTemplateCard small,
 .settingsPromoGrid p {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #ffffff;
   color: #64748b;
   font-size: 12px;
   font-weight: 800;
 }
-.settingsBranchCard p {
-  min-height: 42px;
-  color: #475569;
-  font-size: 13px;
-  line-height: 1.45;
+.settingsBranchActions {
+  display: inline-flex;
+  gap: 6px;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.settingsBranchCard:hover .settingsBranchActions,
+.settingsBranchCard:focus-within .settingsBranchActions {
+  opacity: 1;
+  transform: translateX(0);
+}
+.settingsBranchActions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #2563eb;
+  cursor: pointer;
+}
+.settingsBranchActions button:last-child {
+  border-color: #fecaca;
+  color: #dc2626;
 }
 .settingsBranchCard dl {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
+  grid-template-columns: 1fr;
+  gap: 10px;
   margin: 0;
+  padding-top: 14px;
 }
 .settingsBranchCard dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   color: #94a3b8;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
 }
 .settingsBranchCard dd {
-  margin: 2px 0 0;
+  margin: 4px 0 0 22px;
   color: #0f172a;
   font-size: 13px;
   font-weight: 900;
@@ -20296,8 +20592,24 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   gap: 8px;
   margin-top: 14px;
 }
+.settingsBranchCard footer {
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+}
+.settingsBranchCard footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 900;
+}
 .settingsStatusGreen,
 .settingsStatusAmber,
+.settingsStatusRed,
+.settingsStatusSlate,
 .settingsDeviceBadge {
   display: inline-flex;
   align-items: center;
@@ -20314,6 +20626,14 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .settingsStatusAmber {
   background: #ffedd5;
   color: #c2410c;
+}
+.settingsStatusRed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.settingsStatusSlate {
+  background: #e2e8f0;
+  color: #475569;
 }
 .settingsDeviceBadge {
   background: #e0f2fe;
@@ -20364,33 +20684,63 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   gap: 8px;
   margin-bottom: 14px;
   overflow-x: auto;
+  padding-bottom: 2px;
 }
 .settingsFilterTabs button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   background: #ffffff;
   color: #475569;
+  white-space: nowrap;
+}
+.settingsFilterTabs button span {
+  display: inline-block;
+}
+.settingsFilterTabs button em {
+  min-width: 24px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
 }
 .settingsFilterTabs .settingsFilterActive {
   border-color: #2563eb;
   background: #2563eb;
   color: #ffffff;
 }
+.settingsFilterTabs .settingsFilterActive em {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
 .settingsTemplateGrid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 .settingsTemplateCard,
 .settingsCodeGrid article,
 .settingsPromoGrid article {
   position: relative;
-  padding: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #ffffff;
+  padding: 16px;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.76), rgba(255, 255, 255, 0.98)),
+    #ffffff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.055);
 }
 
 .settingsTemplateCard {
   display: grid;
   gap: 14px;
   padding: 16px;
+  align-content: start;
 }
 
 .settingsTemplateCard header {
@@ -20417,30 +20767,73 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   width: 42px;
   height: 42px;
   flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-grid;
+  place-items: center;
   border-radius: 11px;
-  background: #eff6ff;
+  background: linear-gradient(135deg, #eff6ff, #ccfbf1);
   color: #2563eb;
 }
 
+.settingsTemplateCard header .settingsTemplateIcon {
+  display: inline-grid;
+  place-items: center;
+  margin-top: 0;
+}
+
+.settingsTemplateIcon svg,
+.settingsTemplateDelete svg,
+.settingsTemplateCard footer button svg {
+  display: block;
+  margin: 0;
+}
+
+.settingsTemplateTonecontract .settingsTemplateIcon {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
+}
+
+.settingsTemplateToneinvoice .settingsTemplateIcon {
+  background: linear-gradient(135deg, #ecfeff, #ccfbf1);
+  color: #0f766e;
+}
+
+.settingsTemplateTonereceipt .settingsTemplateIcon {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  color: #15803d;
+}
+
+.settingsTemplateTonebill .settingsTemplateIcon {
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  color: #c2410c;
+}
+
+.settingsTemplateTonemember .settingsTemplateIcon {
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  color: #6d28d9;
+}
+
 .settingsTemplateChips {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  align-items: center;
+  justify-content: start;
   gap: 7px;
 }
 
 .settingsTemplateChips span,
 .settingsTemplateChips em {
-  min-height: 26px;
+  height: 28px;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   border-radius: 999px;
-  padding: 5px 9px;
+  padding: 0 10px;
   font-size: 11px;
+  line-height: 1;
   font-style: normal;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .settingsTemplateChips span {
@@ -20480,6 +20873,26 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   color: #0f172a;
   font-size: 12px;
   font-weight: 900;
+  word-break: break-word;
+}
+
+.settingsTemplateCard footer button {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.settingsTemplateCard footer button svg {
+  flex: 0 0 auto;
+}
+
+.settingsTemplateCard footer button span {
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .settingsTemplatePreview {
@@ -20515,7 +20928,7 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   right: 12px;
   width: 32px;
   height: 32px;
-  display: grid;
+  display: inline-grid;
   place-items: center;
   border: 1px solid #fee2e2;
   border-radius: 9px;
@@ -20536,10 +20949,10 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .settingsTemplateForm section {
   display: grid;
   gap: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 13px;
+  border: 1px solid #dbeafe;
+  border-radius: 15px;
   padding: 14px;
-  background: #ffffff;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
 }
 
 .settingsTemplateForm h4 {
@@ -20549,28 +20962,226 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-weight: 900;
 }
 
-.settingsCheckGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+.settingsTemplateForm section > .settingsFullField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
-.settingsCheckGrid label {
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 9px;
-  padding: 8px 10px;
-  background: #f8fafc;
-  color: #334155;
-  font-size: 13px;
+.settingsTemplateForm section > .settingsFullField span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.settingsTemplateForm section > .settingsFullField textarea {
+  width: 100%;
+  min-height: 88px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.settingsTemplateLivePreview {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 15px;
+  padding: 14px;
+  background: linear-gradient(135deg, #eff6ff, #ffffff);
+}
+
+.settingsTemplateLivePreview > div strong,
+.settingsTemplateLivePreview > div span {
+  display: block;
+}
+
+.settingsTemplateLivePreview > div strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.settingsTemplateLivePreview > div span {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
   font-weight: 800;
 }
 
+.settingsTemplatePreviewMini {
+  max-height: 360px;
+  display: grid;
+  place-items: start center;
+  overflow: auto;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  padding: 18px;
+  background: #ffffff;
+}
+
+.settingsTemplatePreviewMini .settingsPrintPaperA4,
+.settingsTemplatePreviewMini .settingsPrintPaperK80,
+.settingsTemplatePreviewMini .settingsPrintMemberCardDeck {
+  transform: scale(0.42);
+  transform-origin: top center;
+}
+
+.settingsTemplatePreviewMini .settingsPrintPaperA4 {
+  margin-bottom: -570px;
+}
+
+.settingsTemplatePreviewMini .settingsPrintPaperK80 {
+  margin-bottom: -390px;
+}
+
+.settingsTemplatePreviewMini .settingsPrintMemberCardDeck {
+  margin-bottom: -400px;
+}
+
+.settingsTemplatePreviewMini .settingsMemberCardSet {
+  grid-template-columns: 430px;
+}
+
+.settingsCheckGrid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.settingsCheckGrid label {
+  width: fit-content;
+  min-width: 0;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  color: #334155;
+  font-size: 13px;
+  font-weight: 850;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
 .settingsCheckGrid input {
-  accent-color: #2563eb;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  min-width: 18px;
+  max-width: 18px;
+  flex: 0 0 18px;
+  display: inline-grid;
+  place-items: center;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 2px #ffffff;
+  cursor: pointer;
+}
+
+.settingsCheckGrid input:checked {
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+.settingsCheckGrid input:checked::before {
+  content: "";
+  width: 8px;
+  height: 5px;
+  border: solid #ffffff;
+  border-width: 0 0 2px 2px;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.settingsCheckboxRow {
+  grid-column: 1 / -1;
+  width: fit-content;
+  min-height: 36px;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  padding: 8px 12px !important;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  color: #334155;
+  font-size: 13px;
+  font-weight: 850;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.settingsCheckboxRow input {
+  appearance: none;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  flex: 0 0 18px;
+  display: inline-grid;
+  place-items: center;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 0 !important;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 2px #ffffff;
+  cursor: pointer;
+}
+
+.settingsCheckboxRow input:checked {
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+.settingsCheckboxRow input:checked::before {
+  content: "";
+  width: 8px;
+  height: 5px;
+  border: solid #ffffff;
+  border-width: 0 0 2px 2px;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.settingsCheckboxRow span {
+  margin: 0;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.settingsFullField > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.settingsBranchModalForm {
+  align-items: start;
+}
+
+.settingsBranchTimeRow {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settingsBranchTimeRow label {
+  min-height: 0;
+  align-self: start;
 }
 
 .settingsConfirmBox {
@@ -20594,6 +21205,26 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-size: 13px;
   font-weight: 700;
   line-height: 1.55;
+}
+.settingsConfirmBox ul {
+  display: grid;
+  gap: 7px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.settingsConfirmBox li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: #7f1d1d;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+.settingsConfirmBox li svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
 }
 .settingsEmptyState {
   min-height: 280px;
@@ -20651,6 +21282,7 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .settingsProviderGrid strong,
 .settingsThemeGrid strong,
 .settingsProviderGrid span,
+.settingsProviderGrid em,
 .settingsThemeGrid span {
   display: block;
 }
@@ -20659,6 +21291,29 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   margin: 8px 0 4px;
   color: #0f172a;
   font-weight: 900;
+}
+.settingsProviderGrid button > span {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  box-shadow: inset 0 -8px 12px rgba(15, 23, 42, 0.16);
+}
+.settingsProviderGrid em {
+  color: #64748b;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.settingsProviderToneblue > span { background: linear-gradient(135deg, #1d4ed8, #0ea5e9) !important; }
+.settingsProviderTonered > span { background: linear-gradient(135deg, #b91c1c, #ef4444) !important; }
+.settingsProviderToneorange > span { background: linear-gradient(135deg, #c2410c, #f59e0b) !important; }
+.settingsProviderTonegreen > span { background: linear-gradient(135deg, #15803d, #22c55e) !important; }
+.settingsProviderTonecyan > span {
+  border-radius: 7px !important;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #0369a1, #0ea5e9) !important;
 }
 .settingsProviderActive {
   border-color: #2563eb !important;
@@ -20709,13 +21364,46 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   grid-template-columns: 360px minmax(0, 1fr);
   gap: 14px;
 }
+.settingsSubTabs {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 5px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+.settingsSubTabs button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 13px;
+  background: transparent;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.settingsSubTabs .settingsSubTabActive {
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+}
 .settingsRoleList button {
   width: 100%;
   position: relative;
   display: block;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 13px 40px 13px 13px;
+  padding: 13px 34px 13px 13px;
   background: #ffffff;
   text-align: left;
   cursor: pointer;
@@ -20730,6 +21418,151 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .settingsRoleList .settingsRoleActive {
   border-color: #2563eb;
   background: #eff6ff;
+}
+.settingsRoleList strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+.settingsRoleList em {
+  border-radius: 999px;
+  padding: 3px 7px;
+  background: #ffedd5;
+  color: #c2410c;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 950;
+}
+.settingsPermissionTable {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+.settingsPermissionTable > div {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) repeat(4, 72px);
+  align-items: center;
+  min-height: 48px;
+  border-bottom: 1px solid #edf2f7;
+}
+.settingsPermissionTable > div:first-child {
+  background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+  color: #1e40af;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+.settingsPermissionTable > div:last-child {
+  border-bottom: 0;
+}
+.settingsPermissionTable strong,
+.settingsPermissionTable span,
+.settingsPermissionTable label {
+  padding: 0 14px;
+}
+.settingsPermissionTable label {
+  display: grid;
+  place-items: center;
+}
+.settingsPermissionDisabled {
+  color: #cbd5e1 !important;
+  pointer-events: none;
+}
+.settingsPermissionDisabled span {
+  color: #cbd5e1;
+  font-weight: 900;
+}
+.settingsPermissionTable .settingsPermissionGroupRow {
+  min-height: 38px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+.settingsPermissionTable .settingsPermissionGroupRow strong {
+  color: #1d4ed8;
+}
+.settingsInlineEditor {
+  display: grid;
+  gap: 14px;
+}
+.settingsInlineEditor > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #059669, #0ea5e9);
+  color: #ffffff;
+}
+.settingsInlineEditor > header strong,
+.settingsInlineEditor > header span {
+  display: block;
+}
+.settingsInlineEditor > header strong {
+  font-size: 18px;
+  font-weight: 950;
+}
+.settingsInlineEditor > header span {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  font-weight: 800;
+}
+.settingsInlineEditor > header div:last-child {
+  display: flex;
+  gap: 8px;
+}
+.settingsInlineEditor > header button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-weight: 950;
+  cursor: pointer;
+}
+.settingsInlineEditor > header button:last-child {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #047857;
+}
+.settingsInlineRoleForm {
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  padding: 14px;
+  background: #f8fbff;
+}
+.settingsInlineRoleForm h4,
+.settingsInlineMatrixHead h4 {
+  margin: 0 0 12px;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 950;
+}
+.settingsInlineMatrixHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settingsInlineMatrixHead span {
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 12px;
+  font-weight: 950;
 }
 .settingsPermissionGrid {
   display: grid;
@@ -20769,6 +21602,145 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   border-radius: 12px;
   background: #f8fafc;
 }
+.settingsAgentTable {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+.settingsAgentTable > div {
+  display: grid;
+  grid-template-columns: 76px minmax(128px, 1fr) minmax(160px, 1.12fr) minmax(108px, 0.9fr) minmax(122px, 0.92fr) 112px 70px 92px 92px;
+  align-items: center;
+  gap: 8px;
+  min-width: 1040px;
+  min-height: 54px;
+  border-bottom: 1px solid #edf2f7;
+  padding: 0 10px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+.settingsAgentTable > div:first-child {
+  min-height: 46px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.settingsAgentTable > div:last-child {
+  border-bottom: 0;
+}
+.settingsAgentTable em {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: #dcfce7;
+  color: #15803d;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1.2;
+}
+.settingsAgentTable strong small {
+  display: block;
+  width: fit-content;
+  margin-top: 5px;
+  border-radius: 999px;
+  padding: 3px 7px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+.settingsAgentTable button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #2563eb;
+  cursor: pointer;
+}
+.settingsAgentTable button:last-child {
+  color: #dc2626;
+}
+.settingsInlineLink {
+  width: fit-content !important;
+  height: 30px !important;
+  margin-left: 0 !important;
+  padding: 0 11px !important;
+  border-color: #bfdbfe !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  font-weight: 950 !important;
+}
+.settingsTableEmpty {
+  grid-template-columns: 1fr !important;
+  min-width: 0 !important;
+  justify-items: center;
+  min-height: 84px !important;
+  color: #64748b;
+}
+.settingsRoleMemberGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.settingsRoleMemberGrid article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+}
+.settingsRoleMemberGrid strong,
+.settingsRoleMemberGrid span {
+  display: block;
+}
+.settingsRoleMemberGrid strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 950;
+  line-height: 1.25;
+}
+.settingsRoleMemberGrid span {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+.settingsRoleMemberGrid em {
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+  white-space: nowrap;
+}
+.settingsRoleMemberGrid button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: #ffffff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
 .settingsCodeGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 14px;
@@ -20776,6 +21748,7 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .settingsCodeGrid header,
 .settingsPromoGrid header {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
 }
@@ -20799,6 +21772,31 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-size: 12px;
   font-weight: 800;
 }
+.settingsCodeHeaderActions {
+  display: inline-flex;
+  gap: 8px;
+}
+.settingsCodeHeaderActions button,
+.settingsCodeFooter button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.settingsCodeHeaderActions button:last-child {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #dc2626;
+}
 .settingsCodeCard {
   background:
     linear-gradient(135deg, #ffffff, #f8fafc),
@@ -20806,6 +21804,83 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 }
 .settingsCodeGrid .settingsFormGrid {
   margin-top: 12px;
+}
+.settingsCodeLivePreview {
+  margin-top: 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #eff6ff, #f8fbff);
+}
+.settingsCodeLivePreview span,
+.settingsCodeLivePreview small {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+}
+.settingsCodeLivePreview strong {
+  display: inline-flex;
+  margin-top: 8px;
+  color: #2563eb;
+  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
+  font-size: 25px;
+  font-weight: 950;
+  letter-spacing: 0.03em;
+}
+.settingsCodeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+}
+.settingsCodeChips span {
+  border: 1px solid #dbe3ee;
+  border-radius: 9px;
+  padding: 6px 10px;
+  background: #ffffff;
+  color: #334155;
+  font-family: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 850;
+}
+.settingsCodeFooter {
+  position: sticky;
+  bottom: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  border: 1px solid #fde68a;
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: rgba(255, 251, 235, 0.94);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.10);
+}
+.settingsCodeFooter span {
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 850;
+}
+.settingsCodeFooter div {
+  display: inline-flex;
+  gap: 10px;
+}
+.settingsCodeFooter button:last-child {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+.settingsCodeFooter button:disabled {
+  border-color: #cbd5e1;
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .settingsCodeModal {
@@ -20880,26 +21955,147 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-weight: 900;
 }
 .settingsOrgChart {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  justify-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 28px 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #bfdbfe, #ddd6fe) border-box;
 }
-.settingsOrgChart div:first-child,
-.settingsOrgChart span {
-  border: 1px solid #bfdbfe;
-  border-radius: 11px;
-  padding: 10px 12px;
-  background: #eff6ff;
-  color: #1e40af;
-  font-weight: 900;
-}
-.settingsOrgChart div:not(:first-child) {
+.settingsOrgLevel {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  gap: 14px;
+}
+.settingsOrgConnectors {
+  width: min(620px, 90%);
+  height: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  position: relative;
+}
+.settingsOrgConnectors::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16%;
+  right: 16%;
+  height: 1px;
+  background: #bfdbfe;
+}
+.settingsOrgConnectors span {
+  justify-self: center;
+  width: 1px;
+  height: 28px;
+  background: #bfdbfe;
+}
+.settingsOrgNode {
+  width: 258px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
   gap: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+.settingsOrgAvatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #8b5cf6);
+  color: #ffffff;
+  font-weight: 950;
+}
+.settingsOrgNode strong,
+.settingsOrgNode span,
+.settingsOrgNode em,
+.settingsOrgNode small {
+  display: block;
+}
+.settingsOrgNode strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 950;
+}
+.settingsOrgNode span,
+.settingsOrgNode small {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.settingsOrgNode em {
+  width: fit-content;
+  margin-top: 7px;
+  border-radius: 999px;
+  padding: 4px 7px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+}
+.settingsOrgNode b {
+  align-self: start;
+  border-radius: 999px;
+  padding: 4px 7px;
+  font-size: 10px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+.settingsStatusBadgeGreen {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+}
+.settingsStatusBadgeAmber {
+  background: #ffedd5 !important;
+  color: #c2410c !important;
+}
+.settingsStatusBadgeRed {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+.settingsStatusBadgeViolet {
+  background: #f3e8ff !important;
+  color: #7e22ce !important;
+}
+.settingsStatusBadgeSlate {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+}
+.settingsOrgNode footer {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  border-top: 1px solid #edf2f7;
+  padding-top: 9px;
+}
+.settingsOrgNode footer button {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 5px 7px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.settingsOrgNode footer button:last-child {
+  color: #dc2626;
 }
 .settingsModal {
   width: min(94vw, 720px);
@@ -20976,6 +22172,739 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   color: #0f172a;
   box-shadow: inset 0 0 0 8px #f8fafc;
 }
+
+.settingsModalPreview {
+  width: min(92vw, 1480px);
+  max-height: min(92vh, 980px);
+}
+
+.settingsModalPreview header {
+  display: none;
+}
+
+.settingsPrintPreviewShell {
+  display: grid;
+  gap: 20px;
+}
+
+.settingsMemberCardPreviewShell {
+  gap: 14px;
+}
+
+.settingsMemberCardPreviewShell .settingsPreviewTitle strong {
+  font-size: 20px;
+}
+
+.settingsMemberCardPreviewShell .settingsPreviewTitle span {
+  margin-top: 4px;
+}
+
+.settingsPreviewTitle strong,
+.settingsPreviewTitle span {
+  display: block;
+}
+
+.settingsPreviewTitle strong {
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 950;
+}
+
+.settingsPreviewTitle span {
+  margin-top: 8px;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.settingsPrintPreviewStage {
+  min-height: 660px;
+  display: grid;
+  place-items: start center;
+  overflow: auto;
+  border-radius: 14px;
+  padding: 36px 20px;
+  background: #ffffff;
+}
+
+.settingsMemberCardPreviewShell .settingsPrintPreviewStage {
+  min-height: 330px;
+  padding: 22px;
+  place-items: center start;
+}
+
+.settingsMemberCardPreviewShell .settingsPreviewFooter {
+  padding-top: 12px;
+}
+
+.settingsPrintPaperA4,
+.settingsPrintPaperK80 {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+}
+
+.settingsPrintPaperA4 {
+  width: min(100%, 760px);
+  min-height: 1010px;
+  padding: 70px 58px 54px;
+}
+
+.settingsPrintPaperK80 {
+  width: 292px;
+  min-height: 690px;
+  padding: 38px 24px;
+}
+
+.settingsPrintMemberCardDeck {
+  width: max-content;
+  display: grid;
+  gap: 18px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: #0f172a;
+  box-shadow: none;
+}
+
+.settingsPrintMemberCard {
+  width: 430px;
+  min-height: 286px;
+  aspect-ratio: 86 / 54;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.24), transparent 30%),
+    linear-gradient(135deg, #0f3f8f 0%, #2563eb 54%, #14b8a6 100%);
+  color: #ffffff;
+  box-shadow: 0 24px 70px rgba(37, 99, 235, 0.26);
+}
+
+.settingsPrintPaperA4 header,
+.settingsPrintPaperK80 header,
+.settingsPrintMemberCardDeck header {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 22px;
+  text-align: center;
+}
+
+.settingsPrintPaperA4 header > *,
+.settingsPrintPaperK80 header > *,
+.settingsPrintMemberCardDeck header > * {
+  justify-self: center;
+  text-align: center;
+}
+
+.settingsPrintLogo {
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  gap: 0;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(20, 184, 166, 0.22), transparent 30%),
+    linear-gradient(135deg, #ffffff 0%, #eff6ff 62%, #ecfeff 100%);
+  color: #0f3f8f;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.16);
+}
+
+.settingsPrintLogo b,
+.settingsPrintLogo small {
+  width: auto;
+  display: block;
+  margin: 0;
+  text-align: center;
+}
+
+.settingsPrintLogo b {
+  color: #0f3f8f;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.settingsPrintLogo small {
+  margin-top: -8px;
+  color: #0f766e;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+}
+
+.settingsPrintPaperK80 .settingsPrintLogo {
+  width: 52px;
+  height: 52px;
+}
+
+.settingsPrintPaperK80 .settingsPrintLogo b {
+  font-size: 18px;
+}
+
+.settingsPrintPaperK80 .settingsPrintLogo small {
+  margin-top: -8px;
+  font-size: 8px;
+}
+
+.settingsPrintPaperA4 header strong,
+.settingsPrintPaperK80 header strong,
+.settingsPrintMemberCardDeck header strong {
+  width: 100%;
+  margin-top: 8px;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.settingsPrintPaperK80 header strong {
+  font-size: 19px;
+}
+
+.settingsPrintPaperA4 header span,
+.settingsPrintPaperK80 header span,
+.settingsPrintMemberCardDeck header span {
+  width: 100%;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.settingsPrintPaperA4 h4,
+.settingsPrintPaperK80 h4 {
+  margin: 58px 0 54px;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.settingsPrintPaperK80 h4 {
+  margin: 50px 0 74px;
+  font-size: 18px;
+}
+
+.settingsPrintMemberCardDeck h4 {
+  margin: 8px 0 2px;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.settingsPrintInfoBox {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 22px;
+  background: #f8fafc;
+}
+
+.settingsPrintPaperK80 .settingsPrintInfoBox {
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.settingsPrintMemberCardDeck .settingsPrintInfoBox,
+.settingsPrintMemberCard .settingsPrintInfoBox {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.settingsMemberCardSet {
+  display: grid;
+  grid-template-columns: repeat(3, 430px);
+  gap: 18px;
+}
+
+.settingsMemberCardSet .settingsMemberCardPreview {
+  min-width: 0;
+  width: 430px;
+  max-width: 100%;
+  aspect-ratio: 86 / 54;
+  min-height: auto;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  align-content: space-between;
+  justify-self: center;
+  gap: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 18px;
+  padding: 16px;
+  color: #ffffff;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+}
+
+.settingsMemberTierGold {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(254, 240, 138, 0.34), transparent 32%),
+    linear-gradient(135deg, #78350f 0%, #b45309 42%, #f59e0b 100%);
+}
+
+.settingsMemberTierSilver {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(241, 245, 249, 0.40), transparent 32%),
+    linear-gradient(135deg, #334155 0%, #64748b 48%, #cbd5e1 100%);
+}
+
+.settingsMemberTierAcademy {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(187, 247, 208, 0.34), transparent 32%),
+    linear-gradient(135deg, #14532d 0%, #15803d 45%, #22c55e 100%);
+}
+
+.settingsMemberTierCorporate {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(191, 219, 254, 0.34), transparent 32%),
+    linear-gradient(135deg, #172554 0%, #1d4ed8 48%, #0f766e 100%);
+}
+
+.settingsMemberTierJunior {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(253, 230, 138, 0.34), transparent 32%),
+    linear-gradient(135deg, #7c2d12 0%, #ea580c 48%, #facc15 100%);
+}
+
+.settingsPrintInfoBox div.settingsMemberCardPreview {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  border-bottom: 0;
+  padding: 0;
+}
+
+.settingsPrintInfoBox .settingsMemberCardPreview > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 0;
+  border-bottom: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.settingsMemberCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settingsMemberTierLabel {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  margin-left: auto;
+  text-align: right;
+}
+
+.settingsMemberCardTop em {
+  display: block;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.settingsMemberBrand {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settingsMemberBrand i {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f3f8f;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+}
+
+.settingsMemberBrand small {
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1.15;
+  text-transform: uppercase;
+  white-space: normal;
+}
+
+.settingsMemberCardBottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 0;
+}
+
+.settingsMemberCardBottom b {
+  width: 34px;
+  height: 34px;
+  display: block;
+  border: 3px solid #ffffff;
+  border-radius: 6px;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath fill='%230f172a' d='M1 1h8v8H1zM3 3v4h4V3zM20 1h8v8h-8zM22 3v4h4V3zM1 20h8v8H1zM3 22v4h4v-4zM12 2h2v2h-2zM16 2h2v2h-2zM12 6h6v2h-6zM11 11h2v2h-2zM15 11h4v2h-4zM22 12h2v2h-2zM26 12h2v2h-2zM2 12h2v2H2zM6 13h2v4H6zM10 15h4v2h-4zM16 15h2v2h-2zM20 16h8v2h-8zM12 20h2v2h-2zM16 20h4v2h-4zM22 21h2v2h-2zM26 21h2v2h-2zM11 24h6v2h-6zM19 25h2v2h-2zM23 25h5v2h-5z'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 28px 28px;
+}
+
+.settingsMemberCardPreview span,
+.settingsMemberCardPreview strong,
+.settingsMemberCardPreview p,
+.settingsMemberCardPreview dt,
+.settingsMemberCardPreview dd,
+.settingsMemberCardPreview small {
+  min-width: 0;
+  color: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.settingsMemberCardPreview p {
+  margin: 4px 0;
+  font-size: 25px;
+  font-weight: 950;
+}
+
+.settingsMemberCardPreview dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.settingsPrintInfoBox .settingsMemberCardPreview dl div {
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 10px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.settingsMemberCardPreview dt {
+  font-size: 9px;
+  font-weight: 850;
+  opacity: 0.78;
+  text-transform: uppercase;
+}
+
+.settingsMemberCardPreview dd {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.settingsMemberCardPreview small {
+  line-height: 1.45;
+  opacity: 0.86;
+}
+
+.settingsPrintMemberCard footer {
+  display: none;
+}
+
+.settingsPrintInfoBox div:not(.settingsPrintMeta) {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 0;
+}
+
+.settingsPrintInfoBox span,
+.settingsPrintInfoBox strong,
+.settingsPrintInfoBox p {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.settingsPrintPaperK80 .settingsPrintInfoBox span,
+.settingsPrintPaperK80 .settingsPrintInfoBox strong,
+.settingsPrintPaperK80 .settingsPrintInfoBox p {
+  font-size: 10px;
+}
+
+.settingsPrintInfoBox strong {
+  justify-self: end;
+  color: #111827;
+}
+
+.settingsPrintInfoBox p {
+  margin: 22px 0 14px;
+  line-height: 1.6;
+}
+
+.settingsPrintMemberCardDeck .settingsPrintInfoBox div.settingsMemberCardPreview,
+.settingsPrintMemberCard .settingsPrintInfoBox div.settingsMemberCardPreview {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+  border-bottom: 0;
+  padding: 0;
+}
+
+.settingsPrintMemberCardDeck .settingsPrintInfoBox .settingsMemberCardPreview > div,
+.settingsPrintMemberCard .settingsPrintInfoBox .settingsMemberCardPreview > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 0;
+  padding: 0;
+}
+
+.settingsPrintMemberCardDeck .settingsPrintInfoBox .settingsMemberCardPreview dl div,
+.settingsPrintMemberCard .settingsPrintInfoBox .settingsMemberCardPreview dl div {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 10px;
+  padding: 7px 8px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.settingsPrintMemberCardDeck .settingsMemberCardPreview span,
+.settingsPrintMemberCardDeck .settingsMemberCardPreview strong,
+.settingsPrintMemberCardDeck .settingsMemberCardPreview p,
+.settingsPrintMemberCardDeck .settingsMemberCardPreview dt,
+.settingsPrintMemberCardDeck .settingsMemberCardPreview dd,
+.settingsPrintMemberCardDeck .settingsMemberCardPreview small,
+.settingsPrintMemberCard .settingsMemberCardPreview span,
+.settingsPrintMemberCard .settingsMemberCardPreview strong,
+.settingsPrintMemberCard .settingsMemberCardPreview p,
+.settingsPrintMemberCard .settingsMemberCardPreview dt,
+.settingsPrintMemberCard .settingsMemberCardPreview dd,
+.settingsPrintMemberCard .settingsMemberCardPreview small {
+  justify-self: auto;
+  color: #ffffff;
+}
+
+.settingsPrintMemberCardDeck .settingsMemberCardPreview p,
+.settingsPrintMemberCard .settingsMemberCardPreview p {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.1;
+  font-weight: 950;
+  white-space: normal;
+}
+
+.settingsPrintMemberCardDeck .settingsMemberCardPreview small,
+.settingsPrintMemberCard .settingsMemberCardPreview small {
+  display: block;
+  align-self: end;
+  font-size: 8px;
+  line-height: 1.28;
+  white-space: normal;
+}
+
+.settingsPrintMeta {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.settingsPrintInfoBox div.settingsContractPreview {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  border-bottom: 0;
+  margin: 18px 0;
+  padding: 0;
+}
+
+.settingsPrintInfoBox .settingsContractPreview p {
+  margin: 0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.65;
+}
+
+.settingsPrintInfoBox .settingsContractPreview div {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  border: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.settingsPrintInfoBox .settingsContractPreview div strong {
+  justify-self: start;
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.settingsPrintInfoBox .settingsContractPreview div span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.settingsPrintInfoBox .settingsContractPreview table {
+  margin-top: 0;
+}
+
+.settingsPrintInfoBox .settingsContractPreview th {
+  width: 160px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.settingsPrintInfoBox .settingsContractPreview td {
+  text-align: left;
+  line-height: 1.5;
+}
+
+.settingsPrintInfoBox .settingsContractPreview ol {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.settingsPrintInfoBox table {
+  width: 100%;
+  margin-top: 14px;
+  border-collapse: collapse;
+}
+
+.settingsPrintInfoBox td,
+.settingsPrintInfoBox th {
+  border-top: 1px solid #e5e7eb;
+  padding: 7px 0;
+  color: #111827;
+  font-size: 11px;
+  text-align: right;
+}
+
+.settingsPrintInfoBox td:first-child,
+.settingsPrintInfoBox th:first-child {
+  text-align: left;
+}
+
+.settingsPrintPaperA4 footer,
+.settingsPrintPaperK80 footer {
+  margin-top: 58px;
+  display: grid;
+  gap: 56px;
+  color: #475569;
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+}
+
+.settingsPrintPaperK80 footer {
+  margin-top: 52px;
+  gap: 42px;
+  font-size: 10px;
+}
+
+.settingsPrintPaperA4 footer > span {
+  justify-self: end;
+}
+
+.settingsPrintPaperA4 footer div {
+  display: grid;
+  grid-template-columns: 1fr 1fr 110px;
+  align-items: center;
+  gap: 24px;
+  font-style: normal;
+}
+
+.settingsPrintPaperA4 footer b {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  border: 3px solid #ef4444;
+  border-radius: 50%;
+  color: #ef4444;
+  font-size: 12px;
+  transform: rotate(-12deg);
+}
+
+.settingsPreviewFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.settingsPreviewFooter > span {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.settingsPreviewFooter div {
+  display: flex;
+  gap: 10px;
+}
+
+.settingsPreviewFooter button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 8px 15px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.settingsPreviewFooter button:last-child {
+  border-color: transparent;
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+}
 .settingsPrintPreview strong,
 .settingsPrintPreview span,
 .settingsPrintPreview p {
@@ -20991,17 +22920,40 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-weight: 800;
 }
 .settingsPrintPreview div {
-  height: 180px;
+  min-height: 180px;
   margin: 20px 0;
   border-radius: 12px;
-  background: repeating-linear-gradient(0deg, #e2e8f0, #e2e8f0 1px, transparent 1px, transparent 34px);
+  padding: 18px;
+  background: repeating-linear-gradient(0deg, #f8fafc, #f8fafc 1px, transparent 1px, transparent 34px);
 }
 .settingsPrintPreview p {
-  margin: 0;
+  margin: 0 0 9px;
+  text-align: left;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 850;
+}
+.settingsPrintPreview > p {
   text-align: right;
   color: #1d4ed8;
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 950;
+}
+.settingsPreviewDownload {
+  width: fit-content;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 13px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
   font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
 }
 
 .settingsPrintPreviewA4,
@@ -21123,6 +23075,566 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   flex-direction: column;
   gap: 14px;
 }
+.settingsModalSection {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px;
+  background: #ffffff;
+}
+.settingsModalSection h4 {
+  margin: 0 0 12px;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 950;
+}
+.settingsPermissionMatrix {
+  display: grid;
+  gap: 8px;
+}
+.settingsPermissionMatrix div {
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) repeat(4, minmax(64px, auto));
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #f8fafc;
+}
+.settingsPermissionMatrix strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 950;
+}
+.settingsPermissionMatrix label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 850;
+}
+.settingsAgentInviteHero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(135deg, #eff6ff, #eef2ff);
+}
+.settingsAgentInviteHero > svg {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-radius: 13px;
+  padding: 11px;
+  background: #2563eb;
+  color: #ffffff;
+}
+.settingsAgentInviteHero strong,
+.settingsAgentInviteHero span {
+  display: block;
+}
+.settingsAgentInviteHero strong {
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 950;
+}
+.settingsAgentInviteHero span {
+  margin-top: 3px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+.settingsImportDrop {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  min-height: 170px;
+  margin-bottom: 14px;
+  border: 1px dashed #93c5fd;
+  border-radius: 14px;
+  padding: 20px;
+  background: #eff6ff;
+  text-align: center;
+}
+.settingsImportDrop svg {
+  color: #2563eb;
+}
+.settingsImportDrop strong {
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 950;
+}
+.settingsImportDrop span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+.settingsImportDrop button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 14px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+}
+.settingsSearchSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.settingsSearchSelect > span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+.settingsSearchSelect input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 14px;
+}
+.settingsSearchSelectedValue {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 9px 11px;
+  background: linear-gradient(135deg, #eff6ff, #f0fdfa);
+  color: #0f172a;
+}
+.settingsSearchSelectedValue svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 7px;
+  padding: 4px;
+  background: #2563eb;
+  color: #ffffff;
+}
+.settingsSearchSelectedValue strong {
+  min-width: 0;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.settingsSearchSelectedValue em {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #2563eb;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.settingsSearchSelect > div:not(.settingsSearchSelectedValue) {
+  max-height: 142px;
+  overflow: auto;
+  display: grid;
+  gap: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 6px;
+  background: #f8fafc;
+}
+.settingsSearchSelect button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 9px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+}
+.settingsSearchSelect button svg {
+  opacity: 0;
+  color: #2563eb;
+}
+.settingsSearchSelect .settingsSearchSelectActive {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.settingsSearchSelect .settingsSearchSelectActive svg {
+  opacity: 1;
+}
+.settingsSearchSelect > div:not(.settingsSearchSelectedValue) em {
+  padding: 8px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+.settingsQrField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.settingsQrField > span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+.settingsQrField > div {
+  position: relative;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 112px;
+  border: 1px dashed #93c5fd;
+  border-radius: 12px;
+  padding: 12px;
+  background: #eff6ff;
+}
+.settingsQrPreview {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #ffffff;
+}
+.settingsQrPreview > span {
+  width: 76px;
+  height: 76px;
+  display: block;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.settingsQrSvg {
+  width: 78px;
+  height: 78px;
+  display: block;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px #e2e8f0;
+}
+.settingsQrField section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+.settingsQrField strong,
+.settingsQrField small {
+  flex: 1 0 100%;
+  display: block;
+}
+.settingsQrField strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 950;
+}
+.settingsQrField small {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+.settingsQrField em {
+  flex: 1 0 100%;
+  color: #dc2626;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+.settingsQrField button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: #ffffff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.settingsPanel input[type="checkbox"],
+.settingsModal input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-content: center;
+  appearance: none;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  margin: 0;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+.settingsPanel input[type="checkbox"]::before,
+.settingsModal input[type="checkbox"]::before {
+  width: 9px;
+  height: 9px;
+  content: "";
+  clip-path: polygon(14% 44%, 0 58%, 38% 96%, 100% 22%, 86% 8%, 38% 66%);
+  transform: scale(0);
+  background: #ffffff;
+  transition: transform 0.16s ease;
+}
+.settingsPanel input[type="checkbox"]:checked,
+.settingsModal input[type="checkbox"]:checked {
+  border-color: #2563eb;
+  background: #2563eb;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+}
+.settingsPanel input[type="checkbox"]:checked::before,
+.settingsModal input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+.settingsValidationBoxOk,
+.settingsValidationBoxError {
+  border-radius: 13px;
+  padding: 13px 14px;
+}
+.settingsValidationBoxOk {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+}
+.settingsValidationBoxError {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+}
+.settingsValidationBoxOk strong,
+.settingsValidationBoxError strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 950;
+}
+.settingsValidationBoxOk strong {
+  color: #15803d;
+}
+.settingsValidationBoxError strong {
+  color: #b91c1c;
+}
+.settingsValidationBoxOk ul,
+.settingsValidationBoxError ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+}
+.settingsValidationBoxOk li,
+.settingsValidationBoxError li {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+.settingsValidationBoxOk li {
+  color: #166534;
+}
+.settingsValidationBoxError li {
+  color: #991b1b;
+}
+.settingsRoleImpact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.settingsRoleImpact article,
+.settingsConnectionResult,
+.settingsConnectionWarning {
+  border: 1px solid #dbeafe;
+  border-radius: 13px;
+  padding: 14px;
+  background: #eff6ff;
+}
+.settingsRoleImpact strong,
+.settingsRoleImpact span,
+.settingsConnectionResult strong,
+.settingsConnectionResult span,
+.settingsConnectionWarning span {
+  display: block;
+}
+.settingsRoleImpact strong,
+.settingsConnectionResult strong,
+.settingsConnectionWarning strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 950;
+}
+.settingsRoleImpact span,
+.settingsConnectionResult span,
+.settingsConnectionWarning span {
+  margin-top: 5px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+.settingsConnectionResult,
+.settingsConnectionWarning {
+  margin-top: 14px;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+.settingsConnectionResult svg {
+  color: #059669;
+}
+.settingsConnectionWarning {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+.settingsConnectionWarning svg {
+  color: #ea580c;
+}
+.settingsLogTable {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #ffffff;
+}
+.settingsLogTable > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border-bottom: 1px solid #edf2f7;
+  padding: 11px 12px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+.settingsLogTable > div:first-child {
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.settingsLogTable > div:last-child {
+  border-bottom: 0;
+}
+.settingsLogoEditor {
+  display: grid;
+  gap: 16px;
+}
+.settingsLogoCropWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 16px;
+  align-items: center;
+}
+.settingsLogoCropFrame {
+  position: relative;
+  height: 360px;
+  overflow: hidden;
+  border-radius: 18px;
+  cursor: grab;
+  touch-action: none;
+  background:
+    linear-gradient(45deg, #e2e8f0 25%, transparent 25% 75%, #e2e8f0 75%),
+    linear-gradient(45deg, #e2e8f0 25%, transparent 25% 75%, #e2e8f0 75%);
+  background-position: 0 0, 12px 12px;
+  background-size: 24px 24px;
+}
+.settingsLogoCropFrame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 160ms ease;
+  user-select: none;
+  pointer-events: none;
+}
+.settingsLogoCropMask {
+  position: absolute;
+  inset: 50%;
+  width: 220px;
+  height: 220px;
+  transform: translate(-50%, -50%);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 999px rgba(15, 23, 42, 0.42), 0 18px 46px rgba(15, 23, 42, 0.24);
+  pointer-events: none;
+}
+.settingsLogoCropPreview {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.settingsLogoCropPreview strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 950;
+}
+.settingsLogoCropPreview div {
+  width: 118px;
+  height: 118px;
+  overflow: hidden;
+  border: 1px solid #dbeafe;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
+}
+.settingsLogoCropPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 160ms ease;
+}
+.settingsLogoCropPreview span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+.settingsLogoSliders {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+.settingsLogoSliders label {
+  display: grid;
+  gap: 7px;
+}
+.settingsLogoSliders span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+.settingsLogoSliders button {
+  min-height: 38px;
+  border: 1px solid #dbeafe;
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #1d4ed8;
+  font-weight: 900;
+  cursor: pointer;
+}
 .settingsModal {
   background: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.94);
@@ -21210,6 +23722,21 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-size: 12px;
   font-weight: 700;
 }
+.settingsPromoDateStack {
+  display: grid;
+  gap: 6px;
+}
+.settingsPromoDateStack span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 850;
+}
+.settingsPromoDateStack svg {
+  color: #64748b;
+}
 .settingsDotGreen,
 .settingsDotRed {
   display: inline-block;
@@ -21243,19 +23770,13 @@ button.classesCalendarCell:hover { background: #eff6ff; }
 .settingsWizardTabs button,
 .settingsDeviceTypeTabs button {
   min-height: 38px;
-  border: 1px solid #dbeafe;
-  border-radius: 9px;
+  border: 1px solid #bfdbfe;
+  border-radius: 11px;
   padding: 8px 12px;
-  background: #eff6ff;
+  background: linear-gradient(180deg, #ffffff, #eff6ff);
   color: #1d4ed8;
   font-weight: 900;
   cursor: pointer;
-}
-.settingsWizardTabs button:first-child,
-.settingsDeviceTypeTabs button:first-child {
-  border-color: #2563eb;
-  background: #2563eb;
-  color: #ffffff;
 }
 .settingsCodePreview {
   padding: 20px;
@@ -21285,6 +23806,182 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   font-size: 13px;
   font-weight: 800;
   line-height: 1.45;
+}
+
+.settingsPanelHead {
+  min-height: 58px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.settingsPanelHead h3 {
+  letter-spacing: 0;
+}
+
+.settingsPanelHead p {
+  max-width: 760px;
+}
+
+.settingsFormGrid label {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.settingsFormGrid input,
+.settingsFormGrid textarea,
+.settingsTextarea {
+  border-color: #dbe3ee;
+  background: #ffffff;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.settingsFormGrid input:focus,
+.settingsFormGrid textarea:focus,
+.settingsTextarea:focus,
+.settingsToolbarLine input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.settingsFormGrid .settingsFieldError {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.settingsFormGrid .settingsFieldError input,
+.settingsFormGrid .settingsFieldError textarea,
+.settingsFormGrid .settingsFieldError select {
+  border-color: #ef4444;
+  background: #ffffff;
+}
+
+.settingsFieldErrorText {
+  display: block;
+  margin-top: 6px;
+  color: #dc2626;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.settingsMiniStats article {
+  position: relative;
+  overflow: hidden;
+  min-height: 86px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+.settingsMiniStats article:nth-child(2) {
+  background: linear-gradient(135deg, #059669, #22c55e);
+}
+
+.settingsMiniStats article:nth-child(3) {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+}
+
+.settingsMiniStats article:nth-child(4) {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+}
+
+.settingsMiniStats article::before {
+  content: "";
+  position: absolute;
+  inset: auto -24px -38px auto;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.settingsPaymentMethods article,
+.settingsBranchCard,
+.settingsTemplateCard,
+.settingsCodeCard,
+.settingsAgentList article {
+  border-color: #dbe3ee;
+}
+
+.settingsPaymentMethods article > span {
+  background: linear-gradient(135deg, #eff6ff, #ccfbf1);
+}
+
+.settingsPaymentMethods .settingsPaymentActive {
+  border-color: #86efac;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34, 197, 94, 0.13), transparent 35%),
+    linear-gradient(180deg, #ffffff, #f0fdf4);
+}
+
+.settingsBranchCard {
+  display: grid;
+  gap: 12px;
+}
+
+.settingsBranchCard > div:first-child:not(.settingsBranchHeader) {
+  min-height: 78px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.settingsBranchCard > .settingsBranchHeader {
+  min-height: 0;
+  padding: 16px 16px 14px;
+}
+
+.settingsTemplateCard dl,
+.settingsBranchCard dl {
+  background: linear-gradient(135deg, #f8fafc, #eef6ff);
+}
+
+.settingsCodeCard header > span {
+  background: linear-gradient(135deg, #0f766e, #2563eb);
+  color: #ffffff;
+}
+
+.settingsProviderGrid button,
+.settingsThemeGrid button,
+.settingsVatOptions button {
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.settingsProviderGrid button:hover,
+.settingsThemeGrid button:hover,
+.settingsVatOptions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.09);
+}
+
+.settingsProviderActive,
+.settingsVatOptions .settingsVatActive {
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.16);
+}
+
+.settingsFormGrid .settingsCheckGrid label {
+  width: fit-content;
+  min-width: 0;
+  min-height: 34px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 8px 12px;
+  border-color: #dbeafe;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.settingsFormGrid .settingsCheckGrid input {
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  max-width: 18px;
 }
 
 @media (max-width: 1180px) {
@@ -21326,6 +24023,18 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   .settingsCodeGrid,
   .settingsPromoGrid {
     grid-template-columns: 1fr;
+  }
+  .settingsTabBar {
+    gap: 7px;
+    padding: 8px;
+  }
+  .settingsTabBar button {
+    flex: 0 0 auto;
+    min-height: 42px;
+    min-width: 132px;
+    padding: 9px 10px;
+    font-size: 12px;
+    white-space: nowrap;
   }
   .settingsToolbarLine {
     align-items: stretch;

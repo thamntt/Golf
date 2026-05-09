@@ -37,20 +37,23 @@
   gap: 12px;
 }
 
-.sidebarBrand > span {
+.brandMark {
   width: 42px;
   height: 42px;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: 0;
   border-radius: 14px;
   background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
   color: #ffffff;
   font-size: 13px;
+  font-family: inherit;
   font-weight: 900;
   letter-spacing: 0.02em;
   box-shadow: 0 14px 26px rgba(37, 99, 235, 0.22);
+  cursor: default;
 }
 
 .sidebarBrand h1 {
@@ -86,14 +89,33 @@
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
 }
 
+.sidebarHeader .brandMark {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
+  color: #ffffff;
+  box-shadow: 0 14px 26px rgba(37, 99, 235, 0.22);
+}
+
 .collapsedShell .sidebarHeader {
+  min-height: 86px;
   justify-content: center;
   padding: 16px 0 12px;
 }
 
-.collapsedShell .sidebarBrand > div,
+.collapsedShell .sidebarBrand > div {
+  display: none;
+}
+
 .collapsedShell .sidebarHeader button {
   display: none;
+}
+
+.collapsedShell .sidebarHeader .brandMark {
+  display: inline-flex;
+  cursor: pointer;
 }
 
 .navigation {
@@ -426,6 +448,37 @@
   font-size: 14px;
   font-weight: 600;
 }
+.authForm .authPasswordField input {
+  height: 40px;
+  border: 0;
+  padding-right: 42px;
+}
+.authPasswordField {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid #d9dee7;
+  border-radius: 9px;
+  background: #ffffff;
+}
+.authPasswordField:focus-within {
+  border-color: #079b67;
+  box-shadow: 0 0 0 3px rgba(7, 155, 103, 0.16);
+}
+.authForm .authPasswordField button {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #667085;
+  box-shadow: none;
+}
 
 .authForm input:focus-visible {
   outline: none;
@@ -443,6 +496,114 @@
   font: inherit;
   font-weight: 900;
   box-shadow: 0 14px 26px rgba(7, 155, 103, 0.2);
+}
+.authForm .authLinkButton {
+  height: auto;
+  justify-self: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #2563eb;
+  box-shadow: none;
+  font-weight: 900;
+}
+.authTestAccount {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 12px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 800;
+}
+.authTestAccount strong {
+  color: #1d4ed8;
+  font-weight: 950;
+}
+.authError,
+.authSuccess {
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+.authError {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+}
+.authSuccess {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+.authModalOverlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(6px);
+}
+.authResetModal {
+  width: min(430px, 100%);
+  display: grid;
+  gap: 14px;
+  border-radius: 14px;
+  padding: 24px;
+  background: #ffffff;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28);
+}
+.authResetModal h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 22px;
+  font-weight: 950;
+}
+.authResetModal p {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 650;
+}
+.authResetModal label {
+  display: grid;
+  gap: 7px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 850;
+}
+.authResetModal input {
+  height: 42px;
+  border: 1px solid #d9dee7;
+  border-radius: 9px;
+  padding: 0 12px;
+  font: inherit;
+}
+.authResetModal > div:last-child {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+}
+.authResetModal > div:last-child button {
+  min-height: 38px;
+  border: 1px solid #d9dee7;
+  border-radius: 9px;
+  padding: 8px 13px;
+  background: #ffffff;
+  color: #344054;
+  font-weight: 900;
+  cursor: pointer;
+}
+.authResetModal > div:last-child button:last-child {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
 }
 
 .authPanel footer {

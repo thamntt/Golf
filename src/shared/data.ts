@@ -17,6 +17,64 @@ import {
 } from "lucide-react";
 import type { Customer, NavItem } from "./types";
 
+export const systemBranches = [
+  {
+    code: "CN-BN",
+    name: "Chi nhánh Bến Nghé",
+    shortName: "Bến Nghé",
+    address: "123 Nguyễn Huệ, Phường Bến Nghé, TP.HCM",
+    displayAddress: "Bến Nghé · 06:00-22:00",
+    manager: "Nguyễn Văn A",
+    members: 150,
+    phone: "028 3822 1234",
+    email: "bennghe@gymmaster.vn",
+    hours: "06:00 - 22:00",
+    status: "Đang hoạt động",
+  },
+  {
+    code: "CN-VTS",
+    name: "Chi nhánh Võ Thị Sáu",
+    shortName: "Võ Thị Sáu",
+    address: "456 Võ Văn Tần, Phường Võ Thị Sáu, TP.HCM",
+    displayAddress: "Quận 3 · 05:30-22:30",
+    manager: "Trần Thị B",
+    members: 180,
+    phone: "028 3933 5678",
+    email: "vothisau@gymmaster.vn",
+    hours: "05:30 - 22:30",
+    status: "Đang hoạt động",
+  },
+  {
+    code: "CN-TD",
+    name: "Chi nhánh Thảo Điền",
+    shortName: "Thảo Điền",
+    address: "789 Xa Lộ Hà Nội, Phường Thảo Điền, TP. Thủ Đức",
+    displayAddress: "TP. Thủ Đức · 07:00-21:30",
+    manager: "Lê Văn C",
+    members: 220,
+    phone: "028 3744 9012",
+    email: "thaodien@gymmaster.vn",
+    hours: "07:00 - 21:30",
+    status: "Đang hoạt động",
+  },
+  {
+    code: "CN-TP",
+    name: "Chi nhánh Tân Phú",
+    shortName: "Tân Phú",
+    address: "321 Nguyễn Văn Linh, Phường Tân Phú, TP.HCM",
+    displayAddress: "Tân Phú · 06:00-21:30",
+    manager: "Phạm Thị D",
+    members: 130,
+    phone: "028 3775 3456",
+    email: "tanphu@gymmaster.vn",
+    hours: "06:00 - 21:30",
+    status: "Đang hoạt động",
+  },
+];
+
+export const branchShortNames = systemBranches.map((branch) => branch.shortName);
+export const branchFullNames = systemBranches.map((branch) => branch.name);
+
 export const navItems: NavItem[] = [
   { key: "dashboard", label: "Dashboard", Icon: BarChart3 },
   { key: "customers", label: "Khách Hàng", Icon: Users },
