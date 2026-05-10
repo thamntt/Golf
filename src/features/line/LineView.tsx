@@ -142,6 +142,21 @@ const INITIAL_LINES: Line[] = [
   { id: "LN-OLD", name: "Line cũ", branch: "NextVision", startTime: "05:00", endTime: "22:00", maxCheckin: 1, active: false, description: "Đã ngừng sử dụng", createdAt: "01/06/2024" },
 ];
 
+const EXTRA_NEXTVISION_LINES: Line[] = Array.from({ length: 18 }, (_, index) => {
+  const n = index + 6;
+  return {
+    id: `LN-${String(n).padStart(2, "0")}`,
+    name: `Line ${n}`,
+    branch: "NextVision",
+    startTime: "05:00",
+    endTime: "22:00",
+    maxCheckin: n % 6 === 0 ? 2 : 1,
+    active: true,
+    description: n % 6 === 0 ? "Line rộng cho 2 khách thay phiên" : "Line tập tiêu chuẩn",
+    createdAt: "01/01/2026",
+  };
+});
+
 const INITIAL_SERVICES: ServiceItem[] = [
   { id: "SV-WATER", name: "Nước suối 500ml", branch: "Toàn hệ thống", priceBeforeVat: 8_000, unitPrice: 10_000, notUsable: false, description: "Nước Lavie / Aquafina" },
   { id: "SV-COKE", name: "Coca/Pepsi lon", branch: "Toàn hệ thống", priceBeforeVat: 13_000, unitPrice: 15_000, notUsable: false },
@@ -283,7 +298,7 @@ type TabKey = "list" | "diagram";
 
 export default function LineView() {
   const [tab, setTab] = useState<TabKey>("diagram");
-  const [lines, setLines] = useState<Line[]>(INITIAL_LINES);
+  const [lines, setLines] = useState<Line[]>(() => [...INITIAL_LINES, ...EXTRA_NEXTVISION_LINES]);
   const [services, setServices] = useState<ServiceItem[]>(INITIAL_SERVICES);
   const [tickets, setTickets] = useState<LineTicket[]>(INITIAL_TICKETS);
   const [customers, setCustomers] = useState<CustomerLite[]>(INITIAL_CUSTOMERS);
@@ -471,6 +486,16 @@ function DiagramTab({
   };
 
   const handleCreateService = (s: ServiceItem) => onServicesChange([...services, s]);
+  const handleDeleteService = (s: ServiceItem) => {
+    const usedInTicket = tickets.some((t) => t.services.some((item) => item.serviceId === s.id));
+    if (usedInTicket) {
+      onServicesChange(services.map((item) => item.id === s.id ? { ...item, notUsable: true } : item));
+      flash(`Đã ngừng sử dụng ${s.name} · giữ lịch sử vé đã phát sinh`);
+      return;
+    }
+    onServicesChange(services.filter((item) => item.id !== s.id));
+    flash(`Đã xóa dịch vụ ${s.name}`);
+  };
   const handleCreateCustomer = (c: CustomerLite) => onCustomersChange([...customers, c]);
 
   return (
@@ -523,7 +548,7 @@ function DiagramTab({
             {visibleLines.map((line, i) => {
               const { state, ticket } = lineState(line);
               const customer = ticket?.customerCode ? customers.find((c) => c.code === ticket.customerCode) : undefined;
-              const memberLabel = customer?.isMember ? "Hội viên" : ticket?.customerName ? "Khách lẻ" : "";
+              const memberLabel = customer?.isMember ? "Hội viên" : ticket?.customerName && ticket.customerName !== "Khách lẻ" ? "Khách lẻ" : "";
               return (
                 <article
                   className={`${styles.lineBoxV2} ${styles[`lineBoxState_${state}`]}`}
@@ -569,6 +594,7 @@ function DiagramTab({
           onClose={() => { setPrintOpen(false); setEditingTicket(null); }}
           onSubmit={submitTicket}
           onCreateService={handleCreateService}
+          onDeleteService={handleDeleteService}
           onCreateCustomer={handleCreateCustomer}
         />
       ) : null}
@@ -603,6 +629,7 @@ function LineListTab({
   const [query, setQuery] = useState("");
   const [branchFilter, setBranchFilter] = useState<string>("Toàn hệ thống");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Line | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Line | null>(null);
@@ -619,6 +646,10 @@ function LineListTab({
       return true;
     });
   }, [lines, query, branchFilter, statusFilter]);
+  const pageSize = 10;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const stats = useMemo(() => ({
     total: lines.length,
@@ -672,9 +703,9 @@ function LineListTab({
       <div className={styles.contractListSearchRow}>
         <div className={styles.pricingSearch} style={{ flex: 1 }}>
           <Search size={18} />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tìm theo tên Line, mô tả..." />
+          <input value={query} onChange={(e) => { setQuery(e.target.value); setPage(1); }} placeholder="Tìm theo tên Line, mô tả..." />
         </div>
-        <select className={styles.selectInput} value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)}>
+        <select className={styles.selectInput} value={branchFilter} onChange={(e) => { setBranchFilter(e.target.value); setPage(1); }}>
           {BRANCHES.map((b) => <option key={b}>{b}</option>)}
         </select>
       </div>
@@ -689,7 +720,7 @@ function LineListTab({
             <button
               className={statusFilter === opt.key ? styles.contractFilterActive : styles.contractFilterChip}
               key={opt.key}
-              onClick={() => setStatusFilter(opt.key as typeof statusFilter)}
+              onClick={() => { setStatusFilter(opt.key as typeof statusFilter); setPage(1); }}
               type="button"
             >
               {opt.label}
@@ -705,7 +736,7 @@ function LineListTab({
 
       <section className={styles.memberTableCard}>
         <div className={styles.memberTableWrap}>
-          <table className={`${styles.memberTable} ${styles.contractListTable}`}>
+          <table className={`${styles.memberTable} ${styles.contractListTable} ${styles.lineListTable}`}>
             <thead>
               <tr>
                 <th>STT</th>
@@ -723,9 +754,9 @@ function LineListTab({
               {filtered.length === 0 ? (
                 <tr><td className={styles.emptyTableCell} colSpan={9}>Không có Line nào khớp bộ lọc</td></tr>
               ) : null}
-              {filtered.map((l, i) => (
+              {pageItems.map((l, i) => (
                 <tr key={l.id}>
-                  <td className={styles.contractRowIndex}>{i + 1}</td>
+                  <td className={styles.contractRowIndex}>{(currentPage - 1) * pageSize + i + 1}</td>
                   <td className={styles.memberName}>
                     <strong>{l.name}</strong>
                     {isLineInUse(l) ? <span className={styles.lineRowActiveTag}><Lightbulb size={10} /> Đang dùng</span> : null}
@@ -751,6 +782,25 @@ function LineListTab({
             </tbody>
           </table>
         </div>
+        {filtered.length > pageSize ? (
+          <footer className={styles.contractTableFooter}>
+            <span>{(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, filtered.length)} / {filtered.length} Line</span>
+            <div>
+              <button className={styles.contractFilterChip} disabled={currentPage === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} type="button">Trước</button>
+              {Array.from({ length: pageCount }, (_, index) => index + 1).map((p) => (
+                <button
+                  className={p === currentPage ? styles.contractFilterActive : styles.contractFilterChip}
+                  key={p}
+                  onClick={() => setPage(p)}
+                  type="button"
+                >
+                  {p}
+                </button>
+              ))}
+              <button className={styles.contractFilterChip} disabled={currentPage === pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))} type="button">Sau</button>
+            </div>
+          </footer>
+        ) : null}
       </section>
 
       {formOpen ? (
@@ -801,19 +851,22 @@ function LineFormModal({
   const [maxCheckin, setMaxCheckin] = useState(initial?.maxCheckin ?? 1);
   const [active, setActive] = useState(initial?.active ?? true);
   const [description, setDescription] = useState(initial?.description ?? "");
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const inUseCount = initial ? existingTickets.filter((t) => t.lineId === initial.id && t.status === "active").length : 0;
   const lockedFields = isEdit && inUseCount > 0;
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!name.trim()) { setError("Vui lòng nhập tên Line"); return; }
+    const nextErrors: Record<string, string> = {};
+    if (!name.trim()) nextErrors.name = "Vui lòng nhập tên Line";
     const dup = existing.find((l) => l.name === name.trim() && l.branch === branch && l.id !== initial?.id);
-    if (dup) { setError(`Tên ${name} đã tồn tại ở chi nhánh ${branch}`); return; }
-    if (timeToMinutes(endTime) <= timeToMinutes(startTime)) { setError("Giờ ra phải sau giờ vào"); return; }
-    if (maxCheckin < 1 || maxCheckin > 4) { setError("Số lượt checkin phải 1-4"); return; }
-    if (lockedFields && maxCheckin < inUseCount) { setError(`Đang có ${inUseCount} khách check-in, không thể giảm dưới ${inUseCount}`); return; }
+    if (dup) nextErrors.name = `Tên ${name} đã tồn tại ở chi nhánh ${branch}`;
+    if (timeToMinutes(endTime) <= timeToMinutes(startTime)) nextErrors.endTime = "Giờ ra phải sau giờ vào";
+    if (maxCheckin < 1 || maxCheckin > 4) nextErrors.maxCheckin = "Số lượt checkin phải 1-4";
+    if (lockedFields && maxCheckin < inUseCount) nextErrors.maxCheckin = `Đang có ${inUseCount} khách check-in, không thể giảm dưới ${inUseCount}`;
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
     onSubmit({
       id: initial?.id ?? `LN-${Date.now()}`,
       name: name.trim(),
@@ -835,7 +888,6 @@ function LineFormModal({
           <button onClick={onClose} type="button"><X size={18} /></button>
         </header>
         <div className={styles.contractFormBody}>
-          {error ? <div className={styles.formError}><AlertCircle size={14} /> {error}</div> : null}
           {lockedFields ? (
             <div className={styles.teetimeWarningBanner}>
               <AlertTriangle size={14} />
@@ -848,7 +900,8 @@ function LineFormModal({
             <div className={styles.contractGrid2}>
               <label>
                 <span>Tên Line <b>*</b></span>
-                <input value={name} onChange={(e) => setName(e.target.value)} disabled={lockedFields} placeholder="VD: Line 1, Sân Bóng A-01" />
+                <input className={errors.name ? styles.fieldInvalid : ""} value={name} onChange={(e) => { setName(e.target.value); setErrors((prev) => ({ ...prev, name: "" })); }} disabled={lockedFields} placeholder="VD: Line 1, Sân Bóng A-01" />
+                {errors.name ? <small className={styles.fieldErrorText}>{errors.name}</small> : null}
               </label>
               <label>
                 <span>Chi nhánh <b>*</b></span>
@@ -863,11 +916,13 @@ function LineFormModal({
               </label>
               <label>
                 <span>Giờ ra <b>*</b></span>
-                <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} disabled={lockedFields} />
+                <input className={errors.endTime ? styles.fieldInvalid : ""} type="time" value={endTime} onChange={(e) => { setEndTime(e.target.value); setErrors((prev) => ({ ...prev, endTime: "" })); }} disabled={lockedFields} />
+                {errors.endTime ? <small className={styles.fieldErrorText}>{errors.endTime}</small> : null}
               </label>
               <label>
                 <span>Số lượt checkin (1-4) <b>*</b></span>
-                <input type="number" min={1} max={4} value={maxCheckin} onChange={(e) => setMaxCheckin(Math.max(1, Math.min(4, Number(e.target.value) || 1)))} />
+                <input className={errors.maxCheckin ? styles.fieldInvalid : ""} type="number" min={1} max={4} value={maxCheckin} onChange={(e) => { setMaxCheckin(Math.max(1, Math.min(4, Number(e.target.value) || 1))); setErrors((prev) => ({ ...prev, maxCheckin: "" })); }} />
+                {errors.maxCheckin ? <small className={styles.fieldErrorText}>{errors.maxCheckin}</small> : null}
               </label>
               <label className={styles.contractCheckboxLine}>
                 <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} disabled={lockedFields} />
@@ -1082,6 +1137,7 @@ function PrintTicketModal({
   onClose,
   onSubmit,
   onCreateService,
+  onDeleteService,
   onCreateCustomer,
 }: {
   initial: LineTicket | null;
@@ -1092,16 +1148,22 @@ function PrintTicketModal({
   onClose: () => void;
   onSubmit: (t: LineTicket) => void;
   onCreateService: (s: ServiceItem) => void;
+  onDeleteService: (s: ServiceItem) => void;
   onCreateCustomer: (c: CustomerLite) => void;
 }) {
   const isEdit = Boolean(initial);
   const today = todayString();
   const initialPriceBookId = initial?.priceBookId ?? PRICE_BOOKS[0].id;
   const initialPriceBook = PRICE_BOOKS.find((p) => p.id === initialPriceBookId) ?? PRICE_BOOKS[0];
+  const defaultLineId = initial?.lineId ?? lines.find((l) =>
+    l.active &&
+    l.branch === "NextVision" &&
+    !tickets.some((t) => t.lineId === l.id && (t.status === "active" || t.status === "pending"))
+  )?.id ?? "";
 
   const [priceBookId, setPriceBookId] = useState(initialPriceBookId);
   const [ticketType, setTicketType] = useState<"Line" | "Teetime" | "Combo">(initial?.ticketType ?? "Line");
-  const [lineId, setLineId] = useState(initial?.lineId ?? lines.find((l) => l.active && l.branch !== "Hà Nội Center")?.id ?? "");
+  const [lineId, setLineId] = useState(defaultLineId);
   const [branch, setBranch] = useState(initial?.branch ?? "NextVision");
 
   const [customerCode, setCustomerCode] = useState(initial?.customerCode ?? "");
@@ -1190,7 +1252,8 @@ function PrintTicketModal({
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!customerName.trim()) { setError("Vui lòng nhập tên khách hàng"); return; }
+    const finalCustomerName = customerName.trim() || "Khách lẻ";
+    if (customerPhone.trim() && !/^0\d{9,10}$/.test(customerPhone.trim())) { setError("Số điện thoại không hợp lệ"); return; }
     if (ticketType !== "Teetime" && !lineId) { setError("Vui lòng chọn Line"); return; }
     if (hours <= 0) { setError("Số giờ phải > 0"); return; }
 
@@ -1212,8 +1275,8 @@ function PrintTicketModal({
       ticketType,
       priceBookId,
       customerCode: customerCode || undefined,
-      customerName,
-      customerPhone,
+      customerName: finalCustomerName,
+      customerPhone: customerPhone.trim() || undefined,
       customerAddress: customerAddress || undefined,
       guestCount,
       byHour,
@@ -1246,7 +1309,11 @@ function PrintTicketModal({
     onSubmit(next);
   };
 
-  const availableLines = lines.filter((l) => l.active && (branch === "Toàn hệ thống" || l.branch === branch));
+  const availableLines = lines.filter((l) => {
+    if (!l.active || branch === "Toàn hệ thống" || l.branch !== branch) return false;
+    if (initial?.lineId === l.id) return true;
+    return !tickets.some((t) => t.lineId === l.id && (t.status === "active" || t.status === "pending"));
+  });
 
   return (
     <div className={styles.modalOverlay} role="dialog" aria-modal="true">
@@ -1339,8 +1406,8 @@ function PrintTicketModal({
 
               <div className={styles.contractGrid2}>
                 <label>
-                  <span>Tên khách <b>*</b></span>
-                  <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Tên khách hàng" />
+                  <span>Tên khách</span>
+                  <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Bỏ trống nếu là khách lẻ walk-in" />
                 </label>
                 <label>
                   <span>Số điện thoại</span>
@@ -1537,6 +1604,7 @@ function PrintTicketModal({
           onClose={() => setServiceModalOpen(false)}
           onPick={(svc) => addService(svc)}
           onCreateService={onCreateService}
+          onDeleteService={onDeleteService}
         />
       ) : null}
 
@@ -1561,16 +1629,19 @@ function ServicePickerModal({
   onClose,
   onPick,
   onCreateService,
+  onDeleteService,
 }: {
   services: ServiceItem[];
   alreadyAdded: string[];
   onClose: () => void;
   onPick: (s: ServiceItem) => void;
   onCreateService: (s: ServiceItem) => void;
+  onDeleteService: (s: ServiceItem) => void;
 }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ServiceItem | null>(null);
 
   const filtered = useMemo(() => {
     if (!query) return services;
@@ -1613,11 +1684,12 @@ function ServicePickerModal({
                 <th>Đơn giá</th>
                 <th>Chi nhánh</th>
                 <th>Mô tả</th>
+                <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td className={styles.emptyTableCell} colSpan={6}>Không tìm thấy DV</td></tr>
+                <tr><td className={styles.emptyTableCell} colSpan={7}>Không tìm thấy DV</td></tr>
               ) : null}
               {filtered.map((s) => {
                 const used = alreadyAdded.includes(s.id);
@@ -1631,6 +1703,11 @@ function ServicePickerModal({
                     <td><strong style={{ color: "#15803d" }}>{formatCurrency(s.unitPrice)}</strong></td>
                     <td className={styles.cellMuted}>{s.branch}</td>
                     <td className={styles.cellTruncate} title={s.description}>{s.description ?? "—"}</td>
+                    <td>
+                      <button className={styles.contractDelete} onClick={() => setDeleteTarget(s)} title="Xóa / ngừng sử dụng dịch vụ" type="button">
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -1654,6 +1731,51 @@ function ServicePickerModal({
           onSubmit={(s) => { onCreateService(s); setCreateOpen(false); }}
         />
       ) : null}
+
+      {deleteTarget ? (
+        <DeleteServiceDialog
+          service={deleteTarget}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => { onDeleteService(deleteTarget); setSelected((prev) => prev.filter((id) => id !== deleteTarget.id)); setDeleteTarget(null); }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function DeleteServiceDialog({
+  service,
+  onCancel,
+  onConfirm,
+}: {
+  service: ServiceItem;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className={styles.nestedOverlay} style={{ zIndex: 210 }} role="dialog" aria-modal="true">
+      <div className={styles.ticketDialog}>
+        <header>
+          <span className={styles.ticketDialogIcon} style={{ background: "#fee2e2", color: "#b91c1c" }}>
+            <AlertTriangle size={20} />
+          </span>
+          <div>
+            <h3>Xóa / ngừng sử dụng dịch vụ</h3>
+            <p>Dịch vụ đã phát sinh vé sẽ được chuyển sang trạng thái không sử dụng để giữ lịch sử đối soát.</p>
+          </div>
+        </header>
+        <div className={styles.ticketDialogBody}>
+          <div className={styles.ticketDialogInfo}>
+            <div><span>Dịch vụ</span><strong>{service.name}</strong></div>
+            <div><span>Chi nhánh</span><strong>{service.branch}</strong></div>
+            <div><span>Đơn giá</span><strong>{formatCurrency(service.unitPrice)}</strong></div>
+          </div>
+        </div>
+        <footer>
+          <button className={styles.contractFilterChip} onClick={onCancel} type="button">Hủy</button>
+          <button className={styles.ticketDialogDanger} onClick={onConfirm} type="button"><Trash2 size={14} /> Xác nhận</button>
+        </footer>
+      </div>
     </div>
   );
 }

@@ -1,23 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bell,
   BriefcaseBusiness,
   ChevronDown,
+  CheckCircle2,
   CreditCard,
   Globe2,
   HelpCircle,
   Eye,
   EyeOff,
+  KeyRound,
   LogOut,
+  Mail,
   Menu,
   Monitor,
   Moon,
+  Save,
+  ShieldCheck,
+  Smartphone,
   Settings as SettingsIcon,
   Sun,
   Type,
   User,
+  X,
 } from "lucide-react";
 import { navItems, systemBranches } from "@/shared/data";
 import type { ModuleKey } from "@/shared/types";
@@ -61,7 +68,44 @@ const navLabel: Partial<Record<ModuleKey, string>> = {
   reports: "Báo cáo",
 };
 
+const englishNavSection: Record<string, string> = {
+  "Tá»•ng quan": "Overview",
+  "Váº­n hÃ nh sÃ¢n": "Golf Operations",
+  "Kinh doanh": "Commercial",
+  "TÃ i chÃ­nh": "Finance",
+  "Há»‡ thá»‘ng": "System",
+  "Tổng quan": "Overview",
+  "Vận hành sân": "Golf Operations",
+  "Tài chính": "Finance",
+  "Hệ thống": "System",
+};
+
+const englishNavLabel: Partial<Record<ModuleKey, string>> = {
+  dashboard: "Dashboard",
+  reports: "Reports",
+  teetime: "Golf Teetime",
+  line: "Practice Lines",
+  coach: "Coach Schedule",
+  classes: "Class Schedule",
+  checkin: "Check-in/out",
+  customers: "Customers",
+  employees: "Employees",
+  pricing: "Pricing",
+  contracts: "Contracts",
+  tickets: "Single Tickets",
+  cashbook: "Cashbook",
+  commission: "Sales Commission",
+  settings: "Settings",
+};
+
 const branches = systemBranches;
+
+const initialNotifications = [
+  { id: "N-001", title: "Teetime 14:00 đã đủ 4 người chơi", body: "Flight của Huỳnh Xuân Long tại Bến Nghé cần xác nhận caddie trước 13:30.", time: "5 phút trước", module: "teetime" as ModuleKey, unread: true, tone: "blue" },
+  { id: "N-002", title: "Công nợ hội viên quá hạn", body: "3 hợp đồng tại Thảo Điền quá hạn thanh toán, tổng 64.000.000đ.", time: "18 phút trước", module: "cashbook" as ModuleKey, unread: true, tone: "red" },
+  { id: "N-003", title: "Thiết bị Face ID offline", body: "FACE-DR mất kết nối từ 09:10. Kiểm tra trong Check-in/out > Quản lý thiết bị.", time: "42 phút trước", module: "checkin" as ModuleKey, unread: true, tone: "amber" },
+  { id: "N-004", title: "Lớp Short Game còn 7 chỗ", body: "Nên đẩy khuyến mãi giờ thấp điểm cho lớp thứ Sáu 19:00.", time: "Hôm nay", module: "classes" as ModuleKey, unread: false, tone: "green" },
+];
 
 export default function AppShell() {
   const [authMode, setAuthMode] = useState<"login" | "branch" | "app">("login");
@@ -72,9 +116,13 @@ export default function AppShell() {
   const [branchReloading, setBranchReloading] = useState(false);
   const [branchDataVersion, setBranchDataVersion] = useState(0);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState(initialNotifications);
   const [accountLanguage, setAccountLanguage] = useState<"vi" | "en">("vi");
   const [accountTheme, setAccountTheme] = useState<"light" | "dark" | "system">("light");
   const [accountFontSize, setAccountFontSize] = useState<"small" | "medium" | "large">("medium");
+  const [accountDialog, setAccountDialog] = useState<"profile" | "security" | "subscription" | "help" | null>(null);
+  const [accountToast, setAccountToast] = useState("");
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [loginEmail, setLoginEmail] = useState("admin@nextgolf.vn");
   const [loginPassword, setLoginPassword] = useState("nextvision2026");
@@ -83,6 +131,29 @@ export default function AppShell() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
+  const unreadNotifications = notifications.filter((item) => item.unread).length;
+  const isEnglish = accountLanguage === "en";
+
+  useEffect(() => {
+    document.documentElement.lang = accountLanguage;
+    document.documentElement.dataset.theme = accountTheme;
+    document.documentElement.dataset.fontSize = accountFontSize;
+    document.documentElement.style.fontSize = accountFontSize === "small" ? "15px" : accountFontSize === "large" ? "17px" : "16px";
+    return () => {
+      document.documentElement.style.fontSize = "";
+    };
+  }, [accountFontSize, accountLanguage, accountTheme]);
+
+  const openNotification = (id: string, module: ModuleKey) => {
+    setNotifications((items) => items.map((item) => item.id === id ? { ...item, unread: false } : item));
+    setNotificationOpen(false);
+    setActive(module);
+  };
+
+  const showAccountToast = (message: string) => {
+    setAccountToast(message);
+    window.setTimeout(() => setAccountToast(""), 2200);
+  };
 
   const switchBranch = (branchName: string) => {
     setBranchMenuOpen(false);
@@ -194,7 +265,7 @@ export default function AppShell() {
   }
 
   return (
-    <div className={`${styles.shell} ${collapsed ? styles.collapsedShell : ""}`}>
+    <div className={`${styles.shell} ${collapsed ? styles.collapsedShell : ""} ${accountTheme === "dark" ? styles.themeDark : ""} ${accountFontSize === "small" ? styles.fontSmall : accountFontSize === "large" ? styles.fontLarge : ""}`}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarBrand}>
@@ -212,12 +283,12 @@ export default function AppShell() {
         <nav aria-label="Menu quản trị" className={styles.navigation}>
           {navSections.map((section) => (
             <div className={styles.navSection} key={section.title}>
-              <div className={styles.navGroup}>{section.title}</div>
+              <div className={styles.navGroup}>{isEnglish ? englishNavSection[section.title] ?? section.title : section.title}</div>
               {section.items.map((key) => {
                 const item = navItems.find((navItem) => navItem.key === key);
                 if (!item) return null;
                 const Icon = item.Icon;
-                const label = navLabel[item.key] ?? item.label;
+                const label = isEnglish ? englishNavLabel[item.key] ?? item.label : navLabel[item.key] ?? item.label;
                 return (
                   <button className={active === item.key ? styles.activeNav : undefined} key={item.key} onClick={() => setActive(item.key)} title={collapsed ? label : undefined} type="button">
                     <span className={styles.navIcon}><Icon size={18} /></span>
@@ -233,12 +304,44 @@ export default function AppShell() {
       <main className={styles.main}>
         <header className={styles.topbar}>
           <div>
-            <p>Thứ Ba, 7 tháng 4, 2026</p>
-            <strong>Dữ liệu chi nhánh: {activeBranch}</strong>
+            <p>{isEnglish ? "Tuesday, April 7, 2026" : "Thứ Ba, 7 tháng 4, 2026"}</p>
+            <strong>{isEnglish ? "Branch data" : "Dữ liệu chi nhánh"}: {activeBranch}</strong>
           </div>
 
           <div className={styles.userTools}>
-            <button className={styles.branchButton} onClick={() => setBranchMenuOpen((value) => !value)} type="button">
+            <button aria-expanded={notificationOpen} aria-label="Mở trung tâm thông báo" className={styles.notificationButton} onClick={() => { setNotificationOpen((value) => !value); setAccountMenuOpen(false); setBranchMenuOpen(false); }} type="button">
+              <Bell size={18} />
+              {unreadNotifications ? <span>{unreadNotifications}</span> : null}
+            </button>
+            {notificationOpen ? (
+              <div className={styles.notificationPanel}>
+                <header>
+                  <div>
+                    <strong>{isEnglish ? "Operations Notifications" : "Thông báo vận hành"}</strong>
+                    <span>{unreadNotifications} {isEnglish ? "unread" : "thông báo chưa đọc"}</span>
+                  </div>
+                  <button onClick={() => setNotifications((items) => items.map((item) => ({ ...item, unread: false })))} type="button">{isEnglish ? "Mark all read" : "Đánh dấu đã đọc"}</button>
+                </header>
+                <section>
+                  {notifications.map((item) => (
+                    <button className={`${styles.notificationItem} ${item.unread ? styles.notificationUnread : ""}`} key={item.id} onClick={() => openNotification(item.id, item.module)} type="button">
+                      <i className={styles[`notificationTone${item.tone[0].toUpperCase()}${item.tone.slice(1)}`]} />
+                      <span>
+                        <strong>{isEnglish ? item.title.replace("Teetime 14:00 đã đủ 4 người chơi", "Teetime 14:00 is fully booked").replace("Công nợ hội viên quá hạn", "Overdue member debt").replace("Thiết bị Face ID offline", "Face ID device offline").replace("Lớp Short Game còn 7 chỗ", "Short Game class has 7 slots left") : item.title}</strong>
+                        <small>{isEnglish ? item.body.replace("Flight của Huỳnh Xuân Long tại Bến Nghé cần xác nhận caddie trước 13:30.", "Huynh Xuan Long's flight at Ben Nghe needs caddie confirmation before 13:30.").replace("3 hợp đồng tại Thảo Điền quá hạn thanh toán, tổng 64.000.000đ.", "3 contracts at Thao Dien are overdue, totaling VND 64,000,000.").replace("FACE-DR mất kết nối từ 09:10. Kiểm tra trong Check-in/out > Quản lý thiết bị.", "FACE-DR has been offline since 09:10. Check Check-in/out > Device Management.").replace("Nên đẩy khuyến mãi giờ thấp điểm cho lớp thứ Sáu 19:00.", "Consider off-peak promotion for Friday 19:00 class.") : item.body}</small>
+                        <em>{item.time}</em>
+                      </span>
+                    </button>
+                  ))}
+                  {!notifications.length ? <p className={styles.notificationEmpty}>{isEnglish ? "No notifications." : "Không còn thông báo mới."}</p> : null}
+                </section>
+                <footer>
+                  <button onClick={() => { setActive("reports"); setNotificationOpen(false); }} type="button">{isEnglish ? "Open alerts report" : "Xem báo cáo cảnh báo"}</button>
+                  <button onClick={() => setNotifications([])} type="button">{isEnglish ? "Clear all" : "Xóa tất cả"}</button>
+                </footer>
+              </div>
+            ) : null}
+            <button className={styles.branchButton} onClick={() => { setBranchMenuOpen((value) => !value); setNotificationOpen(false); setAccountMenuOpen(false); }} type="button">
               <BriefcaseBusiness size={16} />
               {activeBranch}
               <ChevronDown size={16} />
@@ -255,7 +358,7 @@ export default function AppShell() {
               </div>
             ) : null}
             <span className={styles.role}>Admin</span>
-            <button aria-expanded={accountMenuOpen} aria-label="Mở cài đặt tài khoản" className={styles.avatar} onClick={() => setAccountMenuOpen((value) => !value)} type="button">
+            <button aria-expanded={accountMenuOpen} aria-label="Mở cài đặt tài khoản" className={styles.avatar} onClick={() => { setAccountMenuOpen((value) => !value); setNotificationOpen(false); setBranchMenuOpen(false); }} type="button">
               A
             </button>
             {accountMenuOpen ? (
@@ -270,35 +373,36 @@ export default function AppShell() {
                 </section>
 
                 <section className={styles.accountMenuList}>
-                  <button type="button"><User size={18} /><span><strong>Hồ sơ của tôi</strong><small>Xem và chỉnh sửa thông tin</small></span></button>
-                  <button onClick={() => { setActive("settings"); setAccountMenuOpen(false); }} type="button"><SettingsIcon size={18} /><span><strong>Cài đặt</strong><small>Quản lý tùy chọn hệ thống</small></span></button>
-                  <button type="button"><CreditCard size={18} /><span><strong>Thanh toán & Gói</strong><small>Quản lý đăng ký của bạn</small></span></button>
-                  <button type="button"><Bell size={18} /><span><strong>Thông báo</strong><small>Cấu hình thông báo</small></span><em>3</em></button>
-                  <button type="button"><HelpCircle size={18} /><span><strong>Trợ giúp & Hỗ trợ</strong><small>Tài liệu và hướng dẫn</small></span></button>
+                  <button onClick={() => { setAccountDialog("profile"); setAccountMenuOpen(false); }} type="button"><User size={18} /><span><strong>{isEnglish ? "My Profile" : "Hồ sơ của tôi"}</strong><small>{isEnglish ? "View and edit account information" : "Xem và chỉnh sửa thông tin"}</small></span></button>
+                  <button onClick={() => { setActive("settings"); setAccountMenuOpen(false); }} type="button"><SettingsIcon size={18} /><span><strong>{isEnglish ? "Settings" : "Cài đặt"}</strong><small>{isEnglish ? "Manage system preferences" : "Quản lý tùy chọn hệ thống"}</small></span></button>
+                  <button onClick={() => { setAccountDialog("subscription"); setAccountMenuOpen(false); }} type="button"><CreditCard size={18} /><span><strong>{isEnglish ? "Billing & Plan" : "Thanh toán & Gói"}</strong><small>{isEnglish ? "Manage your subscription" : "Quản lý đăng ký của bạn"}</small></span></button>
+                  <button onClick={() => { setNotificationOpen(true); setAccountMenuOpen(false); }} type="button"><Bell size={18} /><span><strong>{isEnglish ? "Notifications" : "Thông báo"}</strong><small>{isEnglish ? "Notification preferences" : "Cấu hình thông báo"}</small></span><em>{unreadNotifications}</em></button>
+                  <button onClick={() => { setAccountDialog("help"); setAccountMenuOpen(false); }} type="button"><HelpCircle size={18} /><span><strong>{isEnglish ? "Help & Support" : "Trợ giúp & Hỗ trợ"}</strong><small>{isEnglish ? "Docs and operation guides" : "Tài liệu và hướng dẫn"}</small></span></button>
+                  <button onClick={() => { setAccountDialog("security"); setAccountMenuOpen(false); }} type="button"><KeyRound size={18} /><span><strong>{isEnglish ? "Account Security" : "Bảo mật tài khoản"}</strong><small>{isEnglish ? "Password and login sessions" : "Đổi mật khẩu và phiên đăng nhập"}</small></span></button>
                 </section>
 
                 <section className={styles.accountPrefs}>
-                  <label><Globe2 size={16} />Ngôn ngữ</label>
+                  <label><Globe2 size={16} />{isEnglish ? "Language" : "Ngôn ngữ"}</label>
                   <div className={styles.accountSegment}>
-                    <button className={accountLanguage === "vi" ? styles.accountSegmentActive : undefined} onClick={() => setAccountLanguage("vi")} type="button">Tiếng Việt</button>
-                    <button className={accountLanguage === "en" ? styles.accountSegmentActive : undefined} onClick={() => setAccountLanguage("en")} type="button">English</button>
+                    <button className={accountLanguage === "vi" ? styles.accountSegmentActive : undefined} onClick={() => { setAccountLanguage("vi"); showAccountToast("Đã chuyển ngôn ngữ sang Tiếng Việt."); }} type="button">Tiếng Việt</button>
+                    <button className={accountLanguage === "en" ? styles.accountSegmentActive : undefined} onClick={() => { setAccountLanguage("en"); showAccountToast("Language switched to English for this session."); }} type="button">English</button>
                   </div>
-                  <label><Moon size={16} />Giao diện</label>
+                  <label><Moon size={16} />{isEnglish ? "Theme" : "Giao diện"}</label>
                   <div className={styles.accountTheme}>
-                    <button className={accountTheme === "light" ? styles.accountThemeActive : undefined} onClick={() => setAccountTheme("light")} type="button"><Sun size={16} />Sáng</button>
-                    <button className={accountTheme === "dark" ? styles.accountThemeActive : undefined} onClick={() => setAccountTheme("dark")} type="button"><Moon size={16} />Tối</button>
-                    <button className={accountTheme === "system" ? styles.accountThemeActive : undefined} onClick={() => setAccountTheme("system")} type="button"><Monitor size={16} />Hệ thống</button>
+                    <button className={accountTheme === "light" ? styles.accountThemeActive : undefined} onClick={() => { setAccountTheme("light"); showAccountToast(isEnglish ? "Light theme applied." : "Đã áp dụng giao diện sáng."); }} type="button"><Sun size={16} />{isEnglish ? "Light" : "Sáng"}</button>
+                    <button className={accountTheme === "dark" ? styles.accountThemeActive : undefined} onClick={() => { setAccountTheme("dark"); showAccountToast(isEnglish ? "Dark theme applied." : "Đã áp dụng giao diện tối."); }} type="button"><Moon size={16} />{isEnglish ? "Dark" : "Tối"}</button>
+                    <button className={accountTheme === "system" ? styles.accountThemeActive : undefined} onClick={() => { setAccountTheme("system"); showAccountToast(isEnglish ? "System theme applied." : "Đã đồng bộ theo hệ thống."); }} type="button"><Monitor size={16} />{isEnglish ? "System" : "Hệ thống"}</button>
                   </div>
-                  <label><Type size={16} />Kích thước chữ</label>
+                  <label><Type size={16} />{isEnglish ? "Text size" : "Kích thước chữ"}</label>
                   <div className={styles.accountSegment}>
-                    <button className={accountFontSize === "small" ? styles.accountSegmentActive : undefined} onClick={() => setAccountFontSize("small")} type="button">Nhỏ</button>
-                    <button className={accountFontSize === "medium" ? styles.accountSegmentActive : undefined} onClick={() => setAccountFontSize("medium")} type="button">Trung bình</button>
-                    <button className={accountFontSize === "large" ? styles.accountSegmentActive : undefined} onClick={() => setAccountFontSize("large")} type="button">Lớn</button>
+                    <button className={accountFontSize === "small" ? styles.accountSegmentActive : undefined} onClick={() => { setAccountFontSize("small"); showAccountToast(isEnglish ? "Small text size applied." : "Đã thu gọn cỡ chữ."); }} type="button">{isEnglish ? "Small" : "Nhỏ"}</button>
+                    <button className={accountFontSize === "medium" ? styles.accountSegmentActive : undefined} onClick={() => { setAccountFontSize("medium"); showAccountToast(isEnglish ? "Default text size applied." : "Đã dùng cỡ chữ tiêu chuẩn."); }} type="button">{isEnglish ? "Default" : "Trung bình"}</button>
+                    <button className={accountFontSize === "large" ? styles.accountSegmentActive : undefined} onClick={() => { setAccountFontSize("large"); showAccountToast(isEnglish ? "Large text size applied." : "Đã tăng cỡ chữ."); }} type="button">{isEnglish ? "Large" : "Lớn"}</button>
                   </div>
                 </section>
 
                 <section className={styles.accountLogout}>
-                  <button onClick={() => setLogoutConfirmOpen(true)} type="button"><LogOut size={18} /><span><strong>Đăng xuất</strong><small>Thoát khỏi tài khoản</small></span></button>
+                  <button onClick={() => setLogoutConfirmOpen(true)} type="button"><LogOut size={18} /><span><strong>{isEnglish ? "Sign out" : "Đăng xuất"}</strong><small>{isEnglish ? "Leave this account" : "Thoát khỏi tài khoản"}</small></span></button>
                 </section>
                 <footer>Golf Manager Pro v2.0 · © 2026</footer>
               </div>
@@ -318,6 +422,68 @@ export default function AppShell() {
             </section>
           </div>
         ) : null}
+
+        {accountDialog ? (
+          <div className={styles.modalOverlay} onClick={() => setAccountDialog(null)}>
+            <section className={styles.accountWorkDialog} onClick={(event) => event.stopPropagation()}>
+              <header>
+                <span>{accountDialog === "profile" ? <User size={20} /> : accountDialog === "security" ? <KeyRound size={20} /> : accountDialog === "subscription" ? <CreditCard size={20} /> : <HelpCircle size={20} />}</span>
+                <div>
+                  <strong>
+                    {accountDialog === "profile" ? "Hồ sơ tài khoản" : accountDialog === "security" ? "Bảo mật tài khoản" : accountDialog === "subscription" ? "Thanh toán & gói sử dụng" : "Trợ giúp & hỗ trợ"}
+                  </strong>
+                  <small>
+                    {accountDialog === "profile" ? "Thông tin người dùng đang đăng nhập và dữ liệu hiển thị trên hệ thống." : accountDialog === "security" ? "Quản lý mật khẩu, 2FA và phiên đăng nhập." : accountDialog === "subscription" ? "Theo dõi gói NextVision Golf Manager và hóa đơn dịch vụ." : "Kênh hỗ trợ vận hành cho trung tâm golf."}
+                  </small>
+                </div>
+                <button aria-label="Đóng" onClick={() => setAccountDialog(null)} type="button"><X size={18} /></button>
+              </header>
+
+              {accountDialog === "profile" ? (
+                <div className={styles.accountFormGrid}>
+                  <label><span>Họ và tên</span><input defaultValue="Nguyễn Văn A" /></label>
+                  <label><span>Email</span><input defaultValue="nguyenvana@nextgolf.vn" type="email" /></label>
+                  <label><span>Số điện thoại</span><input defaultValue="0901234567" /></label>
+                  <label><span>Vai trò</span><select defaultValue="Admin"><option>Admin</option><option>Quản lý chi nhánh</option><option>Lễ tân</option></select></label>
+                  <label className={styles.accountFullField}><span>Chi nhánh được phân quyền</span><input defaultValue="Bến Nghé, Võ Thị Sáu, Thảo Điền" /></label>
+                </div>
+              ) : null}
+
+              {accountDialog === "security" ? (
+                <div className={styles.accountSecurityGrid}>
+                  <article><ShieldCheck size={20} /><strong>2FA qua email</strong><span>Đang bật cho tài khoản Admin.</span><button onClick={() => showAccountToast("Đã gửi mã xác thực thử nghiệm tới email.")} type="button">Gửi mã thử</button></article>
+                  <article><Smartphone size={20} /><strong>Thiết bị đăng nhập</strong><span>Chrome Windows · Bến Nghé · hoạt động hiện tại.</span><button onClick={() => showAccountToast("Đã giữ phiên hiện tại và đăng xuất các phiên khác trong demo.")} type="button">Đăng xuất phiên khác</button></article>
+                  <label><span>Mật khẩu hiện tại</span><input type="password" /></label>
+                  <label><span>Mật khẩu mới</span><input type="password" /></label>
+                  <label><span>Nhập lại mật khẩu mới</span><input type="password" /></label>
+                </div>
+              ) : null}
+
+              {accountDialog === "subscription" ? (
+                <div className={styles.accountSubscription}>
+                  <article><CheckCircle2 size={22} /><div><strong>Gói Premium Golf Operations</strong><span>Hiệu lực đến 31/12/2026 · 4 chi nhánh · 25 tài khoản nội bộ</span></div><b>Đang hoạt động</b></article>
+                  <dl><div><dt>Chu kỳ thanh toán</dt><dd>12 tháng</dd></div><div><dt>Hóa đơn gần nhất</dt><dd>INV-2026-0412 · 18.000.000đ</dd></div><div><dt>Phương thức</dt><dd>Chuyển khoản Vietcombank</dd></div></dl>
+                  <button onClick={() => { setActive("cashbook"); setAccountDialog(null); }} type="button">Mở chứng từ thanh toán</button>
+                </div>
+              ) : null}
+
+              {accountDialog === "help" ? (
+                <div className={styles.accountHelpGrid}>
+                  <button onClick={() => { setActive("settings"); setAccountDialog(null); }} type="button"><SettingsIcon size={18} /><span><strong>Hướng dẫn cấu hình hệ thống</strong><small>Mở module Cài đặt để kiểm tra phân quyền, mẫu in và thiết bị.</small></span></button>
+                  <button onClick={() => showAccountToast("Đã tạo ticket hỗ trợ #SUP-2026-0412 trong demo.")} type="button"><Mail size={18} /><span><strong>Gửi yêu cầu hỗ trợ</strong><small>Phản hồi SLA 4 giờ làm việc cho gói Premium.</small></span></button>
+                  <button onClick={() => { setActive("reports"); setAccountDialog(null); }} type="button"><Bell size={18} /><span><strong>Xem cảnh báo vận hành</strong><small>Đi tới Báo cáo để xử lý các cảnh báo quan trọng.</small></span></button>
+                </div>
+              ) : null}
+
+              <footer>
+                <button onClick={() => setAccountDialog(null)} type="button">Hủy</button>
+                <button onClick={() => { setAccountDialog(null); showAccountToast("Đã lưu thay đổi tài khoản trong phiên làm việc."); }} type="button"><Save size={16} />Lưu thay đổi</button>
+              </footer>
+            </section>
+          </div>
+        ) : null}
+
+        {accountToast ? <div className={styles.accountToast}>{accountToast}</div> : null}
 
         <div className={`${styles.content} ${branchReloading ? styles.contentLoading : ""}`} key={`${activeBranch}-${branchDataVersion}`}>
           {branchReloading ? (

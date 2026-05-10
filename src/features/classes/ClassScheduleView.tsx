@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   BookOpen,
@@ -16,6 +16,7 @@ import {
   PlusCircle,
   Search,
   Trash2,
+  Trophy,
   User,
   Users,
   X,
@@ -73,7 +74,7 @@ const generateHourSlots = (): string[] => {
   return slots;
 };
 const HOUR_SLOTS = generateHourSlots();
-const CLASS_CALENDAR_SLOT_HEIGHT = 34;
+const CLASS_CALENDAR_SLOT_HEIGHT = 40;
 
 // =====================================================================================
 // SECTION B — Types
@@ -84,6 +85,7 @@ type ClassType = {
   name: string;
   color: string;
   createdAt: string;
+  description?: string;
 };
 
 type StudentLite = {
@@ -489,19 +491,28 @@ export default function ClassScheduleView() {
           {/* ============ KPI ============ */}
           <div className={styles.classesKpiGrid}>
             <article className={`${styles.classesKpiCard} ${styles.classesKpiPurple}`}>
-              <span>Tổng số lớp</span>
-              <strong>{stats.totalClasses}</strong>
-              <p>Lớp đang hoạt động trong hệ thống</p>
+              <span className={styles.classesKpiIcon}><BookOpen size={22} /></span>
+              <div>
+                <span>Tổng số lớp</span>
+                <strong>{stats.totalClasses}</strong>
+                <p>Lớp đang hoạt động trong hệ thống</p>
+              </div>
             </article>
             <article className={`${styles.classesKpiCard} ${styles.classesKpiBlue}`}>
-              <span>Giáo viên</span>
-              <strong>{stats.distinctCoaches}</strong>
-              <p>HLV đang phụ trách lớp</p>
+              <span className={styles.classesKpiIcon}><GraduationCap size={22} /></span>
+              <div>
+                <span>Giáo viên</span>
+                <strong>{stats.distinctCoaches}</strong>
+                <p>HLV đang phụ trách lớp</p>
+              </div>
             </article>
             <article className={`${styles.classesKpiCard} ${styles.classesKpiGreen}`}>
-              <span>Sức chứa</span>
-              <strong>{stats.totalCapacity}</strong>
-              <p>Tổng số chỗ tất cả lớp</p>
+              <span className={styles.classesKpiIcon}><Trophy size={22} /></span>
+              <div>
+                <span>Sức chứa</span>
+                <strong>{stats.totalCapacity}</strong>
+                <p>Tổng số chỗ tất cả lớp</p>
+              </div>
             </article>
           </div>
 
@@ -602,6 +613,7 @@ export default function ClassScheduleView() {
       {/* ============ MODALS ============ */}
       {classFormOpen ? (
         <ClassFormModal
+          existingClasses={classes}
           classTypes={classTypes}
           editingClass={
             classFormOpen.mode === "edit"
@@ -801,6 +813,7 @@ function CalendarTab({
 
   const weekStartVn = formatVn(weekDates[0]);
   const weekEndVn = formatVn(weekDates[6]);
+  const gridRef = useRef<HTMLDivElement | null>(null);
 
   const sessionsThisWeek = useMemo(
     () =>
@@ -832,6 +845,23 @@ function CalendarTab({
     return classTypes.filter((t) => ids.has(t.id));
   }, [classes, classTypes, sessionsThisWeek]);
 
+  useEffect(() => {
+    const firstSlotIndex = sessionsThisWeek.reduce((min, session) => {
+      const index = HOUR_SLOTS.indexOf(session.startTime);
+      return index >= 0 ? Math.min(min, index) : min;
+    }, HOUR_SLOTS.length);
+    if (!gridRef.current || firstSlotIndex === HOUR_SLOTS.length) return;
+    const headerHeight = 62;
+    const offsetSlots = Math.max(0, firstSlotIndex - 4);
+    const targetTop = headerHeight + offsetSlots * CLASS_CALENDAR_SLOT_HEIGHT;
+    const scrollToFirstClass = () => {
+      if (gridRef.current) gridRef.current.scrollTop = targetTop;
+    };
+    requestAnimationFrame(scrollToFirstClass);
+    const timer = window.setTimeout(scrollToFirstClass, 120);
+    return () => window.clearTimeout(timer);
+  }, [sessionsThisWeek, weekAnchor]);
+
   return (
     <div className={styles.classesCalendarBlock}>
       <div className={styles.classesCalendarHeader}>
@@ -861,7 +891,7 @@ function CalendarTab({
         </div>
       </div>
 
-      <div className={styles.classesCalendarGrid}>
+      <div className={styles.classesCalendarGrid} ref={gridRef}>
         <div className={styles.classesCalendarTimeCol}>
           <div className={styles.classesCalendarHead}>Giờ</div>
           {HOUR_SLOTS.map((slot) => {
@@ -957,6 +987,7 @@ function CalendarTab({
 function ClassFormModal({
   classTypes,
   editingClass,
+  existingClasses,
   mode,
   onAddType,
   onClose,
@@ -964,6 +995,7 @@ function ClassFormModal({
 }: {
   classTypes: ClassType[];
   editingClass?: GolfClass;
+  existingClasses: GolfClass[];
   mode: "create" | "edit";
   onAddType: () => void;
   onClose: () => void;
@@ -1032,6 +1064,17 @@ function ClassFormModal({
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = "Tên lớp bắt buộc";
     if (name.trim().length > 100) next.name = "Tối đa 100 ký tự";
+    if (
+      name.trim() &&
+      existingClasses.some(
+        (c) =>
+          c.id !== editingClass?.id &&
+          c.branch === branch &&
+          c.name.trim().toLowerCase() === name.trim().toLowerCase(),
+      )
+    ) {
+      next.name = "Tên lớp đã tồn tại trong chi nhánh";
+    }
     const dur = parseInt(duration, 10);
     if (isNaN(dur) || dur < 5 || dur > 240) next.duration = "5 – 240 phút";
     const cap = parseInt(capacity, 10);
@@ -1041,12 +1084,18 @@ function ClassFormModal({
       next.endDate = "Phải ≥ ngày bắt đầu";
     }
     if (activeDays.length === 0) next.days = "Tick ít nhất 1 ngày";
-    if (mode === "edit") {
-      activeDays.forEach(([d, v]) => {
-        if (minutesBetween(v.startTime, v.endTime) <= 0) {
-          next[`day-${d}`] = "Giờ kết thúc > giờ bắt đầu";
-        }
-      });
+    activeDays.forEach(([d, v]) => {
+      const end = mode === "create" ? addMinutes(v.startTime, dur || 60) : v.endTime;
+      if (!v.startTime || !end) next[`day-${d}`] = "Nhập đủ giờ học";
+      if (minutesBetween(v.startTime, end) <= 0) {
+        next[`day-${d}`] = "Giờ kết thúc > giờ bắt đầu";
+      }
+      if (v.startTime < "06:00" || end > "22:00") {
+        next[`day-${d}`] = "Lịch lớp nằm trong 06:00 – 22:00";
+      }
+    });
+    if (appliedPackages.length === 0) {
+      next.packages = "Chọn ít nhất 1 gói dịch vụ để xác định điều kiện book lớp";
     }
     return next;
   };
@@ -1099,7 +1148,7 @@ function ClassFormModal({
           <section className={styles.classesFormSection}>
             <h4>Thông tin cơ bản</h4>
             <div className={styles.classesFormGrid}>
-              <label className={styles.classesField}>
+              <label className={`${styles.classesField} ${errors.name ? styles.classesFieldInvalid : ""}`}>
                 <span>Tên lớp <b>*</b></span>
                 <input
                   onChange={(e) => setName(e.target.value)}
@@ -1138,7 +1187,7 @@ function ClassFormModal({
                 </select>
               </label>
 
-              <label className={styles.classesField}>
+              <label className={`${styles.classesField} ${errors.duration ? styles.classesFieldInvalid : ""}`}>
                 <span>Thời lượng (phút) <b>*</b></span>
                 <input
                   max={240}
@@ -1150,7 +1199,7 @@ function ClassFormModal({
                 {errors.duration ? <small className={styles.classesFieldError}>{errors.duration}</small> : null}
               </label>
 
-              <label className={styles.classesField}>
+              <label className={`${styles.classesField} ${errors.capacity ? styles.classesFieldInvalid : ""}`}>
                 <span>Sức chứa <b>*</b></span>
                 <input
                   max={100}
@@ -1162,13 +1211,13 @@ function ClassFormModal({
                 {errors.capacity ? <small className={styles.classesFieldError}>{errors.capacity}</small> : null}
               </label>
 
-              <label className={styles.classesField}>
+              <label className={`${styles.classesField} ${errors.startDate ? styles.classesFieldInvalid : ""}`}>
                 <span>Ngày bắt đầu <b>*</b></span>
                 <input onChange={(e) => setStartDate(e.target.value)} type="date" value={startDate} />
                 {errors.startDate ? <small className={styles.classesFieldError}>{errors.startDate}</small> : null}
               </label>
 
-              <label className={styles.classesField}>
+              <label className={`${styles.classesField} ${errors.endDate ? styles.classesFieldInvalid : ""}`}>
                 <span>Ngày kết thúc</span>
                 <input onChange={(e) => setEndDate(e.target.value)} type="date" value={endDate} />
                 {errors.endDate ? <small className={styles.classesFieldError}>{errors.endDate}</small> : null}
@@ -1206,7 +1255,7 @@ function ClassFormModal({
               {DAY_FULL_VN.map((dayName, idx) => {
                 const cfg = days[idx];
                 return (
-                  <div className={`${styles.classesScheduleRow} ${cfg.active ? styles.classesScheduleRowActive : ""}`} key={dayName}>
+                  <div className={`${styles.classesScheduleRow} ${cfg.active ? styles.classesScheduleRowActive : ""} ${errors[`day-${idx}`] ? styles.classesScheduleRowError : ""}`} key={dayName}>
                     <label className={styles.classesScheduleCheck}>
                       <input checked={cfg.active} onChange={() => toggleDay(idx)} type="checkbox" />
                       <span>{dayName}</span>
@@ -1279,6 +1328,7 @@ function ClassFormModal({
                 );
               })}
             </div>
+            {errors.packages ? <small className={styles.classesFieldError}>{errors.packages}</small> : null}
           </section>
         </div>
 
@@ -1308,16 +1358,20 @@ function AddTypeModal({
 }) {
   const [name, setName] = useState("");
   const [color, setColor] = useState<string>(COLOR_PRESETS[0].value);
-  const [error, setError] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSave = () => {
     const trimmed = name.trim();
+    const next: Record<string, string> = {};
     if (!trimmed) {
-      setError("Tên loại lớp bắt buộc");
+      next.name = "Tên loại lớp bắt buộc";
+      setErrors(next);
       return;
     }
     if (existingNames.some((n) => n.toLowerCase() === trimmed.toLowerCase())) {
-      setError("Tên loại lớp đã tồn tại");
+      next.name = "Tên loại lớp đã tồn tại";
+      setErrors(next);
       return;
     }
     onSave({
@@ -1325,6 +1379,7 @@ function AddTypeModal({
       name: trimmed,
       color,
       createdAt: TODAY,
+      description: description.trim() || undefined,
     });
   };
 
@@ -1336,19 +1391,28 @@ function AddTypeModal({
           <button className={styles.modalClose} onClick={onClose} type="button"><X size={18} /></button>
         </header>
         <div className={styles.classesAddTypeBody}>
-          <label className={styles.classesField}>
+          <label className={`${styles.classesField} ${errors.name ? styles.classesFieldInvalid : ""}`}>
             <span>Tên loại lớp <b>*</b></span>
             <input
               autoFocus
               onChange={(e) => {
                 setName(e.target.value);
-                setError(null);
+                setErrors({});
               }}
               placeholder="VD: Short Game, Course Management"
               type="text"
               value={name}
             />
-            {error ? <small className={styles.classesFieldError}>{error}</small> : null}
+            {errors.name ? <small className={styles.classesFieldError}>{errors.name}</small> : null}
+          </label>
+          <label className={styles.classesField}>
+            <span>Mô tả ngắn</span>
+            <textarea
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="VD: Nhóm lớp tập trung putting và short game"
+              rows={2}
+              value={description}
+            />
           </label>
           <div className={styles.classesColorPicker}>
             <span>Màu sắc</span>

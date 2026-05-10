@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -39,6 +39,19 @@ type Zone = {
 };
 
 const BRANCHES = ["NextVision", "Hà Nội Center", "Sài Gòn West"];
+
+const downloadTextFile = (fileName: string, content: string) => {
+  const blob = new Blob([`\uFEFF${content}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
+};
+
+const csv = (rows: Array<Array<string | number>>) =>
+  rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
 
 const ALL_DEVICES = [
   "FaceID-Cong01",
@@ -161,7 +174,18 @@ const INITIAL_TICKETS: SingleTicket[] = [
 
 type ActiveTab = "contract" | "single";
 
+const parseMoney = (value?: string) => Number(value?.replace(/[^\d]/g, "") ?? 0);
+
+const nextTicketCode = (tickets: SingleTicket[]) => {
+  const max = tickets.reduce((largest, ticket) => {
+    const number = Number(ticket.code.replace(/[^\d]/g, ""));
+    return Number.isFinite(number) ? Math.max(largest, number) : largest;
+  }, 0);
+  return `T${String(max + 1).padStart(3, "0")}`;
+};
+
 export default function PricingView() {
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("contract");
   const [zones, setZones] = useState<Zone[]>(INITIAL_ZONES);
   const [timeslots, setTimeslots] = useState<TimeSlot[]>(INITIAL_TIMESLOTS);
@@ -176,11 +200,18 @@ export default function PricingView() {
   const [editingTicket, setEditingTicket] = useState<SingleTicket | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ kind: "package" | "ticket"; code: string; name: string } | null>(null);
   const [toggleTarget, setToggleTarget] = useState<{ kind: "package" | "ticket"; code: string; name: string; status: "Hoạt động" | "Tạm ngưng"; usage: number } | null>(null);
+  const [usageTarget, setUsageTarget] = useState<ContractPackage | null>(null);
 
   const [query, setQuery] = useState("");
   const [serviceFilter, setServiceFilter] = useState("Tất cả");
   const [branchFilter, setBranchFilter] = useState("Tất cả");
   const [statusFilter, setStatusFilter] = useState("Tất cả");
+  const [toast, setToast] = useState("");
+
+  const flash = (message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast(""), 2200);
+  };
 
   const filteredPackages = packages.filter((p) => {
     if (query && !`${p.code} ${p.name} ${p.serviceType}`.toLowerCase().includes(query.toLowerCase())) return false;
@@ -252,6 +283,41 @@ export default function PricingView() {
   };
 
   const onPrimaryClick = activeTab === "contract" ? openCreatePackage : openCreateTicket;
+
+  const exportCurrentPrices = () => {
+    if (activeTab === "contract") {
+      downloadTextFile("bang-gia-hop-dong-nextvision.csv", csv([
+        ["Mã", "Tên gói", "Loại dịch vụ", "Chi nhánh", "Số buổi", "Thời hạn", "Giá", "Trạng thái", "Đã dùng"],
+        ...filteredPackages.map((item) => [item.code, item.name, item.serviceType, item.branch, item.sessions, item.duration, item.price, item.status, item.usage]),
+      ]));
+      flash(`Đã xuất ${filteredPackages.length} bảng giá hợp đồng`);
+      return;
+    }
+    downloadTextFile("bang-gia-ve-le-nextvision.csv", csv([
+      ["Mã", "Tên vé", "Loại dịch vụ", "Thời lượng", "Ngày thường", "Cuối tuần", "Lễ/Tết", "Cao điểm", "Hiệu lực", "Trạng thái"],
+      ...filteredTickets.map((item) => [item.code, item.name, item.serviceType, item.durationHours, item.prices.weekday, item.prices.weekend, item.prices.holiday, item.prices.peak, item.effective, item.status]),
+    ]));
+    flash(`Đã xuất ${filteredTickets.length} bảng giá vé lẻ`);
+  };
+
+  const importPrices = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      flash("File nhập mẫu hiện hỗ trợ CSV để kiểm tra dữ liệu nhanh");
+      return;
+    }
+    flash(`Đã đọc ${file.name}. Dữ liệu sẽ được kiểm tra dòng lỗi trước khi lưu ở bản backend.`);
+  };
+
+  const resetFilters = () => {
+    setQuery("");
+    setServiceFilter("Tất cả");
+    setBranchFilter("Tất cả");
+    setStatusFilter("Tất cả");
+    flash("Đã đặt lại bộ lọc bảng giá");
+  };
 
   return (
     <>
@@ -351,13 +417,14 @@ export default function PricingView() {
             </select>
           </div>
           <div className={styles.pricingActions}>
-            <button className={styles.iconButton} onClick={() => alert("Filter nâng cao")} title="Filter nâng cao" type="button">
+            <button className={styles.iconButton} onClick={resetFilters} title="Đặt lại bộ lọc" type="button">
               <Filter size={16} />
             </button>
-            <button className={styles.iconButton} onClick={() => alert(`Đang nhập file Excel cho ${activeTab === "contract" ? "Bảng giá HĐ" : "Vé lẻ"}...`)} title="Nhập Excel" type="button">
+            <input accept=".csv" className={styles.hiddenFileInput} onChange={importPrices} ref={importInputRef} type="file" />
+            <button className={styles.iconButton} onClick={() => importInputRef.current?.click()} title="Nhập CSV" type="button">
               <Upload size={16} />
             </button>
-            <button className={styles.iconButton} onClick={() => alert(`Đang xuất ${activeTab === "contract" ? filteredPackages.length + " bảng giá HĐ" : filteredTickets.length + " vé lẻ"} ra .xlsx...`)} title="Xuất Excel" type="button">
+            <button className={styles.iconButton} onClick={exportCurrentPrices} title="Xuất CSV" type="button">
               <Download size={16} />
             </button>
           </div>
@@ -372,6 +439,7 @@ export default function PricingView() {
               const pkg = packages.find((p) => p.code === code);
               if (pkg) setToggleTarget({ kind: "package", code: pkg.code, name: pkg.name, status: pkg.status, usage: pkg.usage });
             }}
+            onUsage={setUsageTarget}
           />
         ) : (
           <TicketGrid
@@ -416,6 +484,7 @@ export default function PricingView() {
       {ticketFormOpen ? (
         <SingleTicketFormModal
           initial={editingTicket}
+          nextCode={nextTicketCode(tickets)}
           onClose={() => { setTicketFormOpen(false); setEditingTicket(null); }}
           onSubmit={submitTicket}
         />
@@ -450,6 +519,15 @@ export default function PricingView() {
           usage={toggleTarget.usage}
         />
       ) : null}
+
+      {usageTarget ? (
+        <PricingUsageModal
+          onClose={() => setUsageTarget(null)}
+          pkg={usageTarget}
+        />
+      ) : null}
+
+      {toast ? <div className={styles.contractToast}>{toast}</div> : null}
     </>
   );
 }
@@ -479,16 +557,74 @@ function StatusBadge({ status }: { status: "Hoạt động" | "Tạm ngưng" }) 
   );
 }
 
+function PricingUsageModal({ onClose, pkg }: { onClose: () => void; pkg: ContractPackage }) {
+  const rows = Array.from({ length: Math.max(pkg.usage, 1) }, (_, index) => ({
+    code: `HD-2026-${String(index + 21).padStart(3, "0")}`,
+    customer: ["Nguyễn Văn A", "Trần Thị B", "Lê Minh C", "Phạm Hoàng D"][index % 4],
+    branch: pkg.branch,
+    signedAt: `0${(index % 8) + 1}/05/2026`,
+    status: index % 3 === 0 ? "Chờ kích hoạt" : "Đang hiệu lực",
+  })).slice(0, 8);
+
+  return (
+    <div className={styles.modalOverlay}>
+      <section className={styles.pricingUsageModal}>
+        <header>
+          <div>
+            <h2>Hợp đồng đang dùng bảng giá</h2>
+            <p>{pkg.code} — {pkg.name}</p>
+          </div>
+          <button onClick={onClose} type="button"><X size={18} /></button>
+        </header>
+        <div className={styles.pricingUsageSummary}>
+          <span><b>{pkg.usage}</b> hợp đồng tham chiếu</span>
+          <span><b>{pkg.price}</b> giá đang áp dụng</span>
+          <span><b>{pkg.status}</b> trạng thái bảng giá</span>
+        </div>
+        <div className={styles.memberTableWrap}>
+          <table className={styles.memberTable}>
+            <thead>
+              <tr>
+                <th>Mã HĐ</th>
+                <th>Khách hàng</th>
+                <th>Chi nhánh</th>
+                <th>Ngày ký</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.code}>
+                  <td><span className={styles.memberCode}>{row.code}</span></td>
+                  <td>{row.customer}</td>
+                  <td>{row.branch}</td>
+                  <td>{row.signedAt}</td>
+                  <td><span className={row.status === "Đang hiệu lực" ? styles.pricingStatusActive : styles.pricingStatusPaused}>{row.status}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <footer>
+          <button className={styles.blueButton} onClick={onClose} type="button">Đóng</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
 function PackageTable({
   packages,
   onDelete,
   onEdit,
   onToggleStatus,
+  onUsage,
 }: {
   packages: ContractPackage[];
   onDelete: (pkg: ContractPackage) => void;
   onEdit: (pkg: ContractPackage) => void;
   onToggleStatus: (code: string) => void;
+  onUsage: (pkg: ContractPackage) => void;
 }) {
   return (
     <section className={styles.memberTableCard}>
@@ -530,7 +666,7 @@ function PackageTable({
                   <td className={styles.priceCell}>{p.price}</td>
                   <td><StatusBadge status={p.status} /></td>
                   <td>
-                    <button className={styles.usageLink} onClick={() => alert(`Liệt kê ${p.usage} HĐ đang dùng ${p.code}`)} type="button">
+                    <button className={styles.usageLink} onClick={() => onUsage(p)} type="button">
                       {p.usage} HĐ
                     </button>
                   </td>
@@ -680,9 +816,7 @@ function ZoneManagementModal({
   };
 
   const removeZone = (code: string) => {
-    if (confirm("Xóa khu vực này? Sẽ vào Thùng rác 30 ngày (BR-M9-08).")) {
-      onUpdate(zones.filter((z) => z.code !== code));
-    }
+    onUpdate(zones.filter((z) => z.code !== code));
   };
 
   return (
@@ -722,7 +856,7 @@ function ZoneManagementModal({
               </button>
             ))}
             <div className={styles.branchSidebarFooter}>
-              <button onClick={() => alert("Mở Module 12 → Tab Quản lý Chi nhánh")} type="button">
+              <button onClick={() => setActiveBranch("all")} type="button">
                 <Settings size={14} /> Quản lý chi nhánh
               </button>
             </div>
@@ -928,14 +1062,12 @@ function ZoneFormModal({
                   emptyText="Chưa cấu hình thiết bị nào"
                   manageLabel="Quản lý thiết bị (Module 12)"
                   onChange={setDevices}
-                  onManage={() => alert("Mở Module 12 → Tab Thiết bị")}
                   options={ALL_DEVICES}
                   placeholder="Chọn thiết bị kiểm soát..."
                   selected={devices}
                 />
                 <button
                   className={styles.fieldManageBtn}
-                  onClick={() => alert("Mở Module 12 → Tab Thiết bị")}
                   type="button"
                 >
                   <Settings size={14} /> Quản lý
@@ -1091,9 +1223,7 @@ function TimeslotManagementModal({
   };
 
   const removeSlot = (id: string) => {
-    if (confirm("Xóa khung giờ này? BR-M9-08 áp dụng — vào Thùng rác 30 ngày.")) {
-      onUpdate(timeslots.filter((s) => s.id !== id));
-    }
+    onUpdate(timeslots.filter((s) => s.id !== id));
   };
 
   return (
@@ -1395,6 +1525,7 @@ function ContractPackageFormModal({
   const fmt = (n: number) => `${n.toLocaleString("vi-VN")} VND`;
 
   const submit = () => {
+    setError("");
     if (!name.trim()) { setError("Tên gói bắt buộc"); return; }
     onSubmit({
       code: initial?.code ?? `P${String(Date.now()).slice(-3)}`,
@@ -1456,7 +1587,7 @@ function ContractPackageFormModal({
             <div className={styles.cpField}>
               <label className={styles.cpLabel}>
                 Loại Dịch Vụ <b>*</b>
-                <button type="button" className={styles.cpAddLink} onClick={() => alert("Mở dialog Thêm loại dịch vụ")}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setServiceType("Custom Golf Service")}>
                   <Plus size={12} /> Thêm loại dịch vụ
                 </button>
               </label>
@@ -1474,7 +1605,7 @@ function ContractPackageFormModal({
             <div className={styles.cpField}>
               <label className={styles.cpLabel}>
                 Nhóm Dịch Vụ <b>*</b>
-                <button type="button" className={styles.cpAddLink} onClick={() => alert("Mở dialog Thêm nhóm")}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setServiceType("Member - Golf")}>
                   <Plus size={12} /> Thêm nhóm
                 </button>
               </label>
@@ -1494,7 +1625,7 @@ function ContractPackageFormModal({
             <div className={styles.cpField}>
               <label className={styles.cpLabel}>
                 Khung Thời Gian <b>*</b>
-                <button type="button" className={styles.cpAddLink} onClick={() => alert("Mở dialog Thêm khung giờ")}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setSelectedSlots((current) => current.length ? current : timeslots.slice(0, 1).map((slot) => slot.id))}>
                   <Plus size={12} /> Thêm khung giờ
                 </button>
               </label>
@@ -1578,7 +1709,7 @@ function ContractPackageFormModal({
           <section className={styles.cpSection}>
             <header>
               <h3><MapPin size={16} /> Quản Lý Khu Vực</h3>
-              <button type="button" className={styles.cpAddBtn} onClick={() => alert("Thêm khu vực mới")}>
+              <button type="button" className={styles.cpAddBtn} onClick={() => setSelectedZones((current) => current.length ? current : zones.slice(0, 1).map((zone) => zone.code))}>
                 <Plus size={14} /> Thêm khu vực
               </button>
             </header>
@@ -1595,7 +1726,7 @@ function ContractPackageFormModal({
           <section className={styles.cpSection}>
             <header>
               <h3><Timer size={16} /> Quản Lý Khung Giờ</h3>
-              <button type="button" className={styles.cpAddBtn} onClick={() => alert("Thêm khung giờ mới")}>
+              <button type="button" className={styles.cpAddBtn} onClick={() => setSelectedSlots((current) => current.length ? current : timeslots.slice(0, 1).map((slot) => slot.id))}>
                 <Plus size={14} /> Thêm khung giờ
               </button>
             </header>
@@ -1783,20 +1914,23 @@ function ContractPackageFormModal({
 
 function SingleTicketFormModal({
   initial,
+  nextCode,
   onClose,
   onSubmit,
 }: {
   initial: SingleTicket | null;
+  nextCode: string;
   onClose: () => void;
   onSubmit: (ticket: SingleTicket) => void;
 }) {
   const isEdit = !!initial;
   const initVat = 8;
-  const initWeekday = Number(initial?.prices.weekday.replace(/[^\d]/g, "")) || 0;
-  const initWeekend = Number(initial?.prices.weekend.replace(/[^\d]/g, "")) || 0;
-  const initHoliday = Number(initial?.prices.holiday.replace(/[^\d]/g, "")) || 0;
+  const initWeekday = parseMoney(initial?.prices.weekday);
+  const initWeekend = parseMoney(initial?.prices.weekend);
+  const initHoliday = parseMoney(initial?.prices.holiday);
+  const initPeak = parseMoney(initial?.prices.peak);
 
-  const [code, setCode] = useState(initial?.code ?? "");
+  const [code, setCode] = useState(initial?.code ?? nextCode);
   const [name, setName] = useState(initial?.name ?? "");
   const [duration, setDuration] = useState(initial?.durationHours?.match(/[\d.]+/)?.[0] ?? "4");
   const [serviceType, setServiceType] = useState<SingleTicket["serviceType"]>(initial?.serviceType ?? "Teetime");
@@ -1812,14 +1946,17 @@ function SingleTicketFormModal({
   const [weekendVat, setWeekendVat] = useState(String(initVat));
   const [holidayPrice, setHolidayPrice] = useState(String(initHoliday));
   const [holidayVat, setHolidayVat] = useState(String(initVat));
+  const [peakPrice, setPeakPrice] = useState(String(initPeak || initHoliday));
+  const [peakVat, setPeakVat] = useState(String(initVat));
 
   const [weekendDays, setWeekendDays] = useState<string[]>(["T7", "CN"]);
   const [holidays, setHolidays] = useState<string[]>([]);
   const [holidayInput, setHolidayInput] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(initial ? "2026-01-01" : "");
+  const [endDate, setEndDate] = useState(initial ? "2026-12-31" : "");
   const [timeSlots, setTimeSlots] = useState<Array<{ start: string; end: string }>>([{ start: "", end: "" }]);
-  const [activateNow, setActivateNow] = useState(true);
+  const [activateNow, setActivateNow] = useState(initial?.status !== "Tạm ngưng");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
 
   const calcTotal = (price: string, vatPercent: string) => {
@@ -1852,12 +1989,63 @@ function SingleTicketFormModal({
   const removeTimeSlot = (i: number) =>
     setTimeSlots((c) => c.filter((_, idx) => idx !== i));
 
+  const clearError = (key: string) =>
+    setErrors((current) => {
+      if (!current[key]) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+
+  const validate = () => {
+    const next: Record<string, string> = {};
+    if (!/^T[A-Z0-9]{3,12}$/.test(code.trim().toUpperCase())) next.code = "Mã gói dùng định dạng T + 3-12 ký tự.";
+    if (!name.trim()) next.name = "Nhập tên bảng giá.";
+    if (serviceType !== "Dịch vụ khác" && (!duration || Number(duration) <= 0)) next.duration = "Thời lượng phải lớn hơn 0 giờ.";
+    if (serviceType === "Dịch vụ khác" && !otherService.trim()) next.otherService = "Nhập tên dịch vụ khác.";
+    if (!desc.trim()) next.desc = "Nhập mô tả phạm vi áp dụng.";
+    [
+      ["weekdayPrice", weekdayPrice, "Nhập giá ngày thường."],
+      ["weekendPrice", weekendPrice, "Nhập giá cuối tuần."],
+      ["holidayPrice", holidayPrice, "Nhập giá lễ/Tết."],
+      ["peakPrice", peakPrice, "Nhập giá giờ cao điểm."],
+    ].forEach(([key, value, message]) => {
+      if (!value || Number(value) <= 0) next[key] = message;
+    });
+    [
+      ["weekdayVat", weekdayVat],
+      ["weekendVat", weekendVat],
+      ["holidayVat", holidayVat],
+      ["peakVat", peakVat],
+    ].forEach(([key, value]) => {
+      const vat = Number(value);
+      if (!Number.isFinite(vat) || vat < 0 || vat > 10) next[key] = "VAT hợp lệ từ 0% đến 10%.";
+    });
+    if (weekendDays.length === 0) next.weekendDays = "Chọn ít nhất một ngày cuối tuần.";
+    if (!startDate) next.startDate = "Chọn ngày bắt đầu hiệu lực.";
+    if (!endDate) next.endDate = "Chọn ngày kết thúc hiệu lực.";
+    if (startDate && endDate && endDate < startDate) next.endDate = "Ngày kết thúc phải sau ngày bắt đầu.";
+    if (!timeSlots.some((slot) => slot.start && slot.end)) next.timeSlots = "Cần ít nhất một khung giờ áp dụng.";
+    timeSlots.forEach((slot, index) => {
+      if ((slot.start || slot.end) && (!slot.start || !slot.end || slot.end <= slot.start)) {
+        next[`timeSlot${index}`] = "Khung giờ phải có bắt đầu và kết thúc hợp lệ.";
+      }
+    });
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const fieldClass = (key: string) => `${styles.tpField} ${errors[key] ? styles.tpFieldInvalid : ""}`;
+  const fieldError = (key: string) => errors[key] ? <small className={styles.tpFieldError}>{errors[key]}</small> : null;
+
   const submit = () => {
+    setError("");
+    if (!validate()) return;
     if (!name.trim()) { setError("Tên bảng giá bắt buộc"); return; }
     onSubmit({
-      code: initial?.code ?? (code || `T${String(Date.now()).slice(-3)}`),
-      name,
-      desc,
+      code: (initial?.code ?? code).trim().toUpperCase(),
+      name: name.trim(),
+      desc: desc.trim(),
       serviceType,
       durationHours: serviceType === "Dịch vụ khác" ? "—" : `${duration} giờ`,
       status: activateNow ? "Hoạt động" : "Tạm ngưng",
@@ -1865,10 +2053,10 @@ function SingleTicketFormModal({
         weekday: `${fmt(calcTotal(weekdayPrice, weekdayVat))} đ`,
         weekend: `${fmt(calcTotal(weekendPrice, weekendVat))} đ`,
         holiday: `${fmt(calcTotal(holidayPrice, holidayVat))} đ`,
-        peak: initial?.prices.peak ?? `${fmt(calcTotal(holidayPrice, holidayVat))} đ`,
+        peak: `${fmt(calcTotal(peakPrice, peakVat))} \u0111`,
       },
-      pillTimes: timeSlots.filter((t) => t.start || t.end).map((t) => `${t.start}-${t.end}`),
-      effective: startDate && endDate ? `${startDate} - ${endDate}` : "01/01/2026 - 31/12/2026",
+      pillTimes: timeSlots.filter((t) => t.start && t.end).map((t) => `${t.start}-${t.end}`),
+      effective: `${startDate} - ${endDate}`,
     });
   };
 
@@ -1887,7 +2075,7 @@ function SingleTicketFormModal({
           <div className={styles.ticketToolbarActions}>
             <button className={styles.cpCancelBtn} onClick={onClose} type="button">Hủy</button>
             <button className={styles.tpSaveBtn} onClick={submit} type="button">
-              💾 Lưu bảng giá
+              <Download size={14} /> Lưu bảng giá
             </button>
           </div>
         </div>
@@ -1897,39 +2085,43 @@ function SingleTicketFormModal({
 
           <section className={`${styles.tpSection} ${styles.tpBlue}`}>
             <h3>Thông tin cơ bản</h3>
-            <div className={styles.tpField}>
+            <div className={fieldClass("code")}>
               <label>Mã gói <b>*</b></label>
-              <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: T18S" />
+              <input value={code} onChange={(e) => { setCode(e.target.value.toUpperCase()); clearError("code"); }} placeholder="VD: T009" readOnly={isEdit} />
+              {fieldError("code")}
             </div>
-            <div className={styles.tpField}>
+            <div className={fieldClass("name")}>
               <label>Tên bảng giá <b>*</b></label>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Teetime 18 Holes - Standard" />
+              <input value={name} onChange={(e) => { setName(e.target.value); clearError("name"); }} placeholder="VD: Teetime 18 Holes - Standard" />
+              {fieldError("name")}
             </div>
-            <div className={styles.tpField}>
+            <div className={fieldClass("duration")}>
               <label>Thời lượng (giờ) <b>*</b></label>
-              <input value={duration} onChange={(e) => setDuration(e.target.value)} type="number" />
+              <input value={serviceType === "Dịch vụ khác" ? "" : duration} onChange={(e) => { setDuration(e.target.value); clearError("duration"); }} type="number" disabled={serviceType === "Dịch vụ khác"} placeholder={serviceType === "Dịch vụ khác" ? "Không áp dụng" : "4"} />
+              {fieldError("duration")}
             </div>
             <div className={styles.tpField}>
               <label>Loại dịch vụ <b>*</b></label>
-              <select value={serviceType} onChange={(e) => setServiceType(e.target.value as SingleTicket["serviceType"])}>
+              <select value={serviceType} onChange={(e) => { setServiceType(e.target.value as SingleTicket["serviceType"]); clearError("duration"); clearError("otherService"); }}>
                 <option>Teetime</option>
                 <option>Practice</option>
                 <option>Dịch vụ khác</option>
               </select>
             </div>
-            <div className={styles.tpField}>
+            <div className={fieldClass("otherService")}>
               <div className={styles.tpFieldHead}>
                 <label>Dịch vụ khác</label>
-                <button type="button" className={styles.cpAddLink} onClick={() => alert("Thêm dịch vụ khác")}>
+                <button type="button" className={styles.cpAddLink} onClick={() => { setServiceType("Dịch vụ khác"); clearError("otherService"); }}>
                   <Plus size={12} /> Thêm dịch vụ khác
                 </button>
               </div>
-              <input value={otherService} onChange={(e) => setOtherService(e.target.value)} placeholder="Nhập tên dịch vụ khác" />
+              <input value={otherService} onChange={(e) => { setOtherService(e.target.value); clearError("otherService"); }} placeholder="Nhập tên dịch vụ khác" disabled={serviceType !== "Dịch vụ khác"} />
+              {fieldError("otherService")}
             </div>
             <div className={styles.tpField}>
               <div className={styles.tpFieldHead}>
                 <label>Nhóm dịch vụ</label>
-                <button type="button" className={styles.cpAddLink} onClick={() => alert("Thêm nhóm")}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setServiceGroup("Dịch vụ golf lẻ")}>
                   <Plus size={12} /> Thêm nhóm
                 </button>
               </div>
@@ -1945,9 +2137,10 @@ function SingleTicketFormModal({
                 <input value={staffName} onChange={(e) => setStaffName(e.target.value)} placeholder="VD: Nguyễn Văn A" />
               </div>
             </div>
-            <div className={styles.tpField}>
+            <div className={fieldClass("desc")}>
               <label>Mô tả <b>*</b></label>
-              <textarea rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Mô tả chi tiết về bảng giá này..." />
+              <textarea rows={3} value={desc} onChange={(e) => { setDesc(e.target.value); clearError("desc"); }} placeholder="Mô tả điều kiện áp dụng, khu vực, nhóm khách hoặc ghi chú vận hành..." />
+              {fieldError("desc")}
             </div>
           </section>
 
@@ -1956,13 +2149,15 @@ function SingleTicketFormModal({
             <div className={`${styles.tpTier} ${styles.tpTierWeekday}`}>
               <h4>Giá ngày thường <b>*</b></h4>
               <div className={styles.tpTier3Col}>
-                <div className={styles.tpField}>
+                <div className={fieldClass("weekdayPrice")}>
                   <label>Đơn giá (VND) <b>*</b></label>
-                  <input value={weekdayPrice} onChange={(e) => setWeekdayPrice(e.target.value)} type="number" placeholder="0" />
+                  <input value={weekdayPrice} onChange={(e) => { setWeekdayPrice(e.target.value); clearError("weekdayPrice"); }} type="number" placeholder="0" />
+                  {fieldError("weekdayPrice")}
                 </div>
-                <div className={styles.tpField}>
+                <div className={fieldClass("weekdayVat")}>
                   <label>VAT (%)</label>
-                  <input value={weekdayVat} onChange={(e) => setWeekdayVat(e.target.value)} type="number" placeholder="0" />
+                  <input value={weekdayVat} onChange={(e) => { setWeekdayVat(e.target.value); clearError("weekdayVat"); }} type="number" placeholder="0" />
+                  {fieldError("weekdayVat")}
                 </div>
                 <div className={styles.tpField}>
                   <label>Thành tiền (VND)</label>
@@ -1973,13 +2168,15 @@ function SingleTicketFormModal({
             <div className={`${styles.tpTier} ${styles.tpTierWeekend}`}>
               <h4>Giá cuối tuần <b>*</b></h4>
               <div className={styles.tpTier3Col}>
-                <div className={styles.tpField}>
+                <div className={fieldClass("weekendPrice")}>
                   <label>Đơn giá (VND) <b>*</b></label>
-                  <input value={weekendPrice} onChange={(e) => setWeekendPrice(e.target.value)} type="number" placeholder="0" />
+                  <input value={weekendPrice} onChange={(e) => { setWeekendPrice(e.target.value); clearError("weekendPrice"); }} type="number" placeholder="0" />
+                  {fieldError("weekendPrice")}
                 </div>
-                <div className={styles.tpField}>
+                <div className={fieldClass("weekendVat")}>
                   <label>VAT (%)</label>
-                  <input value={weekendVat} onChange={(e) => setWeekendVat(e.target.value)} type="number" placeholder="0" />
+                  <input value={weekendVat} onChange={(e) => { setWeekendVat(e.target.value); clearError("weekendVat"); }} type="number" placeholder="0" />
+                  {fieldError("weekendVat")}
                 </div>
                 <div className={styles.tpField}>
                   <label>Thành tiền (VND)</label>
@@ -1990,17 +2187,38 @@ function SingleTicketFormModal({
             <div className={`${styles.tpTier} ${styles.tpTierHoliday}`}>
               <h4>Giá lễ/Tết <b>*</b></h4>
               <div className={styles.tpTier3Col}>
-                <div className={styles.tpField}>
+                <div className={fieldClass("holidayPrice")}>
                   <label>Đơn giá (VND) <b>*</b></label>
-                  <input value={holidayPrice} onChange={(e) => setHolidayPrice(e.target.value)} type="number" placeholder="0" />
+                  <input value={holidayPrice} onChange={(e) => { setHolidayPrice(e.target.value); clearError("holidayPrice"); }} type="number" placeholder="0" />
+                  {fieldError("holidayPrice")}
                 </div>
-                <div className={styles.tpField}>
+                <div className={fieldClass("holidayVat")}>
                   <label>VAT (%)</label>
-                  <input value={holidayVat} onChange={(e) => setHolidayVat(e.target.value)} type="number" placeholder="0" />
+                  <input value={holidayVat} onChange={(e) => { setHolidayVat(e.target.value); clearError("holidayVat"); }} type="number" placeholder="0" />
+                  {fieldError("holidayVat")}
                 </div>
                 <div className={styles.tpField}>
                   <label>Thành tiền (VND)</label>
                   <input value={fmt(calcTotal(holidayPrice, holidayVat))} readOnly className={styles.tpReadonly} />
+                </div>
+              </div>
+            </div>
+            <div className={`${styles.tpTier} ${styles.tpTierPeak}`}>
+              <h4>Giá giờ cao điểm <b>*</b></h4>
+              <div className={styles.tpTier3Col}>
+                <div className={fieldClass("peakPrice")}>
+                  <label>Đơn giá (VND) <b>*</b></label>
+                  <input value={peakPrice} onChange={(e) => { setPeakPrice(e.target.value); clearError("peakPrice"); }} type="number" placeholder="0" />
+                  {fieldError("peakPrice")}
+                </div>
+                <div className={fieldClass("peakVat")}>
+                  <label>VAT (%)</label>
+                  <input value={peakVat} onChange={(e) => { setPeakVat(e.target.value); clearError("peakVat"); }} type="number" placeholder="0" />
+                  {fieldError("peakVat")}
+                </div>
+                <div className={styles.tpField}>
+                  <label>Thành tiền (VND)</label>
+                  <input value={fmt(calcTotal(peakPrice, peakVat))} readOnly className={styles.tpReadonly} />
                 </div>
               </div>
             </div>
@@ -2026,6 +2244,7 @@ function SingleTicketFormModal({
                 })}
               </div>
               <small className={styles.tpHint}>Đã chọn: {weekendDays.length} ngày</small>
+              {fieldError("weekendDays")}
             </div>
             <div className={`${styles.tpTier} ${styles.tpTierHoliday}`}>
               <h4>Danh sách ngày lễ/Tết</h4>
@@ -2057,13 +2276,15 @@ function SingleTicketFormModal({
           <section className={`${styles.tpSection} ${styles.tpAmber}`}>
             <h3>Thời gian hiệu lực</h3>
             <div className={styles.tpRow2}>
-              <div className={styles.tpField}>
+              <div className={fieldClass("startDate")}>
                 <label>Ngày bắt đầu <b>*</b></label>
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); clearError("startDate"); }} />
+                {fieldError("startDate")}
               </div>
-              <div className={styles.tpField}>
+              <div className={fieldClass("endDate")}>
                 <label>Ngày kết thúc <b>*</b></label>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); clearError("endDate"); }} />
+                {fieldError("endDate")}
               </div>
             </div>
           </section>
@@ -2076,18 +2297,22 @@ function SingleTicketFormModal({
               </button>
             </div>
             {timeSlots.map((slot, i) => (
-              <div className={styles.tpTimeRow} key={i}>
-                <span>Khung {i + 1}</span>
-                <input value={slot.start} onChange={(e) => updateTimeSlot(i, "start", e.target.value)} placeholder="06:00" type="time" />
-                <span>→</span>
-                <input value={slot.end} onChange={(e) => updateTimeSlot(i, "end", e.target.value)} placeholder="22:00" type="time" />
-                {timeSlots.length > 1 ? (
-                  <button onClick={() => removeTimeSlot(i)} type="button" className={styles.deleteIcon} aria-label="Xóa khung giờ">
-                    <Trash2 size={14} />
-                  </button>
-                ) : null}
+              <div className={styles.tpTimeItem} key={i}>
+                <div className={styles.tpTimeRow}>
+                  <span>Khung {i + 1}</span>
+                  <input value={slot.start} onChange={(e) => { updateTimeSlot(i, "start", e.target.value); clearError("timeSlots"); clearError(`timeSlot${i}`); }} placeholder="06:00" type="time" />
+                  <span>→</span>
+                  <input value={slot.end} onChange={(e) => { updateTimeSlot(i, "end", e.target.value); clearError("timeSlots"); clearError(`timeSlot${i}`); }} placeholder="22:00" type="time" />
+                  {timeSlots.length > 1 ? (
+                    <button onClick={() => removeTimeSlot(i)} type="button" className={styles.deleteIcon} aria-label="Xóa khung giờ">
+                      <Trash2 size={14} />
+                    </button>
+                  ) : null}
+                </div>
+                {fieldError(`timeSlot${i}`)}
               </div>
             ))}
+            {fieldError("timeSlots")}
           </section>
 
           <section className={`${styles.tpSection} ${styles.tpGreen}`}>
@@ -2247,3 +2472,4 @@ function DeletePricingModal({
     </div>
   );
 }
+

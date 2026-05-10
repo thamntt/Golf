@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   AlertTriangle,
   Calendar,
@@ -12,6 +12,7 @@ import {
   Edit,
   Eye,
   Filter,
+  FileSpreadsheet,
   Mail,
   Pencil,
   Phone,
@@ -87,6 +88,88 @@ function ddmmyyyyToISO(input: string | undefined): string {
   return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 }
 
+function isoToDDMMYYYY(input: string): string {
+  if (!input) return "---";
+  const [y, m, d] = input.split("-");
+  return d && m && y ? `${Number(d)}/${Number(m)}/${y}` : input;
+}
+
+function nextCustomerCode(rows: Customer[]): string {
+  const max = rows.reduce((value, row) => {
+    const number = Number(row.code.replace(/\D/g, ""));
+    return Number.isFinite(number) ? Math.max(value, number) : value;
+  }, 1000);
+  return `HV${String(max + 1).padStart(4, "0")}`;
+}
+
+function nextBiometricCode(rows: Customer[]): string {
+  const max = rows.reduce((value, row, index) => {
+    const number = Number(row.biometricCode ?? "");
+    return Number.isFinite(number) && number > 0 ? Math.max(value, number) : Math.max(value, 12345670 + index);
+  }, 12345670);
+  return String(max + 1).padStart(8, "0").slice(-8);
+}
+
+function customerMeta(customer: Customer) {
+  const number = Number(customer.code.replace(/\D/g, "")) || 0;
+  const groups = ["VIP", "Premium", "Standard", "Khách vãng lai"];
+  const sources = ["Walk-in", "Facebook", "Google", "Giới thiệu", "Chi nhánh khác"];
+  return {
+    group: customer.customerGroup ?? groups[number % groups.length],
+    source: customer.source ?? sources[number % sources.length],
+    biometricCode: customer.biometricCode ?? String(12345670 + number).slice(-8),
+  };
+}
+
+function downloadTextFile(filename: string, content: string, type = "text/csv;charset=utf-8") {
+  const blob = new Blob(["\uFEFF", content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function toCustomerCsv(rows: Customer[]) {
+  const headers = [
+    "Ma HV",
+    "Ho ten",
+    "So dien thoai",
+    "Email",
+    "Gioi tinh",
+    "Ngay sinh",
+    "Trang thai",
+    "Nhom KH",
+    "Nguon KH",
+    "Ngay dang ky",
+    "Ngay het han",
+    "Cong no",
+  ];
+  const body = rows.map((row) => {
+    const meta = customerMeta(row);
+    return [
+      row.code,
+      row.name,
+      row.phone,
+      row.email,
+      row.gender,
+      row.birth,
+      row.status,
+      meta.group,
+      meta.source,
+      row.registerDate,
+      row.endDate,
+      row.debt,
+    ]
+      .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
+      .join(",");
+  });
+  return [headers.join(","), ...body].join("\n");
+}
+
 export default function CustomersView() {
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -103,6 +186,7 @@ export default function CustomersView() {
   const [exportOpen, setExportOpen] = useState(false);
   const [advFilter, setAdvFilter] = useState<AdvFilter>(DEFAULT_ADV_FILTER);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(ALL_COLUMNS.map((c) => c.id));
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const quickFilters = ["Tất cả", "Còn hạn", "Hết hạn", "Sắp hết hạn", "Chưa đăng ký"];
 
@@ -127,8 +211,74 @@ export default function CustomersView() {
     if (advFilter.gender !== "Tất cả" && customer.gender !== advFilter.gender) return false;
     if (advFilter.status !== "Tất cả" && customer.status !== advFilter.status) return false;
     if (advFilter.assignee !== "Tất cả" && customer.creator !== advFilter.assignee) return false;
+    const meta = customerMeta(customer);
+    if (advFilter.customerGroup !== "Tất cả" && meta.group !== advFilter.customerGroup) return false;
+    if (advFilter.biometric === "Có" && !meta.biometricCode) return false;
+    if (advFilter.biometric === "Chưa" && meta.biometricCode) return false;
     return true;
   });
+
+  const handleExportCustomers = () => {
+    downloadTextFile(`khach_hang_${new Date().toISOString().slice(0, 10)}.csv`, toCustomerCsv(filteredRows));
+    setExportOpen(false);
+  };
+
+  const handleDownloadTemplate = () => {
+    downloadTextFile(
+      "mau_import_khach_hang.csv",
+      [
+        "Ho ten,So dien thoai,Email,Gioi tinh,Ngay sinh,Nhom KH,Nguon KH,The RFID,CCCD,Ghi chu",
+        "Nguyen Van Mau,0909000000,mau@golf.vn,Nam,1990-05-15,VIP,Facebook,RFID0001,079090000001,Khach quan tam goi HLV",
+      ].join("\n")
+    );
+    setExportOpen(false);
+  };
+
+  const handleImportCustomers = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const lines = String(reader.result ?? "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .slice(1);
+      const imported = lines
+        .map((line, index): Customer | null => {
+          const [name = "", phone = "", email = "", gender = "Nam", birth = "", group = "Standard", source = "Walk-in", card = "", id = "", note = ""] =
+            line.split(",").map((cell) => cell.replace(/^"|"$/g, "").trim());
+          if (!name || !/^[0-9]{10,11}$/.test(phone)) return null;
+          const codeNumber = rows.length + index + 1;
+          return {
+            birth: birth.includes("-") ? isoToDDMMYYYY(birth) : birth || "---",
+            cards: card ? ["green"] : [],
+            code: `HV${String(1000 + codeNumber).padStart(4, "0")}`,
+            createdDate: "7/4/2026",
+            creator: "Admin",
+            customerGroup: group,
+            source,
+            cardNumber: card,
+            idNumber: id,
+            note,
+            debt: "0 VND",
+            email,
+            endDate: "---",
+            gender: gender || "Nam",
+            name,
+            phone,
+            registerDate: "---",
+            status: "Chưa đăng ký",
+            biometricCode: String(12345670 + rows.length + index + 1).slice(-8),
+          };
+        })
+        .filter((row): row is Customer => Boolean(row));
+      if (imported.length) setRows((current) => [...imported, ...current]);
+      event.target.value = "";
+    };
+    reader.readAsText(file);
+    setExportOpen(false);
+  };
 
   const handleCreateCustomer = (customer: Customer) => {
     setRows((current) => [customer, ...current]);
@@ -195,6 +345,14 @@ export default function CustomersView() {
               <Settings size={18} />
             </button>
             <div className={styles.exportContainer}>
+              <input
+                accept=".csv,text/csv"
+                aria-label="Chọn file CSV import khách hàng"
+                className={styles.hiddenFileInput}
+                onChange={handleImportCustomers}
+                ref={importInputRef}
+                type="file"
+              />
               <button
                 className={`${styles.greenButton} ${exportOpen ? styles.exportButtonActive : ""}`}
                 onClick={() => setExportOpen((value) => !value)}
@@ -215,30 +373,24 @@ export default function CustomersView() {
                   <section className={styles.exportMenu}>
                     <button
                       onClick={() => {
-                        alert("Đang chuẩn bị file mẫu import khách hàng (.xlsx)...");
+                        importInputRef.current?.click();
                         setExportOpen(false);
                       }}
                       type="button"
                     >
-                      <Upload size={16} /> Nhập Excel
+                      <Upload size={16} /> Nhập CSV
                     </button>
                     <button
-                      onClick={() => {
-                        alert(`Đang xuất ${filteredRows.length} hội viên ra file .xlsx...`);
-                        setExportOpen(false);
-                      }}
+                      onClick={handleExportCustomers}
                       type="button"
                     >
-                      <Download size={16} /> Xuất Excel
+                      <Download size={16} /> Xuất CSV
                     </button>
                     <button
-                      onClick={() => {
-                        alert("Đang tải file mẫu import_khach_hang.xlsx...");
-                        setExportOpen(false);
-                      }}
+                      onClick={handleDownloadTemplate}
                       type="button"
                     >
-                      Tải file mẫu import
+                      <FileSpreadsheet size={16} /> Tải file mẫu import
                     </button>
                   </section>
                 </>
@@ -353,7 +505,9 @@ export default function CustomersView() {
                 </tr>
               </thead>
               <tbody>
-                {filteredRows.map((customer) => (
+                {filteredRows.map((customer) => {
+                  const meta = customerMeta(customer);
+                  return (
                   <tr key={customer.code}>
                     {isVisible("code") ? (
                       <td>
@@ -383,8 +537,8 @@ export default function CustomersView() {
                         </div>
                       </td>
                     ) : null}
-                    {isVisible("customerGroup") ? <td className={styles.mutedCell}>---</td> : null}
-                    {isVisible("source") ? <td className={styles.mutedCell}>---</td> : null}
+                    {isVisible("customerGroup") ? <td>{meta.group}</td> : null}
+                    {isVisible("source") ? <td>{meta.source}</td> : null}
                     {isVisible("registerDate") ? <td className={customer.registerDate === "---" ? styles.mutedCell : styles.dateGreen}>{customer.registerDate}</td> : null}
                     {isVisible("endDate") ? <td className={customer.endDate === "---" ? styles.mutedCell : styles.dateRed}>{customer.endDate}</td> : null}
                     {isVisible("createdDate") ? <td className={styles.dateGreen}>{customer.createdDate}</td> : null}
@@ -422,7 +576,8 @@ export default function CustomersView() {
                       </td>
                     ) : null}
                   </tr>
-                ))}
+                );
+                })}
                 {filteredRows.length === 0 ? (
                   <tr>
                     <td className={styles.emptyTableCell} colSpan={visibleColumns.length || 1}>
@@ -455,6 +610,7 @@ export default function CustomersView() {
           }}
           onOpenNested={setNestedModal}
           onSubmit={handleCreateCustomer}
+          rows={rows}
         />
       ) : null}
 
@@ -471,6 +627,7 @@ export default function CustomersView() {
           }}
           onOpenNested={setNestedModal}
           onSubmit={handleUpdateCustomer}
+          rows={rows}
         />
       ) : null}
 
@@ -484,10 +641,6 @@ export default function CustomersView() {
           onConfirm={handleDeleteCustomer}
         />
       ) : null}
-
-      {nestedModal === "group" ? <AddGroupModal onClose={() => setNestedModal(null)} /> : null}
-      {nestedModal === "source" ? <AddSourceModal onClose={() => setNestedModal(null)} /> : null}
-      {nestedModal === "companion" ? <AddCompanionModal onClose={() => setNestedModal(null)} /> : null}
 
       {detailOpen ? (
         <CustomerDetailModal
@@ -516,17 +669,26 @@ function CustomerFormModal({
   onClose,
   onOpenNested,
   onSubmit,
+  rows,
 }: {
   initialCustomer?: Customer;
   mode: "create" | "edit";
   nestedModal: "group" | "source" | "companion" | null;
   onClose: () => void;
-  onOpenNested: (modal: "group" | "source" | "companion") => void;
+  onOpenNested: (modal: "group" | "source" | "companion" | null) => void;
   onSubmit: (customer: Customer) => void;
+  rows: Customer[];
 }) {
   const isEdit = mode === "edit";
   const initial = initialCustomer;
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [memberCode, setMemberCode] = useState(initial?.code ?? nextCustomerCode(rows));
+  const [biometricCode, setBiometricCode] = useState(initial?.biometricCode ?? nextBiometricCode(rows));
+  const [groupOptions, setGroupOptions] = useState(["Chọn nhóm", "VIP", "Premium", "Standard", "Khách vãng lai"]);
+  const [sourceOptions, setSourceOptions] = useState(["Chọn nguồn", "Walk-in", "Facebook", "Google", "Giới thiệu", "CN khác"]);
+  const [customerGroup, setCustomerGroup] = useState(initial?.customerGroup ?? "Chọn nhóm");
+  const [customerSource, setCustomerSource] = useState(initial?.source ?? "Chọn nguồn");
+  const [companions, setCompanions] = useState<Array<{ name: string; relation: string; phone?: string }>>([]);
   const [showExtra, setShowExtra] = useState(true);
   const [customFields, setCustomFields] = useState<Array<{ id: string; label: string }>>([]);
   const [customPanelOpen, setCustomPanelOpen] = useState(false);
@@ -547,11 +709,25 @@ function CustomerFormModal({
     const data = new FormData(event.currentTarget);
     const name = String(data.get("name") ?? "").trim();
     const phone = String(data.get("phone") ?? "").trim();
+    const email = String(data.get("email") ?? "").trim();
+    const idNumber = String(data.get("idNumber") ?? "").trim();
+    const nextErrors: Record<string, string> = {};
 
-    if (!name || !phone) {
-      setError("Họ và tên và Số điện thoại là bắt buộc theo SRS.");
+    if (!name) nextErrors.name = "Nhập họ tên hội viên.";
+    if (!/^[0-9]{10,11}$/.test(phone)) nextErrors.phone = "Số điện thoại phải gồm 10-11 chữ số.";
+    if (rows.some((row) => row.phone === phone && row.code !== initial?.code)) {
+      nextErrors.phone = "Số điện thoại đã tồn tại trong danh sách hội viên.";
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) nextErrors.email = "Email không đúng định dạng.";
+    if (idNumber && !/^([0-9]{9}|[0-9]{12})$/.test(idNumber)) nextErrors.idNumber = "CCCD/CMND phải gồm 9 hoặc 12 chữ số.";
+    if (customerGroup === "Chọn nhóm") nextErrors.customerGroup = "Chọn nhóm khách hàng để phục vụ phân loại báo cáo.";
+    if (customerSource === "Chọn nguồn") nextErrors.customerSource = "Chọn nguồn khách hàng để theo dõi hiệu quả kinh doanh.";
+
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors);
       return;
     }
+    setErrors({});
 
     const birthInput = String(data.get("birth") ?? "");
     const formattedBirth = birthInput
@@ -565,8 +741,19 @@ function CustomerFormModal({
       onSubmit({
         ...initial,
         birth: formattedBirth || "---",
-        email: String(data.get("email") ?? initial.email),
+        email,
         gender: String(data.get("gender") ?? initial.gender) || initial.gender,
+        biometricCode,
+        customerGroup,
+        source: customerSource,
+        cardNumber: String(data.get("cardNumber") ?? ""),
+        idNumber,
+        contactName: String(data.get("contactName") ?? ""),
+        contactPhone: String(data.get("contactPhone") ?? ""),
+        province: String(data.get("province") ?? ""),
+        ward: String(data.get("ward") ?? ""),
+        address: String(data.get("address") ?? ""),
+        note: String(data.get("note") ?? ""),
         name,
         phone,
       });
@@ -574,11 +761,22 @@ function CustomerFormModal({
       onSubmit({
         birth: formattedBirth || "---",
         cards: ["green"],
-        code: "HV" + String(customerRows.length + 1).padStart(3, "0"),
+        code: memberCode,
         createdDate: "7/4/2026",
         creator: "Admin",
+        biometricCode,
+        customerGroup,
+        source: customerSource,
+        cardNumber: String(data.get("cardNumber") ?? ""),
+        idNumber,
+        contactName: String(data.get("contactName") ?? ""),
+        contactPhone: String(data.get("contactPhone") ?? ""),
+        province: String(data.get("province") ?? ""),
+        ward: String(data.get("ward") ?? ""),
+        address: String(data.get("address") ?? ""),
+        note: String(data.get("note") ?? ""),
         debt: "0 VND",
-        email: String(data.get("email") ?? ""),
+        email,
         endDate: "---",
         gender: String(data.get("gender") ?? "Nam") || "Nam",
         name,
@@ -595,6 +793,8 @@ function CustomerFormModal({
     ? `Cập nhật thông tin hội viên ${initial?.name ?? ""} (${initial?.code ?? ""})`
     : "Điền thông tin hội viên mới vào form bên dưới";
   const submitLabel = isEdit ? "Cập nhật" : "Thêm hội viên";
+  const fieldError = (name: string) =>
+    errors[name] ? <small className={styles.fieldErrorText}>{errors[name]}</small> : null;
 
   return (
     <div className={styles.modalOverlay}>
@@ -608,41 +808,60 @@ function CustomerFormModal({
         </header>
 
         <div className={styles.modalBody}>
-          {error ? <p className={styles.formError}>{error}</p> : null}
           <h3>Thông tin khách hàng</h3>
           <div className={styles.formGrid}>
-            <FormField
-              action={isEdit ? undefined : "Tự động"}
-              label="Mã hội viên"
-              name="code"
-              value={initial?.code ?? "HV1001"}
-            />
-            <FormField
-              action={isEdit ? undefined : "Tự động"}
-              label="Mã sinh trắc học"
-              name="biometricCode"
-              value="12345678"
-            />
-            <FormField
-              defaultValue={initial?.name}
-              label="Họ và tên"
-              name="name"
-              placeholder="Nhập họ và tên"
-              required
-            />
-            <FormField
-              defaultValue={initial?.phone}
-              label="Số điện thoại"
-              name="phone"
-              placeholder="Nhập số điện thoại"
-              required
-            />
-            <FormField
-              defaultValue={initial?.email}
-              label="Email"
-              name="email"
-              placeholder="Nhập email"
-            />
+            <label>
+              <span>Mã hội viên</span>
+              <div className={styles.inputWrap}>
+                <input name="code" readOnly value={memberCode} />
+                {!isEdit ? <button onClick={() => setMemberCode(nextCustomerCode(rows))} type="button">Tự động</button> : null}
+              </div>
+            </label>
+            <label>
+              <span>Mã sinh trắc học</span>
+              <div className={styles.inputWrap}>
+                <input name="biometricCode" readOnly value={biometricCode} />
+                {!isEdit ? <button onClick={() => setBiometricCode(nextBiometricCode(rows))} type="button">Tự động</button> : null}
+              </div>
+            </label>
+            <label>
+              <span>Họ và tên <b>*</b></span>
+              <div className={`${styles.inputWrap} ${errors.name ? styles.inputWrapError : ""}`}>
+                <input
+                  defaultValue={initial?.name}
+                  name="name"
+                  onChange={() => setErrors((current) => ({ ...current, name: "" }))}
+                  placeholder="Nhập họ và tên"
+                />
+              </div>
+              {fieldError("name")}
+            </label>
+            <label>
+              <span>Số điện thoại <b>*</b></span>
+              <div className={`${styles.inputWrap} ${errors.phone ? styles.inputWrapError : ""}`}>
+                <input
+                  defaultValue={initial?.phone}
+                  inputMode="tel"
+                  name="phone"
+                  onChange={() => setErrors((current) => ({ ...current, phone: "" }))}
+                  placeholder="0901234567"
+                />
+              </div>
+              {fieldError("phone")}
+            </label>
+            <label>
+              <span>Email</span>
+              <div className={`${styles.inputWrap} ${errors.email ? styles.inputWrapError : ""}`}>
+                <input
+                  defaultValue={initial?.email}
+                  name="email"
+                  onChange={() => setErrors((current) => ({ ...current, email: "" }))}
+                  placeholder="member@golf.vn"
+                  type="email"
+                />
+              </div>
+              {fieldError("email")}
+            </label>
             <FormField
               defaultValue={ddmmyyyyToISO(initial?.birth)}
               label="Ngày sinh"
@@ -655,23 +874,35 @@ function CustomerFormModal({
               name="assignedSale"
               options={["Tự chọn Sale phụ trách", "Admin", "Nguyễn Văn Thành", "Lê Thị Mai", "Trần Minh Hoàng"]}
             />
-            <FormField label="Thẻ khách hàng (RFID)" placeholder="Nhập số thẻ vật lý" />
+            <FormField defaultValue={initial?.cardNumber} label="Thẻ khách hàng (RFID)" name="cardNumber" placeholder="RFID/Mifare/Barcode nội bộ" />
             <SelectField
               action="Thêm mới"
               label="Nhóm khách hàng"
               name="customerGroup"
               onAction={() => onOpenNested("group")}
-              options={["Chọn nhóm", "VIP", "Premium", "Standard", "Khách vãng lai"]}
+              onChange={(value) => {
+                setCustomerGroup(value);
+                setErrors((current) => ({ ...current, customerGroup: "" }));
+              }}
+              options={groupOptions}
+              value={customerGroup}
             />
+            {fieldError("customerGroup")}
           </div>
-          <FormField area label="Ghi chú" placeholder="Sở thích, đặc điểm khách hàng..." />
+          <FormField area defaultValue={initial?.note} label="Ghi chú" name="note" placeholder="Sở thích, mục tiêu tập golf, ghi chú chăm sóc..." />
           <SelectField
             action="Thêm mới"
             label="Nguồn khách hàng"
             name="customerSource"
             onAction={() => onOpenNested("source")}
-            options={["Chọn nguồn", "Walk-in", "Facebook", "Google", "Giới thiệu", "CN khác"]}
+            onChange={(value) => {
+              setCustomerSource(value);
+              setErrors((current) => ({ ...current, customerSource: "" }));
+            }}
+            options={sourceOptions}
+            value={customerSource}
           />
+          {fieldError("customerSource")}
 
           <div className={styles.formDivider} />
           <div className={styles.customFieldRow}>
@@ -733,26 +964,37 @@ function CustomerFormModal({
           {showExtra ? (
             <>
               <div className={styles.formGrid}>
-                <FormField label="Số CMND/CCCD" placeholder="Nhập số CMND/CCCD" />
-                <FormField
-                  defaultValue={initial?.gender}
+                <label>
+                  <span>Số CMND/CCCD</span>
+                  <div className={`${styles.inputWrap} ${errors.idNumber ? styles.inputWrapError : ""}`}>
+                    <input
+                      defaultValue={initial?.idNumber}
+                      inputMode="numeric"
+                      name="idNumber"
+                      onChange={() => setErrors((current) => ({ ...current, idNumber: "" }))}
+                      placeholder="9 hoặc 12 chữ số"
+                    />
+                  </div>
+                  {fieldError("idNumber")}
+                </label>
+                <SelectField
+                  defaultValue={initial?.gender ?? "Nam"}
                   label="Giới tính"
                   name="gender"
-                  placeholder="Nam / Nữ"
+                  options={["Nam", "Nữ", "Khác"]}
                 />
                 <FormField
                   action="Thêm"
                   label="Người đi cùng"
                   onAction={() => onOpenNested("companion")}
-                  placeholder="Không có"
+                  value={companions.length ? companions.map((item) => `${item.name} (${item.relation})`).join(", ") : "Không có"}
                 />
-                <FormField label="Người liên hệ" placeholder="Tên người liên hệ" />
-                <FormField label="SĐT liên hệ" placeholder="Số điện thoại" />
-                <FormField label="Tỉnh/Thành phố" />
-                <FormField label="Phường/Xã" />
+                <FormField defaultValue={initial?.contactName} label="Người liên hệ" name="contactName" placeholder="Tên người liên hệ khẩn cấp" />
+                <FormField defaultValue={initial?.contactPhone} label="SĐT liên hệ" name="contactPhone" placeholder="Số điện thoại" />
+                <FormField defaultValue={initial?.province} label="Tỉnh/Thành phố" name="province" placeholder="TP.HCM" />
+                <FormField defaultValue={initial?.ward} label="Phường/Xã" name="ward" placeholder="Phường/Xã" />
               </div>
-              <FormField label="Thôn/Xóm/Số nhà" placeholder="Nhập địa chỉ chi tiết" />
-              <FormField area label="Ghi chú" placeholder="Nhập ghi chú" />
+              <FormField defaultValue={initial?.address} label="Thôn/Xóm/Số nhà" name="address" placeholder="Nhập địa chỉ chi tiết" />
             </>
           ) : null}
         </div>
@@ -762,11 +1004,60 @@ function CustomerFormModal({
           <button className={styles.blueButton} type="submit">{submitLabel}</button>
         </footer>
       </form>
+      {nestedModal === "group" ? (
+        <AddGroupModal
+          onClose={() => onOpenNested(null)}
+          onSave={(group) => {
+            setGroupOptions((current) => (current.includes(group.name) ? current : [...current, group.name]));
+            setCustomerGroup(group.name);
+            setErrors((current) => ({ ...current, customerGroup: "" }));
+            onOpenNested(null);
+          }}
+        />
+      ) : null}
+      {nestedModal === "source" ? (
+        <AddSourceModal
+          onClose={() => onOpenNested(null)}
+          onSave={(source) => {
+            setSourceOptions((current) => (current.includes(source.name) ? current : [...current, source.name]));
+            setCustomerSource(source.name);
+            setErrors((current) => ({ ...current, customerSource: "" }));
+            onOpenNested(null);
+          }}
+        />
+      ) : null}
+      {nestedModal === "companion" ? (
+        <AddCompanionModal
+          onClose={() => onOpenNested(null)}
+          onSave={(companion) => {
+            setCompanions((current) => [...current, companion]);
+            onOpenNested(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
 
-function AddGroupModal({ onClose }: { onClose: () => void }) {
+function AddGroupModal({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave?: (group: { code: string; name: string; description: string }) => void;
+}) {
+  const [code, setCode] = useState("NG001");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [nameError, setNameError] = useState("");
+  const submit = () => {
+    if (!name.trim()) {
+      setNameError("Nhập tên nhóm khách hàng.");
+      return;
+    }
+    onSave?.({ code, name: name.trim(), description });
+    onClose();
+  };
   return (
     <div className={styles.nestedOverlay}>
       <section className={styles.smallModal}>
@@ -775,20 +1066,55 @@ function AddGroupModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
         <div className={styles.smallModalBody}>
-          <FormField action="Tự động" required label="Mã nhóm" value="NG001" />
-          <FormField required label="Tên nhóm" placeholder="VD: VIP, Premium, Doanh nghiệp" />
-          <FormField label="Mô tả" placeholder="Nhập mô tả ngắn (tùy chọn)" />
+          <label>
+            <span>Mã nhóm <b>*</b></span>
+            <div className={styles.inputWrap}>
+              <input readOnly value={code} />
+              <button onClick={() => setCode(`NG${String(Date.now()).slice(-3)}`)} type="button">Tự động</button>
+            </div>
+          </label>
+          <label>
+            <span>Tên nhóm <b>*</b></span>
+            <div className={`${styles.inputWrap} ${nameError ? styles.inputWrapError : ""}`}>
+              <input onChange={(e) => { setName(e.target.value); setNameError(""); }} placeholder="VD: VIP, Premium, Doanh nghiệp" value={name} />
+            </div>
+            {nameError ? <small className={styles.fieldErrorText}>{nameError}</small> : null}
+          </label>
+          <label>
+            <span>Mô tả</span>
+            <div className={styles.inputWrap}>
+              <input onChange={(e) => setDescription(e.target.value)} placeholder="Nhập mô tả ngắn (tùy chọn)" value={description} />
+            </div>
+          </label>
         </div>
         <footer>
           <button onClick={onClose} type="button">Hủy bỏ</button>
-          <button className={styles.blueButton} onClick={onClose} type="button">Thêm</button>
+          <button className={styles.blueButton} onClick={submit} type="button">Thêm</button>
         </footer>
       </section>
     </div>
   );
 }
 
-function AddSourceModal({ onClose }: { onClose: () => void }) {
+function AddSourceModal({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave?: (source: { code: string; name: string; description: string }) => void;
+}) {
+  const [code, setCode] = useState("NS001");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [nameError, setNameError] = useState("");
+  const submit = () => {
+    if (!name.trim()) {
+      setNameError("Nhập tên nguồn khách hàng.");
+      return;
+    }
+    onSave?.({ code, name: name.trim(), description });
+    onClose();
+  };
   return (
     <div className={styles.nestedOverlay}>
       <section className={styles.smallModal}>
@@ -797,20 +1123,61 @@ function AddSourceModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
         <div className={styles.smallModalBody}>
-          <FormField action="Tự động" required label="Mã nguồn" value="NS001" />
-          <FormField required label="Tên nguồn" placeholder="VD: Facebook Ads, Google Ads, Walk-in" />
-          <FormField label="Mô tả" placeholder="Mô tả chiến dịch / chi tiết nguồn" />
+          <label>
+            <span>Mã nguồn <b>*</b></span>
+            <div className={styles.inputWrap}>
+              <input readOnly value={code} />
+              <button onClick={() => setCode(`NS${String(Date.now()).slice(-3)}`)} type="button">Tự động</button>
+            </div>
+          </label>
+          <label>
+            <span>Tên nguồn <b>*</b></span>
+            <div className={`${styles.inputWrap} ${nameError ? styles.inputWrapError : ""}`}>
+              <input onChange={(e) => { setName(e.target.value); setNameError(""); }} placeholder="VD: Facebook Ads, Google Ads, Walk-in" value={name} />
+            </div>
+            {nameError ? <small className={styles.fieldErrorText}>{nameError}</small> : null}
+          </label>
+          <label>
+            <span>Mô tả</span>
+            <div className={styles.inputWrap}>
+              <input onChange={(e) => setDescription(e.target.value)} placeholder="Mô tả chiến dịch / chi tiết nguồn" value={description} />
+            </div>
+          </label>
         </div>
         <footer>
           <button onClick={onClose} type="button">Hủy bỏ</button>
-          <button className={styles.blueButton} onClick={onClose} type="button">Thêm</button>
+          <button className={styles.blueButton} onClick={submit} type="button">Thêm</button>
         </footer>
       </section>
     </div>
   );
 }
 
-function AddCompanionModal({ onClose }: { onClose: () => void }) {
+function AddCompanionModal({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave?: (companion: { name: string; relation: string; phone?: string }) => void;
+}) {
+  const [name, setName] = useState("");
+  const [gender, setGender] = useState("Nam");
+  const [relation, setRelation] = useState("");
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
+  const [preview, setPreview] = useState("");
+  const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
+  const submit = () => {
+    if (!name.trim()) {
+      setError("Nhập họ tên người đi cùng.");
+      return;
+    }
+    onSave?.({ name: name.trim(), relation: relation || "Người thân", phone });
+    onClose();
+  };
   return (
     <div className={styles.nestedOverlay}>
       <section className={styles.companionModal}>
@@ -821,30 +1188,48 @@ function AddCompanionModal({ onClose }: { onClose: () => void }) {
         <div className={styles.companionBody}>
           <div>
             <label>Ảnh <b>*</b></label>
-            <div className={styles.uploadBox}>
-              <UploadCloud size={42} />
-              <span>Tải ảnh lên</span>
-            </div>
-            <button className={styles.greenButton} type="button">Webcam</button>
+            <label className={styles.uploadBox}>
+              {preview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img alt="Ảnh người đi cùng" src={preview} />
+              ) : <><UploadCloud size={42} /><span>Tải ảnh lên</span></>}
+              <input accept="image/*" className={styles.hiddenFileInput} onChange={handleFile} type="file" />
+            </label>
+            <button className={styles.greenButton} onClick={() => setPreview("")} type="button">Webcam</button>
           </div>
           <div className={styles.companionFields}>
-            <FormField required label="Họ và tên" placeholder="Họ tên người đi cùng" />
+            <label>
+              <span>Họ và tên <b>*</b></span>
+              <div className={`${styles.inputWrap} ${error ? styles.inputWrapError : ""}`}>
+                <input onChange={(e) => { setName(e.target.value); setError(""); }} placeholder="Họ tên người đi cùng" value={name} />
+              </div>
+              {error ? <small className={styles.fieldErrorText}>{error}</small> : null}
+            </label>
             <div className={styles.radioRow}>
-              <span className={styles.radioActive} /> Nam
-              <span className={styles.radio} /> Nữ
+              {["Nam", "Nữ"].map((option) => (
+                <button className={gender === option ? styles.radioPillActive : styles.radioPill} key={option} onClick={() => setGender(option)} type="button">
+                  {option}
+                </button>
+              ))}
             </div>
-            <FormField label="Nhóm quan hệ" placeholder="Nhóm quan hệ" />
+            <SelectField label="Nhóm quan hệ" onChange={setRelation} options={["Người thân", "Vợ/Chồng", "Con", "Bạn tập", "Đối tác"]} value={relation || "Người thân"} />
             <FormField label="Ghi chú" placeholder="Ghi chú" />
           </div>
           <FormField label="Ngày sinh" />
           <div className={styles.formGrid}>
             <FormField label="Chiều cao (m)" value="1.70" />
             <FormField label="Cân nặng (kg)" value="65" />
+            <label>
+              <span>SĐT liên hệ</span>
+              <div className={styles.inputWrap}>
+                <input inputMode="tel" onChange={(e) => setPhone(e.target.value)} placeholder="Số điện thoại" value={phone} />
+              </div>
+            </label>
           </div>
         </div>
         <footer>
           <button onClick={onClose} type="button">Hủy bỏ</button>
-          <button className={styles.greenButton} onClick={onClose} type="button">
+          <button className={styles.greenButton} onClick={submit} type="button">
             <Plus size={16} />Thêm người đi cùng
           </button>
         </footer>
@@ -1184,6 +1569,8 @@ type Measurement = {
 
 function InbodyTab() {
   const [addOpen, setAddOpen] = useState(false);
+  const [chartOpen, setChartOpen] = useState(false);
+  const [trackmanPreview, setTrackmanPreview] = useState<Measurement | null>(null);
   const [page, setPage] = useState(1);
   const [measurements, setMeasurements] = useState<Measurement[]>([
     { date: "12/10/2023", club: "Driver", carry: 250, total: 275, angle: -1.2, height: 95, clubPath: 2.5, swingDir: 1.8, faceAngle: -0.5, spin: 2450 },
@@ -1210,7 +1597,7 @@ function InbodyTab() {
           <header className={styles.greenCardHeader}>
             <h4>Danh sách Golf Measurements</h4>
             <div className={styles.greenCardActions}>
-              <button className={styles.outlineButton} onClick={() => alert("Mở biểu đồ Inbody (radar + line chart)...")} type="button">
+              <button className={styles.outlineButton} onClick={() => setChartOpen(true)} type="button">
                 Xem biểu đồ
               </button>
               <button className={styles.greenButton} onClick={() => setAddOpen(true)} type="button">
@@ -1249,7 +1636,7 @@ function InbodyTab() {
                     <td>{formatSigned(m.faceAngle)}</td>
                     <td>{m.spin.toLocaleString()}</td>
                     <td>
-                      <button className={styles.linkButton} onClick={() => alert("Mở ảnh Trackman...")} type="button">
+                      <button className={styles.linkButton} onClick={() => setTrackmanPreview(m)} type="button">
                         View
                       </button>
                     </td>
@@ -1268,6 +1655,8 @@ function InbodyTab() {
           </div>
         </article>
       </section>
+      {chartOpen ? <GolfMeasurementChartModal measurements={measurements} onClose={() => setChartOpen(false)} /> : null}
+      {trackmanPreview ? <TrackmanPreviewModal measurement={trackmanPreview} onClose={() => setTrackmanPreview(null)} /> : null}
       {addOpen ? <AddGolfMeasurementModal onClose={() => setAddOpen(false)} onSave={handleSave} /> : null}
     </>
   );
@@ -1280,6 +1669,7 @@ function AddGolfMeasurementModal({
   onClose: () => void;
   onSave: (entry: Measurement) => void;
 }) {
+  const [trackmanUploadOpen, setTrackmanUploadOpen] = useState(false);
   const [form, setForm] = useState({
     date: "2026-05-05",
     club: "",
@@ -1373,7 +1763,7 @@ function AddGolfMeasurementModal({
               <input inputMode="decimal" placeholder="0" value={form.spin} onChange={(e) => update("spin", e.target.value)} />
             </label>
           </div>
-          <button className={styles.outlineButton} onClick={() => alert("Mở dialog tải ảnh Trackman (JPG/PNG, max 5MB)")} type="button">
+          <button className={styles.outlineButton} onClick={() => setTrackmanUploadOpen(true)} type="button">
             <UploadCloud size={16} /> Chọn ảnh Trackman
           </button>
         </div>
@@ -1383,6 +1773,7 @@ function AddGolfMeasurementModal({
             Lưu dữ liệu
           </button>
         </footer>
+        {trackmanUploadOpen ? <TrackmanUploadModal onClose={() => setTrackmanUploadOpen(false)} /> : null}
       </section>
     </div>
   );
@@ -1419,6 +1810,7 @@ function TaTab() {
   ]);
   const [assignOpen, setAssignOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [removeIndex, setRemoveIndex] = useState<number | null>(null);
 
   const addTa = (entry: TaEntry) => {
     setTas((current) => [...current, entry]);
@@ -1429,9 +1821,12 @@ function TaTab() {
     setEditIndex(null);
   };
   const removeTa = (index: number) => {
-    if (confirm(`Bạn có chắc chắn muốn gỡ ${tas[index].name} khỏi khách hàng này?\n\nThao tác này chỉ xóa quan hệ, không xóa hồ sơ nhân viên.`)) {
-      setTas((current) => current.filter((_, i) => i !== index));
-    }
+    setRemoveIndex(index);
+  };
+  const confirmRemoveTa = () => {
+    if (removeIndex === null) return;
+    setTas((current) => current.filter((_, i) => i !== removeIndex));
+    setRemoveIndex(null);
   };
 
   return (
@@ -1501,6 +1896,16 @@ function TaTab() {
           onSave={(patch) => updateTa(editIndex, patch)}
         />
       ) : null}
+      {removeIndex !== null ? (
+        <CustomerConfirmDialog
+          title="Gỡ trợ giảng khỏi khách hàng"
+          message={`Gỡ ${tas[removeIndex]?.name ?? "trợ giảng"} khỏi hồ sơ khách hàng? Thao tác này chỉ xóa quan hệ phụ trách, không xóa hồ sơ nhân viên.`}
+          confirmLabel="Gỡ trợ giảng"
+          tone="danger"
+          onCancel={() => setRemoveIndex(null)}
+          onConfirm={confirmRemoveTa}
+        />
+      ) : null}
     </section>
   );
 }
@@ -1514,6 +1919,7 @@ function AssignTaModal({ onClose, onSave }: { onClose: () => void; onSave: (entr
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [error, setError] = useState("");
 
   const suggestions = taQuery.trim()
     ? TA_DIRECTORY.filter(
@@ -1529,15 +1935,16 @@ function AssignTaModal({ onClose, onSave }: { onClose: () => void; onSave: (entr
     setPhone(ta.phone);
     setEmail(ta.email);
     setShowSuggestions(false);
+    setError("");
   };
 
   const submit = () => {
     if (!selectedTa) {
-      alert("Vui lòng chọn Trợ giảng từ danh sách.");
+      setError("Vui lòng chọn trợ giảng từ danh sách nhân viên.");
       return;
     }
     if (!course) {
-      alert("Vui lòng chọn khoá học phụ trách.");
+      setError("Vui lòng chọn gói dịch vụ hoặc lớp phụ trách.");
       return;
     }
     onSave({
@@ -1561,6 +1968,7 @@ function AssignTaModal({ onClose, onSave }: { onClose: () => void; onSave: (entr
           </div>
           <button onClick={onClose} type="button"><X size={18} /></button>
         </header>
+        {error ? <div className={styles.formError}><AlertTriangle size={14} /> {error}</div> : null}
         <div className={styles.taModalBody}>
           <label className={styles.taField}>
             <span>Chọn TA <b>*</b></span>
@@ -1781,8 +2189,8 @@ function BasicInfoTab({ customer }: { customer: Customer | null }) {
         <div className={styles.mgmtGrid}>
           <InfoBlock label="Ngày tạo">{c?.createdDate ?? "10/1/2024"}</InfoBlock>
           <InfoBlock label="Người tạo">{c?.creator ?? "Admin"}</InfoBlock>
-          <InfoBlock label="Nhóm khách hàng"><span className={styles.mgmtMuted}>---</span></InfoBlock>
-          <InfoBlock label="Nguồn khách hàng"><span className={styles.mgmtMuted}>---</span></InfoBlock>
+          <InfoBlock label="Nhóm khách hàng">{c?.customerGroup ?? customerMeta(c ?? customerRows[0]).group}</InfoBlock>
+          <InfoBlock label="Nguồn khách hàng">{c?.source ?? customerMeta(c ?? customerRows[0]).source}</InfoBlock>
         </div>
       </section>
 
@@ -1819,29 +2227,46 @@ function ContractsTab() {
     ["Golf Teetime - VIP", "Hết hạn", "HD001", "15/1/2024", "15/7/2024", "15,000,000 VND"],
     ["Golf Practice - Premium", "Còn hạn", "HD002", "1/2/2024", "31/12/2026", "25,000,000 VND"],
   ];
+  const [selectedContract, setSelectedContract] = useState<typeof contracts[number] | null>(null);
   return (
-    <section className={styles.detailCard}>
-      <div className={styles.tabSectionHeader}>
-        <h3>Danh sách hợp đồng</h3>
-        <button className={styles.blueButton} type="button">
-          <Plus size={16} />Thêm hợp đồng
-        </button>
-      </div>
-      {contracts.map(([name, status, code, start, end, value]) => (
-        <article className={styles.contractCard} key={code}>
-          <div>
-            <h4>{name} <CustomerStatus status={status} /></h4>
-            <div className={styles.contractGrid}>
-              <InfoBlock label="Mã hợp đồng"><span className={styles.memberCode}>{code}</span></InfoBlock>
-              <InfoBlock label="Ngày bắt đầu">{start}</InfoBlock>
-              <InfoBlock label="Ngày kết thúc">{end}</InfoBlock>
-              <InfoBlock label="Giá trị"><span className={styles.dateGreen}>{value}</span></InfoBlock>
+    <>
+      <section className={styles.detailCard}>
+        <div className={styles.tabSectionHeader}>
+          <h3>Danh sách hợp đồng</h3>
+          <button className={styles.blueButton} type="button">
+            <Plus size={16} />Thêm hợp đồng
+          </button>
+        </div>
+        {contracts.map(([name, status, code, start, end, value]) => (
+          <article className={styles.contractCard} key={code}>
+            <div>
+              <h4>{name} <CustomerStatus status={status} /></h4>
+              <div className={styles.contractGrid}>
+                <InfoBlock label="Mã hợp đồng"><span className={styles.memberCode}>{code}</span></InfoBlock>
+                <InfoBlock label="Ngày bắt đầu">{start}</InfoBlock>
+                <InfoBlock label="Ngày kết thúc">{end}</InfoBlock>
+                <InfoBlock label="Giá trị"><span className={styles.dateGreen}>{value}</span></InfoBlock>
+              </div>
             </div>
-          </div>
-          <button type="button" onClick={() => alert(`Xem chi tiết hợp đồng ${code}`)}>Xem chi tiết</button>
-        </article>
-      ))}
-    </section>
+            <button type="button" onClick={() => setSelectedContract([name, status, code, start, end, value])}>Xem chi tiết</button>
+          </article>
+        ))}
+      </section>
+      {selectedContract ? (
+        <CustomerInfoDialog
+          title={`Chi tiết hợp đồng ${selectedContract[2]}`}
+          rows={[
+            ["Gói dịch vụ", selectedContract[0]],
+            ["Trạng thái", selectedContract[1]],
+            ["Ngày bắt đầu", selectedContract[3]],
+            ["Ngày kết thúc", selectedContract[4]],
+            ["Giá trị", selectedContract[5]],
+            ["Liên kết nghiệp vụ", "Hợp đồng, Lịch HLV, Teetime, Check-in/out và Sổ quỹ"],
+          ]}
+          onClose={() => setSelectedContract(null)}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -1851,46 +2276,63 @@ function TransactionsTab() {
     { code: "GD002", date: "10/3/2026", type: "Booking Teetime", amount: "500,000 VND", method: "Tiền mặt", status: "Hoàn thành" },
     { code: "GD003", date: "5/3/2026", type: "Thanh toán công nợ", amount: "1,500,000 VND", method: "Momo", status: "Đang xử lý" },
   ];
+  const [selectedTx, setSelectedTx] = useState<typeof txs[number] | null>(null);
   return (
-    <section className={styles.detailCard}>
-      <h3>Lịch sử giao dịch</h3>
-      <div className={styles.tableWrap}>
-        <table className={styles.softTable}>
-          <thead>
-            <tr>
-              <th>Mã GD</th>
-              <th>Ngày</th>
-              <th>Loại giao dịch</th>
-              <th>Số tiền</th>
-              <th>Phương thức</th>
-              <th>Trạng thái</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {txs.map((t) => (
-              <tr key={t.code}>
-                <td><button className={styles.linkButton} type="button" onClick={() => alert(`Chi tiết giao dịch ${t.code}`)}>{t.code}</button></td>
-                <td>{t.date}</td>
-                <td>{t.type}</td>
-                <td className={styles.amountGreen}>{t.amount}</td>
-                <td>{t.method}</td>
-                <td>
-                  <span className={t.status === "Hoàn thành" ? styles.softStatusDone : styles.softStatusPending}>
-                    {t.status}
-                  </span>
-                </td>
-                <td>
-                  <button className={styles.outlineButton} onClick={() => alert(`Chi tiết giao dịch ${t.code}`)} type="button">
-                    Chi tiết
-                  </button>
-                </td>
+    <>
+      <section className={styles.detailCard}>
+        <h3>Lịch sử giao dịch</h3>
+        <div className={styles.tableWrap}>
+          <table className={styles.softTable}>
+            <thead>
+              <tr>
+                <th>Mã GD</th>
+                <th>Ngày</th>
+                <th>Loại giao dịch</th>
+                <th>Số tiền</th>
+                <th>Phương thức</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
+            </thead>
+            <tbody>
+              {txs.map((t) => (
+                <tr key={t.code}>
+                  <td><button className={styles.linkButton} type="button" onClick={() => setSelectedTx(t)}>{t.code}</button></td>
+                  <td>{t.date}</td>
+                  <td>{t.type}</td>
+                  <td className={styles.amountGreen}>{t.amount}</td>
+                  <td>{t.method}</td>
+                  <td>
+                    <span className={t.status === "Hoàn thành" ? styles.softStatusDone : styles.softStatusPending}>
+                      {t.status}
+                    </span>
+                  </td>
+                  <td>
+                    <button className={styles.outlineButton} onClick={() => setSelectedTx(t)} type="button">
+                      Chi tiết
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {selectedTx ? (
+        <CustomerInfoDialog
+          title={`Chi tiết giao dịch ${selectedTx.code}`}
+          rows={[
+            ["Ngày giao dịch", selectedTx.date],
+            ["Loại giao dịch", selectedTx.type],
+            ["Số tiền", selectedTx.amount],
+            ["Phương thức", selectedTx.method],
+            ["Trạng thái", selectedTx.status],
+            ["Đối soát", selectedTx.status === "Hoàn thành" ? "Đã ghi nhận vào Sổ quỹ" : "Chờ đối soát thanh toán"],
+          ]}
+          onClose={() => setSelectedTx(null)}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -1977,6 +2419,7 @@ type MealPlan = {
 
 function MealPlanTab() {
   const [addOpen, setAddOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [plan, setPlan] = useState<MealPlan | null>({
     name: "Kế hoạch Giảm mỡ - Tăng cơ",
     start: "1/3/2026",
@@ -2011,9 +2454,7 @@ function MealPlanTab() {
     );
   }
 
-  const handleDelete = () => {
-    if (confirm("Bạn có chắc muốn xóa Meal Plan này?")) setPlan(null);
-  };
+  const handleDelete = () => setDeleteOpen(true);
 
   const days = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
@@ -2095,6 +2536,16 @@ function MealPlanTab() {
       </section>
 
       {addOpen ? <AddMealPlanModal onClose={() => setAddOpen(false)} onSave={(p) => { setPlan(p); setAddOpen(false); }} initial={plan} /> : null}
+      {deleteOpen ? (
+        <CustomerConfirmDialog
+          title="Xóa Meal Plan"
+          message="Xóa kế hoạch dinh dưỡng hiện tại khỏi hồ sơ khách hàng? Khi triển khai backend, dữ liệu này nên được lưu lịch sử thay vì xóa cứng."
+          confirmLabel="Xóa Meal Plan"
+          tone="danger"
+          onCancel={() => setDeleteOpen(false)}
+          onConfirm={() => { setPlan(null); setDeleteOpen(false); }}
+        />
+      ) : null}
     </>
   );
 }
@@ -2121,6 +2572,7 @@ function AddMealPlanModal({
       meals: [{ name: "Bữa sáng", time: "", items: [""], cal: 0, pro: 0 }],
     }
   );
+  const [error, setError] = useState("");
   const update = <K extends keyof MealPlan>(key: K, value: MealPlan[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
 
@@ -2155,11 +2607,11 @@ function AddMealPlanModal({
 
   const submit = () => {
     if (!form.name.trim() || !form.start || !form.end) {
-      alert("Tên kế hoạch, ngày bắt đầu và ngày kết thúc là bắt buộc.");
+      setError("Tên kế hoạch, ngày bắt đầu và ngày kết thúc là bắt buộc.");
       return;
     }
     if (form.meals.length === 0 || form.meals.some((m) => m.items.filter((i) => i.trim()).length === 0)) {
-      alert("Mỗi bữa ăn phải có ít nhất 1 món ăn.");
+      setError("Mỗi bữa ăn phải có ít nhất 1 món ăn.");
       return;
     }
     onSave({
@@ -2180,6 +2632,7 @@ function AddMealPlanModal({
           </div>
           <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
+        {error ? <div className={styles.formError}><AlertTriangle size={14} /> {error}</div> : null}
         <div className={styles.mealModalBody}>
           <section className={styles.mealModalSection}>
             <h3><Calendar size={16} /> Thông tin cơ bản</h3>
@@ -2356,25 +2809,25 @@ type Profile = {
 };
 
 const DEFAULT_PROFILE: Profile = {
-  courseCount: "5",
-  coachEpga: "Nguyễn Văn A",
-  coachOther: "Trần Thị B",
-  name: "quyet test addr 2",
-  gender: "nam_",
-  dob: "-",
-  phone: "-",
-  email: "-",
+  courseCount: "2",
+  coachEpga: "Trần Quốc Toàn",
+  coachOther: "Đã học thử tại sân Thảo Điền",
+  name: "Nguyễn Test Golf",
+  gender: "Nam",
+  dob: "1990-05-15",
+  phone: "0911111111",
+  email: "test.golf@nextvision.vn",
   level: "Beginner",
-  handicap: "5",
+  handicap: "Chưa có HCP",
   golfStartTime: "20/05/2026",
-  playingGoal: "Vui",
-  handedness: "Trái",
-  otherSports: "Bơi lội",
-  clubs: "Vip",
+  playingGoal: "Cải thiện swing cơ bản và lên sân 9 hố",
+  handedness: "Phải",
+  otherSports: "Gym, chạy bộ",
+  clubs: "Bộ gậy thuê tại trung tâm",
   coachFreq: "2",
   selfFreq: "1",
   fitness: 4,
-  healthNotes: "đứt dây chằng",
+  healthNotes: "Đau nhẹ cổ tay phải khi tập lực lớn",
   golfDuration: "",
   currentHandicap: "",
   targetHandicap: "",
@@ -2390,15 +2843,14 @@ function ProfilesTab() {
   const [showModal, setShowModal] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(DEFAULT_PROFILE);
   const [activeStep, setActiveStep] = useState<1 | 2>(1);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const handleSave = (next: Profile) => {
     setProfile(next);
     setShowModal(false);
   };
 
-  const handleDelete = () => {
-    if (confirm("Bạn có chắc muốn xóa profile này?")) setProfile(null);
-  };
+  const handleDelete = () => setDeleteOpen(true);
 
   if (!profile) {
     return (
@@ -2496,6 +2948,16 @@ function ProfilesTab() {
         </div>
       </section>
       {showModal ? <AddProfileModal onClose={() => setShowModal(false)} onSave={handleSave} initial={profile} /> : null}
+      {deleteOpen ? (
+        <CustomerConfirmDialog
+          title="Xóa profile golf"
+          message="Xóa profile kinh nghiệm golf khỏi hồ sơ khách hàng? Thao tác này ảnh hưởng dữ liệu tư vấn HLV và lộ trình học."
+          confirmLabel="Xóa profile"
+          tone="danger"
+          onCancel={() => setDeleteOpen(false)}
+          onConfirm={() => { setProfile(null); setDeleteOpen(false); }}
+        />
+      ) : null}
     </>
   );
 }
@@ -2520,12 +2982,13 @@ function AddProfileModal({
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState<Profile>(initial);
+  const [error, setError] = useState("");
   const update = <K extends keyof Profile>(key: K, value: Profile[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
 
   const submit = () => {
     if (!form.name.trim()) {
-      alert("Họ và tên là bắt buộc.");
+      setError("Họ và tên là bắt buộc.");
       setStep(1);
       return;
     }
@@ -2539,6 +3002,7 @@ function AddProfileModal({
           <h2>Thêm mới Profile hội viên</h2>
           <button onClick={onClose} type="button"><X size={20} /></button>
         </header>
+        {error ? <div className={styles.formError}><AlertTriangle size={14} /> {error}</div> : null}
         <div className={styles.profileStepperBar}>
           <div className={`${styles.profileStepBubble} ${step >= 1 ? styles.profileStepBubbleActive : ""} ${step > 1 ? styles.profileStepBubbleDone : ""}`}>
             <span>{step > 1 ? "✓" : "1"}</span>
@@ -2758,6 +3222,167 @@ function UpperLabel({
       <span>{label}</span>
       {children}
     </label>
+  );
+}
+
+function CustomerInfoDialog({
+  title,
+  rows,
+  onClose,
+}: {
+  title: string;
+  rows: Array<[string, string]>;
+  onClose: () => void;
+}) {
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <section className={styles.smallModal}>
+        <header>
+          <h2>{title}</h2>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.smallModalBody}>
+          {rows.map(([label, value]) => (
+            <InfoBlock key={label} label={label}>{value}</InfoBlock>
+          ))}
+        </div>
+        <footer>
+          <button className={styles.blueButton} onClick={onClose} type="button">Đóng</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function CustomerConfirmDialog({
+  title,
+  message,
+  confirmLabel,
+  tone = "default",
+  onCancel,
+  onConfirm,
+}: {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  tone?: "default" | "danger";
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <section className={styles.smallModal}>
+        <header>
+          <h2>{title}</h2>
+          <button onClick={onCancel} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.smallModalBody}>
+          <div className={tone === "danger" ? styles.formError : styles.ticketCustomerInfo}>
+            <AlertTriangle size={16} />
+            <span>{message}</span>
+          </div>
+        </div>
+        <footer>
+          <button onClick={onCancel} type="button">Hủy</button>
+          <button className={tone === "danger" ? styles.contractDelete : styles.blueButton} onClick={onConfirm} type="button">
+            {confirmLabel}
+          </button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function GolfMeasurementChartModal({
+  measurements,
+  onClose,
+}: {
+  measurements: Measurement[];
+  onClose: () => void;
+}) {
+  const bestCarry = Math.max(...measurements.map((m) => m.carry), 1);
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <section className={styles.smallModal}>
+        <header>
+          <h2>Biểu đồ Trackman</h2>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.smallModalBody}>
+          {measurements.map((m) => (
+            <div key={`${m.date}-${m.club}`} style={{ display: "grid", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontWeight: 700 }}>
+                <span>{m.club} · {m.date}</span>
+                <span>{m.carry} yds · spin {m.spin.toLocaleString()}</span>
+              </div>
+              <div style={{ height: 10, borderRadius: 999, background: "#e2e8f0", overflow: "hidden" }}>
+                <span style={{ display: "block", height: "100%", width: `${Math.max(10, (m.carry / bestCarry) * 100)}%`, background: "linear-gradient(90deg, #2563eb, #22c55e)" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <footer>
+          <button className={styles.blueButton} onClick={onClose} type="button">Đóng</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function TrackmanPreviewModal({
+  measurement,
+  onClose,
+}: {
+  measurement: Measurement;
+  onClose: () => void;
+}) {
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <section className={styles.smallModal}>
+        <header>
+          <h2>Ảnh Trackman · {measurement.club}</h2>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.smallModalBody}>
+          <div style={{ border: "1px solid #dbeafe", borderRadius: 16, padding: 16, background: "linear-gradient(135deg, #eff6ff, #f8fafc)" }}>
+            <strong>{measurement.date}</strong>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10, marginTop: 12 }}>
+              <InfoBlock label="Carry">{measurement.carry} yds</InfoBlock>
+              <InfoBlock label="Total">{measurement.total} yds</InfoBlock>
+              <InfoBlock label="Attack angle">{measurement.angle}°</InfoBlock>
+              <InfoBlock label="Spin rate">{measurement.spin.toLocaleString()}</InfoBlock>
+            </div>
+          </div>
+        </div>
+        <footer>
+          <button className={styles.blueButton} onClick={onClose} type="button">Đóng</button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function TrackmanUploadModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <section className={styles.smallModal}>
+        <header>
+          <h2>Tải ảnh Trackman</h2>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.smallModalBody}>
+          <label>
+            <span>Ảnh kết quả <b>*</b></span>
+            <input accept="image/png,image/jpeg" type="file" />
+          </label>
+          <InfoBlock label="Quy chuẩn">JPG/PNG, tối đa 5MB. Ảnh dùng để đối chiếu chỉ số Carry, Total, Club Path, Face Angle và Spin.</InfoBlock>
+        </div>
+        <footer>
+          <button onClick={onClose} type="button">Hủy</button>
+          <button className={styles.greenButton} onClick={onClose} type="button">Đính kèm</button>
+        </footer>
+      </section>
+    </div>
   );
 }
 

@@ -63,6 +63,9 @@ const generateAllSlots = (): string[] => {
   return slots;
 };
 const ALL_SLOTS = generateAllSlots();
+const COACH_TIME_COL_WIDTH = 104;
+const COACH_COL_WIDTH = 246;
+const COACH_SLOT_HEIGHT = 40;
 
 // =====================================================================================
 // SECTION B — Types
@@ -632,10 +635,10 @@ function CalendarGrid({
   return (
     <section className={styles.coachCalendarCard}>
       <div className={styles.coachCalendarScroll}>
-        <table className={styles.coachCalendarTable} style={{ minWidth: `${92 + coaches.length * 220}px` }}>
+        <table className={styles.coachCalendarTable} style={{ minWidth: `${COACH_TIME_COL_WIDTH + coaches.length * COACH_COL_WIDTH}px` }}>
           <colgroup>
-            <col style={{ width: 92 }} />
-            {coaches.map((c) => <col key={c.id} style={{ width: 220 }} />)}
+            <col style={{ width: COACH_TIME_COL_WIDTH }} />
+            {coaches.map((c) => <col key={c.id} style={{ width: COACH_COL_WIDTH }} />)}
           </colgroup>
           <thead>
             <tr>
@@ -671,7 +674,7 @@ function CalendarGrid({
                             className={`${styles.coachSessionCard} ${styles[`coachSessionCard_${session.status}`]}`}
                             onClick={() => onClickSession(session)}
                             type="button"
-                            style={{ minHeight: span * 32 }}
+                            style={{ minHeight: span * COACH_SLOT_HEIGHT - 10 }}
                           >
                             <strong>{cust?.name ?? "—"}</strong>
                             <span>{cust?.phone}</span>
@@ -955,6 +958,7 @@ function FlexibleBookModal({
   const startTime = selectedSlots[0] ?? "";
   const endTime = selectedSlots.length > 0 ? minutesToTime(timeToMinutes(selectedSlots[selectedSlots.length - 1]) + 15) : "";
   const totalMinutes = selectedSlots.length * 15;
+  const hasSlotError = Boolean(error?.toLowerCase().includes("slot"));
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -1056,7 +1060,8 @@ function FlexibleBookModal({
               <Clock size={14} /> Slot 15 phút · {selectedDate}
               <em>Chọn {selectedSlots.length} slot · {totalMinutes}p</em>
             </h4>
-            <div className={styles.coachSlotList}>
+            {hasSlotError ? <span className={styles.fieldErrorText}>Chọn ít nhất 1 slot trống trước khi lưu lịch.</span> : null}
+            <div className={`${styles.coachSlotList} ${hasSlotError ? styles.coachSlotListError : ""}`}>
               {ALL_SLOTS.map((slot) => {
                 const busy = busySlots.has(slot);
                 const selected = selectedSlots.includes(slot);
@@ -1081,7 +1086,7 @@ function FlexibleBookModal({
           <span>{selectedSlots.length} slot · {totalMinutes} phút</span>
           <div>
             <button className={styles.contractFilterChip} onClick={onClose} type="button">Bỏ qua</button>
-            <button className={styles.greenButton} type="submit" disabled={selectedSlots.length === 0}>
+            <button className={styles.greenButton} type="submit">
               <CheckCircle2 size={14} /> Lưu lịch
             </button>
           </div>
@@ -1298,7 +1303,7 @@ function MonthBookModal({
           <span>Sẽ tạo {conflictCheck ? validSlots.length : preview.length} buổi</span>
           <div>
             <button className={styles.contractFilterChip} onClick={onClose} type="button">Bỏ qua</button>
-            <button className={styles.greenButton} type="submit" disabled={preview.length === 0}>
+            <button className={styles.greenButton} type="submit">
               <CheckCircle2 size={14} /> Lưu lịch tập
             </button>
           </div>

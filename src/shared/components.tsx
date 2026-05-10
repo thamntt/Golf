@@ -78,8 +78,9 @@ export function BookingTable({ onOpen }: { onOpen?: (key: ModuleKey) => void }) 
               <td>
                 <button
                   className={styles.bookingCode}
-                  onClick={() => alert(`Chi tiết booking ${booking.code}`)}
+                  onClick={() => onOpen?.("teetime")}
                   type="button"
+                  title={`Mở lịch teetime để xem booking ${booking.code}`}
                 >
                   {booking.code}
                 </button>

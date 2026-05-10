@@ -134,7 +134,7 @@ const INITIAL_CONFIG: TeetimeConfig = {
   maxBook: 4,
   stepMinutes: 10,
   startTime: "06:00",
-  endTime: "18:00",
+  endTime: "22:50",
   active: true,
   description: "Cấu hình mặc định cho sân golf 18 hố tại NextVision",
   createdAt: "01/01/2026 08:00",
@@ -282,15 +282,39 @@ function isPastSlot(date: string, time: string): boolean {
   return d.getTime() < Date.now();
 }
 
+function defaultTeetimeDate(): string {
+  const today = todayString();
+  const futureSlots = generateSlots(INITIAL_CONFIG).filter((slot) => !isPastSlot(today, slot.time)).length;
+  return futureSlots >= 6 ? today : shiftDate(today, 1);
+}
+
 // =====================================================================================
 // SECTION C — Top-level component
 // =====================================================================================
 
 export default function TeetimeView() {
+  const initialDate = defaultTeetimeDate();
   const [config, setConfig] = useState<TeetimeConfig>(INITIAL_CONFIG);
-  const [bookings, setBookings] = useState<TeetimeBooking[]>(INITIAL_BOOKINGS);
+  const [bookings, setBookings] = useState<TeetimeBooking[]>(() => {
+    const todaySlots = generateSlots(INITIAL_CONFIG);
+    const firstFutureSlot = Math.max(0, todaySlots.findIndex((slot) => !isPastSlot(initialDate, slot.time)));
+    const demoSlots = firstFutureSlot > 6
+      ? [firstFutureSlot, firstFutureSlot + 1, firstFutureSlot + 2, firstFutureSlot - 6, firstFutureSlot + 3]
+      : [0, 1, 2, 3, 4];
+    return INITIAL_BOOKINGS.map((booking, index) => {
+      const slotIndex = demoSlots[index] ?? booking.slotIndex;
+      const slot = todaySlots[slotIndex] ?? todaySlots[booking.slotIndex];
+      return {
+        ...booking,
+        date: initialDate,
+        slotIndex,
+        startTime: slot?.time ?? booking.startTime,
+        endTime: slot?.endTime ?? booking.endTime,
+      };
+    });
+  });
   const [customers, setCustomers] = useState<CustomerLite[]>(INITIAL_CUSTOMERS);
-  const [date, setDate] = useState<string>("08/05/2026");
+  const [date, setDate] = useState<string>(() => initialDate);
   const [branch, setBranch] = useState<string>("NextVision");
 
   const [setupOpen, setSetupOpen] = useState(false);
@@ -809,12 +833,12 @@ function RegisterModal({
   const [assistantId, setAssistantId] = useState<string>(existing?.assistantId ?? "");
   const [teachingAidId, setTeachingAidId] = useState<string>(existing?.teachingAidId ?? "");
   const [caddieId, setCaddieId] = useState<string>(existing?.caddieId ?? "");
-  const initialCustomerCode = existing?.customerCode ?? customers[0]?.code ?? "";
+  const initialCustomerCode = existing?.customerCode ?? "";
   const initialCustomer = lookupCustomer(initialCustomerCode, customers);
   const [customerCode, setCustomerCode] = useState<string>(initialCustomerCode);
   const [packageCode, setPackageCode] = useState<string>(existing?.packageCode ?? initialCustomer?.packageCode ?? "");
   const [note, setNote] = useState<string>(existing?.note ?? "");
-  const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [customerSearch, setCustomerSearch] = useState("");
 
   const customer = lookupCustomer(customerCode, customers);
@@ -828,14 +852,16 @@ function RegisterModal({
   const totalAtSlot = existingAtSlot.reduce((s, b) => b.id === existing?.id ? s : s + b.guestCount + b.visitorCount, 0);
   const remaining = config.maxBook - totalAtSlot;
   const totalNew = guestCount + visitorCount;
+  const setFieldError = (field: string, message: string) => setFormErrors({ [field]: message });
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!customerCode) { setError("Vui lòng chọn hội viên đại diện"); return; }
-    if (totalNew < 1) { setError("Tổng người chơi tối thiểu 1"); return; }
-    if (totalNew > remaining) { setError(`Vượt sức chứa: còn ${remaining}/${config.maxBook} chỗ ở slot này`); return; }
+    setFormErrors({});
+    if (!customerCode) { setFieldError("customer", "Vui lòng chọn hội viên đại diện trước khi lưu booking."); return; }
+    if (totalNew < 1) { setFieldError("guestCount", "Tổng người chơi tối thiểu 1."); return; }
+    if (totalNew > remaining) { setFieldError("guestCount", `Vượt sức chứa: slot này chỉ còn ${remaining}/${config.maxBook} chỗ.`); return; }
     if (customer?.remainingSessions !== undefined && customer.remainingSessions === 0 && customer.isMember) {
-      setError("Hội viên đã hết buổi gói tập");
+      setFieldError("customer", "Hội viên đã hết buổi gói tập, không thể book thêm.");
       return;
     }
 
@@ -848,7 +874,7 @@ function RegisterModal({
       b.status !== "cancelled"
     );
     if (conflict) {
-      setError(`Hội viên đã có booking ${conflict.id} cùng giờ`);
+      setFieldError("customer", `Hội viên đã có booking ${conflict.id} cùng giờ.`);
       return;
     }
 
@@ -861,7 +887,7 @@ function RegisterModal({
         b.startTime === slot.time &&
         b.status !== "cancelled"
       );
-      if (c) { setError(`HLV đang có booking ${c.id} cùng giờ`); return; }
+      if (c) { setFieldError("coachId", `HLV đang có booking ${c.id} cùng giờ.`); return; }
     }
     if (caddieId) {
       const c = bookings.find((b) =>
@@ -871,7 +897,7 @@ function RegisterModal({
         b.startTime === slot.time &&
         b.status !== "cancelled"
       );
-      if (c) { setError(`Caddie đang có booking ${c.id} cùng giờ`); return; }
+      if (c) { setFieldError("caddieId", `Caddie đang có booking ${c.id} cùng giờ.`); return; }
     }
 
     const id = existing?.id ?? nextBookingId(bookings);
@@ -923,8 +949,6 @@ function RegisterModal({
         </header>
 
         <div className={styles.contractFormBody}>
-          {error ? <div className={styles.formError}><AlertCircle size={14} /> {error}</div> : null}
-
           {/* Section 1: Buổi chơi */}
           <section className={`${styles.contractFormSection} ${styles.contractSectionGreen}`}>
             <h3 className={styles.contractSectionHeader}><Flag size={16} /> Thông tin buổi chơi</h3>
@@ -950,7 +974,15 @@ function RegisterModal({
               </label>
               <label>
                 <span>Số khách (HV + người đi cùng)</span>
-                <input type="number" min={1} max={config.maxBook} value={guestCount} onChange={(e) => setGuestCount(Math.max(1, Math.min(config.maxBook, Number(e.target.value) || 1)))} />
+                <input
+                  className={formErrors.guestCount ? styles.fieldInvalid : undefined}
+                  type="number"
+                  min={1}
+                  max={config.maxBook}
+                  value={guestCount}
+                  onChange={(e) => { setGuestCount(Math.max(1, Math.min(config.maxBook, Number(e.target.value) || 1))); setFormErrors((prev) => ({ ...prev, guestCount: "" })); }}
+                />
+                {formErrors.guestCount ? <small className={styles.fieldErrorText}>{formErrors.guestCount}</small> : null}
               </label>
               <label>
                 <span>Số khách tham quan (vãng lai)</span>
@@ -971,10 +1003,11 @@ function RegisterModal({
             <div className={styles.contractGrid2}>
               <label>
                 <span>Huấn luyện viên</span>
-                <select className={styles.selectInput} value={coachId} onChange={(e) => setCoachId(e.target.value)}>
+                <select className={`${styles.selectInput} ${formErrors.coachId ? styles.fieldInvalid : ""}`} value={coachId} onChange={(e) => { setCoachId(e.target.value); setFormErrors((prev) => ({ ...prev, coachId: "" })); }}>
                   <option value="">— Không gán HLV —</option>
                   {COACHES.filter((c) => c.branch === branch).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
+                {formErrors.coachId ? <small className={styles.fieldErrorText}>{formErrors.coachId}</small> : null}
               </label>
               <label>
                 <span>Trợ lý HLV</span>
@@ -992,10 +1025,11 @@ function RegisterModal({
               </label>
               <label>
                 <span>Caddie</span>
-                <select className={styles.selectInput} value={caddieId} onChange={(e) => setCaddieId(e.target.value)}>
+                <select className={`${styles.selectInput} ${formErrors.caddieId ? styles.fieldInvalid : ""}`} value={caddieId} onChange={(e) => { setCaddieId(e.target.value); setFormErrors((prev) => ({ ...prev, caddieId: "" })); }}>
                   <option value="">— Chưa gán caddie —</option>
                   {CADDIES.filter((c) => c.branch === branch).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
+                {formErrors.caddieId ? <small className={styles.fieldErrorText}>{formErrors.caddieId}</small> : null}
               </label>
             </div>
           </section>
@@ -1003,7 +1037,7 @@ function RegisterModal({
           {/* Section 3: Hội viên đại diện */}
           <section className={`${styles.contractFormSection} ${styles.contractSectionBlue}`}>
             <h3 className={styles.contractSectionHeader}><User size={16} /> Hội viên đại diện</h3>
-            <div className={styles.teetimeCustomerSearch}>
+            <div className={`${styles.teetimeCustomerSearch} ${formErrors.customer ? styles.fieldInvalid : ""}`}>
               <Search size={14} />
               <input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder="Tìm theo tên, mã, SĐT..." />
               <button className={styles.contractLinkBtn} onClick={onOpenAddCustomer} type="button"><UserPlus size={14} /> Thêm HV mới</button>
@@ -1013,7 +1047,7 @@ function RegisterModal({
                 <button
                   key={c.code}
                   className={c.code === customerCode ? styles.teetimeCustomerCardActive : styles.teetimeCustomerCard}
-                  onClick={() => { setCustomerCode(c.code); setPackageCode(c.packageCode ?? ""); }}
+                  onClick={() => { setCustomerCode(c.code); setPackageCode(c.packageCode ?? ""); setFormErrors((prev) => ({ ...prev, customer: "" })); }}
                   type="button"
                 >
                   <div className={styles.teetimeCustomerAvatar}>{c.name.split(" ").pop()?.[0] ?? "?"}</div>
@@ -1025,6 +1059,7 @@ function RegisterModal({
                 </button>
               ))}
             </div>
+            {formErrors.customer ? <small className={styles.fieldErrorText}>{formErrors.customer}</small> : null}
 
             {customer ? (
               <div className={styles.contractGrid2}>
@@ -1039,7 +1074,9 @@ function RegisterModal({
                 {customer.packageCode ? (
                   <label>
                     <span>Gói tập</span>
-                    <input readOnly value={`${customer.packageName} · còn ${customer.remainingSessions}/${customer.totalSessions} buổi`} />
+                    <select className={styles.selectInput} value={packageCode} onChange={(e) => setPackageCode(e.target.value)}>
+                      <option value={customer.packageCode}>{customer.packageName} · còn {customer.remainingSessions}/{customer.totalSessions} buổi</option>
+                    </select>
                   </label>
                 ) : null}
                 <label className={styles.fullField}>

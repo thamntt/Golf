@@ -32,6 +32,17 @@ export type Customer = {
   birth: string;
   status: string;
   cards: string[];
+  biometricCode?: string;
+  customerGroup?: string;
+  source?: string;
+  cardNumber?: string;
+  idNumber?: string;
+  contactName?: string;
+  contactPhone?: string;
+  province?: string;
+  ward?: string;
+  address?: string;
+  note?: string;
   registerDate: string;
   endDate: string;
   createdDate: string;

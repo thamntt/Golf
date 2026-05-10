@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   BadgeCheck,
@@ -9,9 +9,12 @@ import {
   Camera,
   CheckCircle2,
   Clock3,
+  Download,
   Edit3,
+  FileSpreadsheet,
   Filter,
   GraduationCap,
+  IdCard,
   Mail,
   Phone,
   Plus,
@@ -31,6 +34,25 @@ type EmployeeStatus = "Đang làm" | "Tạm nghỉ" | "Đã nghỉ việc";
 type WorkMode = "fulltime" | "shift";
 type Gender = "Nam" | "Nữ" | "Khác";
 type ShiftName = "Sáng" | "Chiều" | "Tối";
+type EmployeeFormErrorKey =
+  | "branch"
+  | "code"
+  | "name"
+  | "birthDate"
+  | "phone"
+  | "email"
+  | "identityNo"
+  | "identityDate"
+  | "identityPlace"
+  | "startDate"
+  | "endDate"
+  | "group"
+  | "department"
+  | "title"
+  | "roles"
+  | "shifts";
+
+type EmployeeFormErrors = Partial<Record<EmployeeFormErrorKey, string>>;
 
 type DayShift = {
   active: boolean;
@@ -73,6 +95,7 @@ const TITLES = ["HLV", "Caddie", "Sale", "Lễ tân", "Quản lý chi nhánh", "
 const ROLES: EmployeeRole[] = ["Vận hành", "Sale", "HLV", "Caddie", "Trợ giảng HLV", "Trợ lý HLV"];
 const SHIFT_NAMES: ShiftName[] = ["Sáng", "Chiều", "Tối"];
 const DAYS = ["Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật"];
+const TIME_OPTIONS = ["06:00", "07:00", "08:00", "10:00", "12:00", "13:00", "14:00", "17:30", "18:00", "20:00", "22:00"];
 
 const defaultShifts = (): Record<number, Record<ShiftName, DayShift>> => {
   const result = {} as Record<number, Record<ShiftName, DayShift>>;
@@ -175,6 +198,50 @@ const nextEmployeeCode = (employees: Employee[]) => {
   return `NV${max + 1}`;
 };
 
+const nextCardCode = (employees: Employee[]) => {
+  const max = employees.reduce((value, employee) => {
+    const numeric = Number(employee.cardCode.replace(/\D/g, ""));
+    return Number.isFinite(numeric) ? Math.max(value, numeric) : value;
+  }, 0);
+  return `CARD${String(max + 1).padStart(3, "0")}`;
+};
+
+const isValidEmail = (value: string) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+const isValidPhone = (value: string) => /^(0|\+84)[0-9]{9,10}$/.test(value.trim());
+const isValidIdentity = (value: string) => !value || /^[0-9]{9}$|^[0-9]{12}$/.test(value.trim());
+const timeToMinutes = (value: string) => {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+const employeeCsv = (employees: Employee[]) => {
+  const rows = [
+    ["Mã NV", "Họ tên", "Chi nhánh", "SĐT", "Email", "Chức danh", "Phòng ban", "Trạng thái", "Vai trò"],
+    ...employees.map((employee) => [
+      employee.code,
+      employee.name,
+      employee.branch,
+      employee.phone,
+      employee.email,
+      employee.title,
+      employee.department,
+      employee.status,
+      employee.roles.join(" | "),
+    ]),
+  ];
+  return rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+};
+
+const downloadTextFile = (fileName: string, content: string) => {
+  const blob = new Blob([`\uFEFF${content}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
+};
+
 const initials = (name: string) =>
   name
     .split(" ")
@@ -240,6 +307,19 @@ export default function EmployeesView() {
     setSelectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   };
 
+  const exportEmployees = () => {
+    downloadTextFile("danh-sach-nhan-vien-nextvision.csv", employeeCsv(filteredEmployees));
+    flash(`Đã xuất ${filteredEmployees.length} hồ sơ nhân viên`);
+  };
+
+  const downloadTemplate = () => {
+    downloadTextFile(
+      "mau-nhap-nhan-vien.csv",
+      "Mã NV,Họ tên,Chi nhánh,SĐT,Email,Chức danh,Phòng ban,Vai trò,Ngày bắt đầu\nNV0001,Nguyễn Văn A,NextVision,0901234567,a@example.com,HLV,Đào tạo,HLV,2026-05-10",
+    );
+    flash("Đã tải mẫu nhập nhân viên");
+  };
+
   const saveEmployee = (employee: Employee) => {
     setEmployees((current) => {
       const exists = current.some((item) => item.id === employee.id);
@@ -288,6 +368,12 @@ export default function EmployeesView() {
             />
           </div>
           <span className={styles.employeeCount}>Tổng: {filteredEmployees.length} nhân viên</span>
+          <button className={styles.contractFilterChip} onClick={downloadTemplate} type="button">
+            <FileSpreadsheet size={14} /> Mẫu nhập
+          </button>
+          <button className={styles.contractFilterChip} onClick={exportEmployees} type="button">
+            <Download size={14} /> Xuất CSV
+          </button>
         </div>
 
         <div className={styles.employeeFilters}>
@@ -419,6 +505,10 @@ function EmployeeFormModal({
   onClose: () => void;
   onSave: (employee: Employee) => void;
 }) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [groupOptions, setGroupOptions] = useState(GROUPS);
+  const [departmentOptions, setDepartmentOptions] = useState(DEPARTMENTS);
+  const [titleOptions, setTitleOptions] = useState(TITLES);
   const [draft, setDraft] = useState<Employee>(() => initial ?? {
     id: `EMP-${Date.now()}`,
     code: nextEmployeeCode(employees),
@@ -445,10 +535,18 @@ function EmployeeFormModal({
     shifts: defaultShifts(),
     note: "",
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<EmployeeFormErrors>({});
   const [nested, setNested] = useState<"group" | "department" | "title" | null>(null);
 
-  const update = <K extends keyof Employee>(key: K, value: Employee[K]) => setDraft((current) => ({ ...current, [key]: value }));
+  const update = <K extends keyof Employee>(key: K, value: Employee[K]) => {
+    setDraft((current) => ({ ...current, [key]: value }));
+    setErrors((current) => {
+      if (!(key in current)) return current;
+      const next = { ...current };
+      delete next[key as EmployeeFormErrorKey];
+      return next;
+    });
+  };
 
   const toggleRole = (role: EmployeeRole) => {
     setDraft((current) => {
@@ -472,25 +570,67 @@ function EmployeeFormModal({
         },
       },
     }));
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.shifts;
+      return next;
+    });
+  };
+
+  const validate = () => {
+    const next: EmployeeFormErrors = {};
+    if (!draft.branch) next.branch = "Chọn chi nhánh làm việc.";
+    if (!draft.code.trim()) next.code = "Mã nhân viên phải được sinh tự động.";
+    if (!draft.name.trim()) next.name = "Nhập họ và tên nhân viên.";
+    if (!draft.birthDate) next.birthDate = "Chọn ngày sinh để hoàn thiện hồ sơ.";
+    if (!isValidPhone(draft.phone)) next.phone = "Số điện thoại phải đúng định dạng Việt Nam.";
+    if (!isValidEmail(draft.email)) next.email = "Email không đúng định dạng.";
+    if (!isValidIdentity(draft.identityNo)) next.identityNo = "CCCD/CMND gồm 9 hoặc 12 chữ số.";
+    if (draft.identityNo && !draft.identityDate) next.identityDate = "Nhập ngày cấp CCCD/CMND.";
+    if (draft.identityNo && !draft.identityPlace.trim()) next.identityPlace = "Nhập nơi cấp CCCD/CMND.";
+    if (!draft.startDate) next.startDate = "Chọn ngày bắt đầu làm việc.";
+    if (draft.endDate && draft.startDate && draft.endDate < draft.startDate) next.endDate = "Ngày kết thúc phải sau ngày bắt đầu.";
+    if (!draft.group) next.group = "Chọn nhóm nhân viên.";
+    if (!draft.department) next.department = "Chọn phòng ban.";
+    if (!draft.title) next.title = "Chọn chức danh.";
+    if (!draft.roles.length) next.roles = "Chọn ít nhất một vai trò vận hành.";
+    if (employees.some((employee) => employee.code === draft.code && employee.id !== draft.id)) next.code = "Mã nhân viên đã tồn tại.";
+    if (draft.workMode === "shift") {
+      const hasActiveShift = Object.values(draft.shifts).some((day) => Object.values(day).some((shift) => shift.active));
+      const invalidShift = Object.values(draft.shifts).some((day) =>
+        Object.values(day).some((shift) => shift.active && timeToMinutes(shift.start) >= timeToMinutes(shift.end)),
+      );
+      if (!hasActiveShift) next.shifts = "Chọn ít nhất một ca làm việc.";
+      else if (invalidShift) next.shifts = "Giờ kết thúc ca phải sau giờ bắt đầu.";
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handlePhotoUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setErrors((current) => ({ ...current, name: current.name ?? "Ảnh đại diện phải là tệp hình ảnh." }));
+      return;
+    }
+    update("avatarUrl", URL.createObjectURL(file));
   };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    if (!draft.name.trim()) { setError("Vui lòng nhập họ và tên nhân viên"); return; }
-    if (!draft.branch) { setError("Vui lòng chọn chi nhánh"); return; }
-    if (!draft.code.trim()) { setError("Mã nhân viên không hợp lệ"); return; }
-    if (employees.some((employee) => employee.code === draft.code && employee.id !== draft.id)) {
-      setError("Mã nhân viên đã tồn tại");
-      return;
-    }
-    if (!draft.roles.length) { setError("Vui lòng chọn ít nhất một vai trò"); return; }
+    if (!validate()) return;
     onSave({ ...draft, name: draft.name.trim(), isSale: draft.isSale || draft.roles.includes("Sale") });
   };
 
   const addOption = (value: string) => {
     if (!nested || !value.trim()) return;
     const key = nested === "group" ? "group" : nested === "department" ? "department" : "title";
-    update(key, value.trim());
+    const nextValue = value.trim();
+    if (nested === "group") setGroupOptions((current) => current.includes(nextValue) ? current : [...current, nextValue]);
+    if (nested === "department") setDepartmentOptions((current) => current.includes(nextValue) ? current : [...current, nextValue]);
+    if (nested === "title") setTitleOptions((current) => current.includes(nextValue) ? current : [...current, nextValue]);
+    update(key, nextValue);
     setNested(null);
   };
 
@@ -506,14 +646,25 @@ function EmployeeFormModal({
         </header>
 
         <div className={styles.employeeModalBody}>
-          {error ? <div className={styles.formError}><ShieldCheck size={16} /> {error}</div> : null}
+          {Object.keys(errors).length ? (
+            <div className={styles.formError}><ShieldCheck size={16} /> Kiểm tra lại các trường được đánh dấu đỏ trước khi lưu hồ sơ.</div>
+          ) : null}
 
           <div className={styles.employeePhotoBlock}>
             <div className={styles.employeePhotoCircle}>
-              {draft.avatarUrl ? <CheckCircle2 size={34} /> : <Upload size={34} />}
+              {draft.avatarUrl && draft.avatarUrl.startsWith("blob:") ? (
+                <span className={styles.employeePhotoPreview} style={{ backgroundImage: `url(${draft.avatarUrl})` }} />
+              ) : <Upload size={34} />}
             </div>
+            <input
+              accept="image/*"
+              className={styles.hiddenFileInput}
+              onChange={handlePhotoUpload}
+              ref={fileInputRef}
+              type="file"
+            />
             <div>
-              <button onClick={() => update("avatarUrl", "uploaded")} type="button"><Upload size={14} /> Tải ảnh lên</button>
+              <button onClick={() => fileInputRef.current?.click()} type="button"><Upload size={14} /> Tải ảnh lên</button>
               <button onClick={() => update("avatarUrl", "webcam")} type="button"><Camera size={14} /> Webcam</button>
             </div>
           </div>
@@ -521,21 +672,24 @@ function EmployeeFormModal({
           <section className={`${styles.contractFormSection} ${styles.contractSectionBlue}`}>
             <h3 className={styles.contractSectionHeader}><BadgeCheck size={16} /> Thông tin cá nhân</h3>
             <div className={styles.employeeFormGrid}>
-              <EmployeeField label="Chi nhánh" required>
+              <EmployeeField error={errors.branch} label="Chi nhánh" required>
                 <select value={draft.branch} onChange={(e) => update("branch", e.target.value)}>
                   {BRANCHES.map((branch) => <option key={branch}>{branch}</option>)}
                 </select>
               </EmployeeField>
-              <EmployeeField label="Mã nhân viên" required>
-                <input value={draft.code} onChange={(e) => update("code", e.target.value)} />
+              <EmployeeField error={errors.code} label="Mã nhân viên" required>
+                <input readOnly value={draft.code} />
               </EmployeeField>
-              <EmployeeField label="Họ và tên" required>
+              <EmployeeField error={errors.name} label="Họ và tên" required>
                 <input placeholder="Tên nhân viên" value={draft.name} onChange={(e) => update("name", e.target.value)} />
               </EmployeeField>
               <EmployeeField label="Mã thẻ, vân tay">
-                <input placeholder="Mã thẻ / vân tay tự đồng bộ" value={draft.cardCode} onChange={(e) => update("cardCode", e.target.value)} />
+                <div className={styles.employeeSelectAdd}>
+                  <input placeholder="Mã thẻ / vân tay tự đồng bộ" value={draft.cardCode} onChange={(e) => update("cardCode", e.target.value)} />
+                  <button onClick={() => update("cardCode", nextCardCode(employees))} title="Cấp mã thẻ" type="button"><IdCard size={15} /></button>
+                </div>
               </EmployeeField>
-              <EmployeeField label="Ngày sinh" required>
+              <EmployeeField error={errors.birthDate} label="Ngày sinh" required>
                 <input type="date" value={draft.birthDate} onChange={(e) => update("birthDate", e.target.value)} />
               </EmployeeField>
               <EmployeeField label="Giới tính">
@@ -545,22 +699,22 @@ function EmployeeFormModal({
                   ))}
                 </div>
               </EmployeeField>
-              <EmployeeField label="Số điện thoại">
-                <input placeholder="Nhập số điện thoại..." value={draft.phone} onChange={(e) => update("phone", e.target.value)} />
+              <EmployeeField error={errors.phone} label="Số điện thoại" required>
+                <input inputMode="tel" placeholder="Nhập số điện thoại..." type="tel" value={draft.phone} onChange={(e) => update("phone", e.target.value)} />
               </EmployeeField>
-              <EmployeeField label="Email">
+              <EmployeeField error={errors.email} label="Email">
                 <input placeholder="Nhập email" type="email" value={draft.email} onChange={(e) => update("email", e.target.value)} />
               </EmployeeField>
               <EmployeeField label="Địa chỉ">
                 <input placeholder="Nhập địa chỉ..." value={draft.address} onChange={(e) => update("address", e.target.value)} />
               </EmployeeField>
-              <EmployeeField label="Số CCCD/CMND">
-                <input placeholder="Nhập số CCCD/CMND" value={draft.identityNo} onChange={(e) => update("identityNo", e.target.value)} />
+              <EmployeeField error={errors.identityNo} label="Số CCCD/CMND">
+                <input inputMode="numeric" placeholder="Nhập số CCCD/CMND" value={draft.identityNo} onChange={(e) => update("identityNo", e.target.value.replace(/\D/g, ""))} />
               </EmployeeField>
-              <EmployeeField label="Ngày cấp CCCD">
+              <EmployeeField error={errors.identityDate} label="Ngày cấp CCCD">
                 <input type="date" value={draft.identityDate} onChange={(e) => update("identityDate", e.target.value)} />
               </EmployeeField>
-              <EmployeeField label="Nơi cấp CCCD">
+              <EmployeeField error={errors.identityPlace} label="Nơi cấp CCCD">
                 <input placeholder="Nơi cấp" value={draft.identityPlace} onChange={(e) => update("identityPlace", e.target.value)} />
               </EmployeeField>
             </div>
@@ -569,20 +723,20 @@ function EmployeeFormModal({
           <section className={`${styles.contractFormSection} ${styles.contractSectionGreen}`}>
             <h3 className={styles.contractSectionHeader}><BriefcaseBusiness size={16} /> Công việc & vai trò</h3>
             <div className={styles.employeeFormGrid}>
-              <EmployeeField label="Ngày bắt đầu làm việc">
+              <EmployeeField error={errors.startDate} label="Ngày bắt đầu làm việc" required>
                 <input type="date" value={draft.startDate} onChange={(e) => update("startDate", e.target.value)} />
               </EmployeeField>
-              <EmployeeField label="Ngày kết thúc làm việc">
+              <EmployeeField error={errors.endDate} label="Ngày kết thúc làm việc">
                 <input type="date" value={draft.endDate} onChange={(e) => update("endDate", e.target.value)} />
               </EmployeeField>
-              <EmployeeField label="Nhóm nhân viên">
-                <SelectWithAdd onAdd={() => setNested("group")} value={draft.group} onChange={(value) => update("group", value)} options={GROUPS} />
+              <EmployeeField error={errors.group} label="Nhóm nhân viên" required>
+                <SelectWithAdd onAdd={() => setNested("group")} value={draft.group} onChange={(value) => update("group", value)} options={groupOptions} />
               </EmployeeField>
-              <EmployeeField label="Phòng ban">
-                <SelectWithAdd onAdd={() => setNested("department")} value={draft.department} onChange={(value) => update("department", value)} options={DEPARTMENTS} />
+              <EmployeeField error={errors.department} label="Phòng ban" required>
+                <SelectWithAdd onAdd={() => setNested("department")} value={draft.department} onChange={(value) => update("department", value)} options={departmentOptions} />
               </EmployeeField>
-              <EmployeeField label="Chức danh">
-                <SelectWithAdd onAdd={() => setNested("title")} value={draft.title} onChange={(value) => update("title", value)} options={TITLES} />
+              <EmployeeField error={errors.title} label="Chức danh" required>
+                <SelectWithAdd onAdd={() => setNested("title")} value={draft.title} onChange={(value) => update("title", value)} options={titleOptions} />
               </EmployeeField>
               <EmployeeField label="Trạng thái">
                 <select value={draft.status} onChange={(e) => update("status", e.target.value as EmployeeStatus)}>
@@ -594,10 +748,12 @@ function EmployeeFormModal({
             </div>
             <div className={styles.employeeCheckGrid}>
               <label><input checked={draft.isSale} onChange={(e) => update("isSale", e.target.checked)} type="checkbox" /> Nhân viên Sale</label>
+              <label><input checked={draft.status === "Đã nghỉ việc"} onChange={(e) => update("status", e.target.checked ? "Đã nghỉ việc" : "Đang làm")} type="checkbox" /> Đã nghỉ việc</label>
               {ROLES.map((role) => (
                 <label key={role}><input checked={draft.roles.includes(role)} onChange={() => toggleRole(role)} type="checkbox" /> {role}</label>
               ))}
             </div>
+            {errors.roles ? <p className={styles.employeeFieldError}>{errors.roles}</p> : null}
           </section>
 
           <section className={`${styles.contractFormSection} ${styles.contractSectionPurple}`}>
@@ -621,9 +777,13 @@ function EmployeeFormModal({
                       return (
                         <div className={styles.employeeShiftCell} key={shift}>
                           <input checked={cfg.active} onChange={(e) => updateShift(dayIndex, shift, { active: e.target.checked })} type="checkbox" />
-                          <input disabled={!cfg.active} type="time" value={cfg.start} onChange={(e) => updateShift(dayIndex, shift, { start: e.target.value })} />
+                          <select disabled={!cfg.active} value={cfg.start} onChange={(e) => updateShift(dayIndex, shift, { start: e.target.value })}>
+                            {TIME_OPTIONS.map((time) => <option key={time}>{time}</option>)}
+                          </select>
                           <Clock3 size={13} />
-                          <input disabled={!cfg.active} type="time" value={cfg.end} onChange={(e) => updateShift(dayIndex, shift, { end: e.target.value })} />
+                          <select disabled={!cfg.active} value={cfg.end} onChange={(e) => updateShift(dayIndex, shift, { end: e.target.value })}>
+                            {TIME_OPTIONS.map((time) => <option key={time}>{time}</option>)}
+                          </select>
                         </div>
                       );
                     })}
@@ -639,6 +799,7 @@ function EmployeeFormModal({
                 </div>
               </div>
             )}
+            {errors.shifts ? <p className={styles.employeeFieldError}>{errors.shifts}</p> : null}
           </section>
 
           <section className={`${styles.contractFormSection} ${styles.contractSectionTeal}`}>
@@ -661,11 +822,12 @@ function EmployeeFormModal({
   );
 }
 
-function EmployeeField({ children, label, required }: { children: ReactNode; label: string; required?: boolean }) {
+function EmployeeField({ children, error, label, required }: { children: ReactNode; error?: string; label: string; required?: boolean }) {
   return (
-    <label className={styles.employeeField}>
+    <label className={`${styles.employeeField} ${error ? styles.employeeFieldInvalid : ""}`}>
       <span>{label} {required ? <b>*</b> : null}</span>
       {children}
+      {error ? <small className={styles.employeeFieldError}>{error}</small> : null}
     </label>
   );
 }
@@ -683,18 +845,28 @@ function SelectWithAdd({ onAdd, onChange, options, value }: { onAdd: () => void;
 
 function AddOptionDialog({ onCancel, onSave, type }: { onCancel: () => void; onSave: (value: string) => void; type: "group" | "department" | "title" }) {
   const [value, setValue] = useState("");
+  const [error, setError] = useState("");
   const label = type === "group" ? "nhóm nhân viên" : type === "department" ? "phòng ban" : "chức danh";
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (!value.trim()) {
+      setError(`Nhập tên ${label}.`);
+      return;
+    }
+    onSave(value);
+  };
   return (
     <div className={`${styles.modalOverlay} ${styles.nestedOverlay}`} role="dialog" aria-modal="true">
-      <form className={styles.smallModal} onSubmit={(event) => { event.preventDefault(); onSave(value); }}>
+      <form className={styles.smallModal} onSubmit={submit}>
         <header>
           <h2><Plus size={16} /> Thêm {label}</h2>
           <button onClick={onCancel} type="button"><X size={16} /></button>
         </header>
         <div className={styles.smallModalBody}>
-          <label>
+          <label className={error ? styles.employeeFieldInvalid : undefined}>
             <span>Tên {label}</span>
-            <input autoFocus value={value} onChange={(event) => setValue(event.target.value)} placeholder={`Nhập ${label}`} />
+            <input autoFocus value={value} onChange={(event) => { setValue(event.target.value); setError(""); }} placeholder={`Nhập ${label}`} />
+            {error ? <small className={styles.employeeFieldError}>{error}</small> : null}
           </label>
         </div>
         <footer>
@@ -714,7 +886,7 @@ function DeleteEmployeeDialog({ employee, onCancel, onConfirm }: { employee: Emp
           <span className={styles.ticketDialogIcon} style={{ background: "#fee2e2", color: "#b91c1c" }}><Trash2 size={20} /></span>
           <div>
             <h3>Xóa nhân viên {employee.name}</h3>
-            <p>Thao tác này xóa hồ sơ khỏi danh sách demo. Trong hệ thống thật nên chuyển trạng thái Đã nghỉ việc nếu nhân viên đã phát sinh lịch sử.</p>
+            <p>Nếu nhân viên đã có lịch HLV, hoa hồng Sale, phiếu thu chi hoặc check-in liên quan, nên chuyển trạng thái Đã nghỉ việc để giữ lịch sử vận hành.</p>
           </div>
         </header>
         <footer>

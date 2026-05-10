@@ -1030,7 +1030,8 @@ function ManualCheckinModal({
   const [addons, setAddons] = useState<AddonChosen[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<string>(PAYMENT_METHODS[0]);
   const [staff] = useState("Nguyễn Thị Lan");
-  const [tab, setTab] = useState<"package" | "note" | "history">("package");
+  const [tab, setTab] = useState<"package" | "note" | "business" | "companions" | "session" | "packageNote" | "history">("package");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const matches = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -1066,8 +1067,19 @@ function ManualCheckinModal({
 
   const total = addons.reduce((sum, a) => sum + a.price * a.quantity, 0);
 
+  const validate = () => {
+    const next: Record<string, string> = {};
+    if (!selected) next.member = "Chọn hội viên trước khi check-in";
+    if (borrowLocker && !lockerCode) next.lockerCode = "Chọn tủ trống để bàn giao cho hội viên";
+    if (borrowTowel && !towelCode) next.towelCode = "Chọn mã khăn để theo dõi trả khi checkout";
+    if (addons.length > 0 && !paymentMethod) next.paymentMethod = "Chọn phương thức thanh toán dịch vụ thêm";
+    return next;
+  };
+
   const handleConfirm = () => {
-    if (!selected) return;
+    const next = validate();
+    setErrors(next);
+    if (!selected || Object.keys(next).length > 0) return;
     onConfirm({
       memberCode: selected.code,
       name: selected.name,
@@ -1193,11 +1205,19 @@ function ManualCheckinModal({
                       <span>Mượn tủ đồ</span>
                     </label>
                     {borrowLocker ? (
-                      <select onChange={(e) => setLockerCode(e.target.value)} value={lockerCode}>
+                      <select
+                        className={errors.lockerCode ? styles.checkinInputError : ""}
+                        onChange={(e) => {
+                          setLockerCode(e.target.value);
+                          setErrors((prev) => ({ ...prev, lockerCode: "" }));
+                        }}
+                        value={lockerCode}
+                      >
                         <option value="">Chọn tủ trống</option>
                         {LOCKER_OPTIONS.map((l) => <option key={l} value={l}>{l}</option>)}
                       </select>
                     ) : null}
+                    {errors.lockerCode ? <small className={styles.checkinFieldError}>{errors.lockerCode}</small> : null}
                   </div>
 
                   <div className={styles.checkinBorrowGroup}>
@@ -1206,11 +1226,19 @@ function ManualCheckinModal({
                       <span>Mượn khăn</span>
                     </label>
                     {borrowTowel ? (
-                      <select onChange={(e) => setTowelCode(e.target.value)} value={towelCode}>
+                      <select
+                        className={errors.towelCode ? styles.checkinInputError : ""}
+                        onChange={(e) => {
+                          setTowelCode(e.target.value);
+                          setErrors((prev) => ({ ...prev, towelCode: "" }));
+                        }}
+                        value={towelCode}
+                      >
                         <option value="">Chọn khăn trống</option>
                         {TOWEL_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
                       </select>
                     ) : null}
+                    {errors.towelCode ? <small className={styles.checkinFieldError}>{errors.towelCode}</small> : null}
                   </div>
                 </section>
 
@@ -1271,11 +1299,39 @@ function ManualCheckinModal({
                     Ghi chú HV
                   </button>
                   <button
+                    className={tab === "business" ? styles.checkinManualTabActive : ""}
+                    onClick={() => setTab("business")}
+                    type="button"
+                  >
+                    Nghiệp vụ HV
+                  </button>
+                  <button
+                    className={tab === "companions" ? styles.checkinManualTabActive : ""}
+                    onClick={() => setTab("companions")}
+                    type="button"
+                  >
+                    HV tập kèm
+                  </button>
+                  <button
+                    className={tab === "session" ? styles.checkinManualTabActive : ""}
+                    onClick={() => setTab("session")}
+                    type="button"
+                  >
+                    Ghi chú buổi tập
+                  </button>
+                  <button
+                    className={tab === "packageNote" ? styles.checkinManualTabActive : ""}
+                    onClick={() => setTab("packageNote")}
+                    type="button"
+                  >
+                    Ghi chú gói thẻ
+                  </button>
+                  <button
                     className={tab === "history" ? styles.checkinManualTabActive : ""}
                     onClick={() => setTab("history")}
                     type="button"
                   >
-                    Lịch sử check-in
+                    Lịch sử
                   </button>
                 </div>
 
@@ -1295,10 +1351,26 @@ function ManualCheckinModal({
                       <div><dt>NV Sale</dt><dd>Phạm Văn Đức</dd></div>
                     </dl>
                     <div className={styles.checkinPkgLinks}>
-                      <button type="button">Lịch sử HĐ</button>
-                      <button type="button">Khung giờ tập</button>
-                      <button type="button">Công nợ</button>
+                      <button onClick={() => setTab("history")} type="button">Lịch sử HĐ</button>
+                      <button onClick={() => setTab("business")} type="button">Khung giờ tập</button>
+                      <button onClick={() => setTab("business")} type="button">Công nợ</button>
                     </div>
+                    <table className={styles.checkinContractTable}>
+                      <thead>
+                        <tr><th>Mã HĐ</th><th>Dịch vụ</th><th>Bắt đầu</th><th>Kết thúc</th><th>Trạng thái</th><th>Còn lại</th><th>Sale</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>{selected.contractCode}</td>
+                          <td>{selected.packageName}</td>
+                          <td>01/02/2026</td>
+                          <td>{selected.packageEnd}</td>
+                          <td><span className={styles.checkinStatusActive}>Đang hiệu lực</span></td>
+                          <td>{selected.packageRemaining} buổi</td>
+                          <td>Phạm Văn Đức</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 ) : null}
 
@@ -1306,6 +1378,38 @@ function ManualCheckinModal({
                   <div className={styles.checkinNote}>
                     <p>VIP — Ưu tiên xếp tee đầu giờ. Không dùng caddie nữ.</p>
                     <p>Sinh nhật {selected.code === "HV001" ? "12/05" : "—"}.</p>
+                  </div>
+                ) : null}
+
+                {tab === "business" ? (
+                  <div className={styles.checkinPackageInfo}>
+                    <dl className={styles.checkinPkgGrid}>
+                      <div><dt>Điều kiện HĐ</dt><dd>Đúng chi nhánh, đúng khung giờ, còn lượt tập</dd></div>
+                      <div><dt>Công nợ</dt><dd>0đ quá hạn</dd></div>
+                      <div><dt>Khu vực được vào</dt><dd>Driving Range, Putting Green, Phòng Locker</dd></div>
+                      <div><dt>Giới hạn/ngày</dt><dd>1 lượt chính + dịch vụ mua thêm</dd></div>
+                    </dl>
+                  </div>
+                ) : null}
+
+                {tab === "companions" ? (
+                  <div className={styles.checkinNote}>
+                    <p>Gói hiện tại cho phép tối đa 01 hội viên tập kèm nếu cùng nhóm Family Combo.</p>
+                    <p>Hôm nay chưa ghi nhận hội viên tập kèm trong lượt check-in này.</p>
+                  </div>
+                ) : null}
+
+                {tab === "session" ? (
+                  <div className={styles.checkinNote}>
+                    <p>Buổi tập ưu tiên line gần camera swing để HLV theo dõi video sau buổi tập.</p>
+                    <p>Lễ tân cần nhắc hội viên trả tủ/khăn trước khi checkout.</p>
+                  </div>
+                ) : null}
+
+                {tab === "packageNote" ? (
+                  <div className={styles.checkinNote}>
+                    <p>Gói được tái ký từ hợp đồng HD-2511-021, giữ nguyên quyền lợi khung giờ cao điểm.</p>
+                    <p>Không áp dụng khuyến mãi khi mua thêm bóng tập trong ngày cuối tuần.</p>
                   </div>
                 ) : null}
 
@@ -1744,7 +1848,12 @@ function DeviceFormModal({
   onSave: (d: Device) => void;
 }) {
   const [type, setType] = useState<DeviceType>(editingDevice?.type ?? "FACE");
-  const [code, setCode] = useState(editingDevice?.code ?? "");
+  const nextDeviceCode = (deviceType: DeviceType) => {
+    const prefix = deviceType === "FACE" ? "FACE-CN" : deviceType === "ATTENDANCE" ? "ATT-CN" : "CARD-CN";
+    const next = existingDevices.filter((d) => d.code.startsWith(prefix)).length + 1;
+    return `${prefix}${next}`;
+  };
+  const [code, setCode] = useState(editingDevice?.code ?? nextDeviceCode("FACE"));
   const [name, setName] = useState(editingDevice?.name ?? "");
   const [port, setPort] = useState(String(editingDevice?.port ?? 4370));
   const [ip, setIp] = useState(editingDevice?.ip ?? "");
@@ -1758,6 +1867,13 @@ function DeviceFormModal({
     if (!code.trim()) next.code = "Bắt buộc";
     if (!name.trim()) next.name = "Bắt buộc";
     if (!ip.trim()) next.ip = "Bắt buộc";
+    if (!password.trim()) next.password = "Nhập mật khẩu kết nối thiết bị";
+    if (code.trim() && existingDevices.some((d) => d.id !== editingDevice?.id && d.code.toLowerCase() === code.trim().toLowerCase())) {
+      next.code = "Mã máy đã tồn tại";
+    }
+    if (ip.trim() && !/^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(ip.trim())) {
+      next.ip = "IP không hợp lệ";
+    }
     const p = parseInt(port, 10);
     if (isNaN(p) || p < 1 || p > 65535) next.port = "Cổng 1-65535";
     if (ip.trim() && existingDevices.some((d) => d.id !== editingDevice?.id && d.branch === branch && d.ip === ip.trim())) {
@@ -1812,7 +1928,10 @@ function DeviceFormModal({
               <button
                 className={`${styles.checkinTypeOption} ${type === t.key ? styles.checkinTypeOptionActive : ""}`}
                 key={t.key}
-                onClick={() => setType(t.key)}
+                onClick={() => {
+                  setType(t.key);
+                  setCode(nextDeviceCode(t.key));
+                }}
                 type="button"
               >
                 {t.icon} {t.label}
@@ -1828,27 +1947,28 @@ function DeviceFormModal({
           <div className={styles.checkinDeviceGrid}>
             <label className={styles.checkinField}>
               <span>Mã máy <b>*</b></span>
-              <input onChange={(e) => setCode(e.target.value)} placeholder="VD: FACE-CN1" type="text" value={code} />
+              <input className={errors.code ? styles.checkinInputError : ""} onChange={(e) => setCode(e.target.value)} placeholder="VD: FACE-CN1" type="text" value={code} />
               {errors.code ? <small>{errors.code}</small> : null}
             </label>
             <label className={styles.checkinField}>
               <span>Tên máy <b>*</b></span>
-              <input onChange={(e) => setName(e.target.value)} placeholder="VD: Face cổng chính" type="text" value={name} />
+              <input className={errors.name ? styles.checkinInputError : ""} onChange={(e) => setName(e.target.value)} placeholder="VD: Face cổng chính" type="text" value={name} />
               {errors.name ? <small>{errors.name}</small> : null}
             </label>
             <label className={styles.checkinField}>
               <span>Cổng <b>*</b></span>
-              <input onChange={(e) => setPort(e.target.value)} placeholder="4370" type="number" value={port} />
+              <input className={errors.port ? styles.checkinInputError : ""} onChange={(e) => setPort(e.target.value)} placeholder="4370" type="number" value={port} />
               {errors.port ? <small>{errors.port}</small> : null}
             </label>
             <label className={styles.checkinField}>
               <span>Địa chỉ IP <b>*</b></span>
-              <input onChange={(e) => setIp(e.target.value)} placeholder="192.168.1.21" type="text" value={ip} />
+              <input className={errors.ip ? styles.checkinInputError : ""} onChange={(e) => setIp(e.target.value)} placeholder="192.168.1.21" type="text" value={ip} />
               {errors.ip ? <small>{errors.ip}</small> : null}
             </label>
             <label className={styles.checkinField}>
-              <span>Mật khẩu</span>
-              <input onChange={(e) => setPassword(e.target.value)} placeholder="Nhập mật khẩu thiết bị" type="password" value={password} />
+              <span>Mật khẩu <b>*</b></span>
+              <input className={errors.password ? styles.checkinInputError : ""} onChange={(e) => setPassword(e.target.value)} placeholder="Nhập mật khẩu thiết bị" type="password" value={password} />
+              {errors.password ? <small>{errors.password}</small> : null}
             </label>
             <label className={styles.checkinField}>
               <span>Chi nhánh</span>
@@ -1933,8 +2053,12 @@ function CheckinReceiptModal({
         </header>
         <div className={styles.checkinReceiptBody}>
           <div className={styles.checkinReceiptQr}>
-            <div />
-            <span>QR giao dịch</span>
+            <div aria-label="Mã QR thanh toán">
+              {Array.from({ length: 49 }).map((_, index) => (
+                <span key={index} />
+              ))}
+            </div>
+            <span>QR giao dịch {receipt.id}</span>
           </div>
           <table className={styles.checkinAddonTable}>
             <thead>
@@ -2274,11 +2398,18 @@ function BiometricRegisterModal({
   );
   const [deviceCode, setDeviceCode] = useState<string>(eligibleDevices[0]?.code ?? "");
   const [cardCode, setCardCode] = useState("");
+  const [cardKind, setCardKind] = useState("RFID Mifare 13.56MHz");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState<"setup" | "scanning" | "done">("setup");
 
   const startRegister = () => {
+    const next: Record<string, string> = {};
+    if (type !== "CARD" && !deviceCode) next.deviceCode = "Chọn thiết bị đăng ký";
+    if (type === "CARD" && !cardCode.trim()) next.cardCode = "Quẹt thẻ hoặc nhập mã thẻ";
+    if (type === "CARD" && !/^[A-Z0-9-]{6,24}$/i.test(cardCode.trim())) next.cardCode = "Mã thẻ 6-24 ký tự, chỉ gồm chữ, số hoặc dấu gạch";
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
     if (type === "CARD") {
-      if (!cardCode.trim()) return;
       setStep("done");
     } else {
       setStep("scanning");
@@ -2315,30 +2446,44 @@ function BiometricRegisterModal({
               {type !== "CARD" ? (
                 <label className={styles.checkinField}>
                   <span>Chọn thiết bị {type === "FACE" ? "camera" : "máy quét"}</span>
-                  <select onChange={(e) => setDeviceCode(e.target.value)} value={deviceCode}>
+                  <select className={errors.deviceCode ? styles.checkinInputError : ""} onChange={(e) => setDeviceCode(e.target.value)} value={deviceCode}>
+                    <option value="">Chọn thiết bị</option>
                     {eligibleDevices.map((d) => (
                       <option key={d.id} value={d.code}>{d.name} ({d.code})</option>
                     ))}
                   </select>
+                  {errors.deviceCode ? <small>{errors.deviceCode}</small> : null}
                 </label>
               ) : (
-                <label className={styles.checkinField}>
-                  <span>Mã thẻ từ / barcode <b>*</b></span>
-                  <input
-                    autoFocus
-                    onChange={(e) => setCardCode(e.target.value)}
-                    placeholder="Quẹt thẻ hoặc nhập tay"
-                    type="text"
-                    value={cardCode}
-                  />
-                </label>
+                <div className={styles.checkinBioCardGrid}>
+                  <label className={styles.checkinField}>
+                    <span>Số thẻ <b>*</b></span>
+                    <input
+                      autoFocus
+                      className={errors.cardCode ? styles.checkinInputError : ""}
+                      onChange={(e) => setCardCode(e.target.value.toUpperCase())}
+                      placeholder="Quẹt thẻ hoặc nhập tay"
+                      type="text"
+                      value={cardCode}
+                    />
+                    {errors.cardCode ? <small>{errors.cardCode}</small> : null}
+                  </label>
+                  <label className={styles.checkinField}>
+                    <span>Loại thẻ <b>*</b></span>
+                    <select onChange={(e) => setCardKind(e.target.value)} value={cardKind}>
+                      <option>RFID Mifare 13.56MHz</option>
+                      <option>Thẻ từ 125KHz</option>
+                      <option>Barcode / QR nội bộ</option>
+                    </select>
+                  </label>
+                </div>
               )}
               <p className={styles.checkinBioHint}>
                 {type === "FACE"
                   ? "HV nhìn thẳng vào camera, giữ khoảng cách 30-50cm. Hệ thống sẽ chụp 3 góc khuôn mặt."
                   : type === "FINGER"
                   ? "HV đặt ngón trỏ lên máy quét. Lặp lại 3 lần để hệ thống lấy mẫu chính xác."
-                  : "Quẹt thẻ vào đầu đọc hoặc nhập mã barcode trên thẻ."}
+                  : `Quẹt ${cardKind} vào đầu đọc hoặc nhập mã in trên thẻ.`}
               </p>
               <button className={styles.checkinBtnConfirm} onClick={startRegister} type="button">
                 Bắt đầu đăng ký

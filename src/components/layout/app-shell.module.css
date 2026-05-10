@@ -311,6 +311,173 @@
   font-weight: 800;
 }
 
+.notificationButton {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, #eff6ff);
+  color: #1d4ed8;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.10);
+}
+
+.notificationButton span {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.notificationPanel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 144px;
+  z-index: 270;
+  width: min(420px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 26px 80px rgba(15, 23, 42, 0.22);
+}
+
+.notificationPanel header,
+.notificationPanel footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background: #f8fafc;
+}
+
+.notificationPanel header strong,
+.notificationPanel header span {
+  display: block;
+}
+
+.notificationPanel header strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.notificationPanel header span {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notificationPanel header button,
+.notificationPanel footer button {
+  min-height: 34px;
+  border: 1px solid #bfdbfe;
+  border-radius: 9px;
+  padding: 7px 10px;
+  background: #ffffff;
+  color: #1d4ed8;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.notificationPanel footer button:last-child {
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.notificationPanel section {
+  max-height: 390px;
+  overflow: auto;
+  display: grid;
+  padding: 8px;
+}
+
+.notificationItem {
+  position: relative;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 11px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 11px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+}
+
+.notificationItem:hover,
+.notificationUnread {
+  border-color: #dbeafe;
+  background: linear-gradient(135deg, #eff6ff, #ffffff);
+}
+
+.notificationItem i {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: #2563eb;
+}
+
+.notificationToneRed { background: #ef4444 !important; }
+.notificationToneAmber { background: #f59e0b !important; }
+.notificationToneGreen { background: #16a34a !important; }
+.notificationToneBlue { background: #2563eb !important; }
+
+.notificationItem strong,
+.notificationItem small,
+.notificationItem em {
+  display: block;
+}
+
+.notificationItem strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.notificationItem small {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.notificationItem em {
+  margin-top: 6px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.notificationEmpty {
+  margin: 0;
+  padding: 18px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 850;
+  text-align: center;
+}
+
 .content {
   position: relative;
   padding: 24px;
@@ -961,6 +1128,585 @@
   border-color: transparent;
   background: #dc2626;
   color: #ffffff;
+}
+
+.accountWorkDialog {
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 44px);
+  overflow: auto;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.30);
+}
+
+.accountWorkDialog > header {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #eff6ff, #ffffff 62%, #ecfdf5);
+}
+
+.accountWorkDialog > header > span {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #2563eb, #14b8a6);
+  color: #ffffff;
+}
+
+.accountWorkDialog > header strong,
+.accountWorkDialog > header small {
+  display: block;
+}
+
+.accountWorkDialog > header strong {
+  color: #0f172a;
+  font-size: 19px;
+  font-weight: 950;
+}
+
+.accountWorkDialog > header small {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.accountWorkDialog > header > button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+}
+
+.accountFormGrid,
+.accountSecurityGrid,
+.accountSubscription,
+.accountHelpGrid {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.accountFormGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.accountFormGrid label,
+.accountSecurityGrid label {
+  display: grid;
+  gap: 7px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.accountFormGrid input,
+.accountFormGrid select,
+.accountSecurityGrid input {
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 14px;
+}
+
+.accountFullField {
+  grid-column: 1 / -1;
+}
+
+.accountSecurityGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.accountSecurityGrid article {
+  grid-column: span 1;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  padding: 13px;
+  background: #eff6ff;
+}
+
+.accountSecurityGrid article button {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.accountSecurityGrid article svg {
+  grid-row: 1 / 3;
+  width: 42px;
+  height: 42px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #2563eb;
+}
+
+.accountSecurityGrid article strong,
+.accountSecurityGrid article span {
+  grid-column: 2;
+  display: block;
+}
+
+.accountSecurityGrid article strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.accountSecurityGrid article span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.accountSecurityGrid article button,
+.accountSubscription button,
+.accountHelpGrid button,
+.accountWorkDialog > footer button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #1d4ed8;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.accountSubscription article {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #bbf7d0;
+  border-radius: 15px;
+  padding: 15px;
+  background: linear-gradient(135deg, #f0fdf4, #ffffff);
+}
+
+.accountSubscription article svg {
+  width: 46px;
+  height: 46px;
+  padding: 11px;
+  border-radius: 14px;
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.accountSubscription strong,
+.accountSubscription span,
+.accountSubscription b {
+  display: block;
+}
+
+.accountSubscription strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.accountSubscription span {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.accountSubscription b {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 12px;
+}
+
+.accountSubscription dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.accountSubscription dl div {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.accountSubscription dt {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.accountSubscription dd {
+  margin: 5px 0 0;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.accountHelpGrid button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.accountHelpGrid button svg {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  padding: 10px;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+
+.accountHelpGrid strong,
+.accountHelpGrid small {
+  display: block;
+}
+
+.accountHelpGrid strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.accountHelpGrid small {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.accountWorkDialog > footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+}
+
+.accountWorkDialog > footer button:last-child {
+  border-color: transparent;
+  background: linear-gradient(135deg, #2563eb, #14b8a6);
+  color: #ffffff;
+}
+
+.accountToast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 500;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.16);
+}
+
+.themeDark {
+  background: #0b1120;
+  color: #e5e7eb;
+  color-scheme: dark;
+}
+
+.themeDark .main,
+.themeDark .content {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.12), transparent 32%),
+    linear-gradient(180deg, #111827, #172033);
+}
+
+.themeDark .topbar,
+.themeDark .sidebar,
+.themeDark .accountMenu,
+.themeDark .notificationPanel,
+.themeDark .branchMenu,
+.themeDark .accountWorkDialog,
+.themeDark .accountConfirmDialog {
+  border-color: rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.96);
+  color: #e5e7eb;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
+
+.themeDark .sidebar {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(17, 24, 39, 0.98));
+}
+
+.themeDark .topbar strong,
+.themeDark .role,
+.themeDark .sidebarBrand h1,
+.themeDark .navigation button,
+.themeDark .accountMenuList strong,
+.themeDark .accountLogout strong,
+.themeDark .notificationItem strong,
+.themeDark .accountWorkDialog strong,
+.themeDark .accountConfirmDialog h3 {
+  color: #f8fafc;
+}
+
+.themeDark .topbar p,
+.themeDark .accountMenuList small,
+.themeDark .accountLogout small,
+.themeDark .notificationItem small,
+.themeDark .accountWorkDialog small,
+.themeDark .accountConfirmDialog p,
+.themeDark .sidebarBrand small,
+.themeDark .navGroup {
+  color: #cbd5e1;
+}
+
+.themeDark .navigation button {
+  color: #dbeafe;
+}
+
+.themeDark .navIcon {
+  background: rgba(226, 232, 240, 0.14);
+  color: #e0f2fe;
+}
+
+.themeDark .navigation button:hover,
+.themeDark .activeNav {
+  background: #f8fafc !important;
+  color: #1d4ed8 !important;
+}
+
+.themeDark .navigation button:hover .navIcon,
+.themeDark .activeNav .navIcon {
+  color: #ffffff;
+}
+
+.themeDark .branchButton,
+.themeDark .notificationButton,
+.themeDark .accountSegment button,
+.themeDark .accountTheme button,
+.themeDark .accountMenuList button,
+.themeDark .accountLogout button,
+.themeDark .notificationItem,
+.themeDark .accountFormGrid input,
+.themeDark .accountFormGrid select,
+.themeDark .accountSecurityGrid input,
+.themeDark .accountWorkDialog > header > button {
+  border-color: rgba(148, 163, 184, 0.28);
+  background: rgba(30, 41, 59, 0.86);
+  color: #e5e7eb;
+}
+
+.themeDark .accountWorkDialog > header,
+.themeDark .notificationPanel header,
+.themeDark .notificationPanel footer,
+.themeDark .accountMenu footer,
+.themeDark .accountWorkDialog > footer {
+  border-color: rgba(148, 163, 184, 0.24);
+  background: rgba(15, 23, 42, 0.94);
+}
+
+.themeDark .content :global(.feature-styles-module__ZzLFva__featurePage),
+.themeDark .content :global(.feature-styles-module__ZzLFva__dashboardShell),
+.themeDark .content :global(.feature-styles-module__ZzLFva__reportsShell) {
+  color-scheme: dark;
+}
+
+.themeDark .content :global(.feature-styles-module__ZzLFva__titleBlock h2),
+.themeDark .content :global(.feature-styles-module__ZzLFva__screen > .feature-styles-module__ZzLFva__titleBlock h2) {
+  color: #f8fafc !important;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.24);
+}
+
+.themeDark .content :global(.feature-styles-module__ZzLFva__titleBlock p),
+.themeDark .content :global(.feature-styles-module__ZzLFva__screen > .feature-styles-module__ZzLFva__titleBlock p) {
+  color: #dbeafe !important;
+}
+
+.themeDark .content :global(article),
+.themeDark .content :global(section),
+.themeDark .content :global(table),
+.themeDark .content :global(thead),
+.themeDark .content :global(tbody),
+.themeDark .content :global(input),
+.themeDark .content :global(select),
+.themeDark .content :global(textarea) {
+  border-color: rgba(148, 163, 184, 0.26);
+}
+
+.themeDark .content :global([class*="feature-styles-module"]) {
+  color-scheme: dark;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__screen"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__featurePage"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__dashboardShell"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsShell"]) {
+  background: transparent !important;
+  color: #e5e7eb !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Hero"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__hero"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Panel"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__panel"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Card"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__card"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__TableWrap"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__tableWrap"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Filter"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__filter"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Tabs"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__tabs"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Chart"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__chart"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Board"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__board"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Shell"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__shell"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsDrilldown"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsOverviewCharts"] > article),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsFinanceTiles"] article),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsLifecycleGrid"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsCoachCards"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsFinanceFlow"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsMiniMix"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsAlerts"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsCapacityList"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsDataTable"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsDrillGrid"] article) {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  background:
+    linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.92)) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.22) !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__Kpi"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__kpi"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsKpi"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__statCard"]) {
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24) !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module"] h1),
+.themeDark .content :global([class*="feature-styles-module"] h2),
+.themeDark .content :global([class*="feature-styles-module"] h3),
+.themeDark .content :global([class*="feature-styles-module"] h4),
+.themeDark .content :global([class*="feature-styles-module"] h5),
+.themeDark .content :global([class*="feature-styles-module"] strong),
+.themeDark .content :global([class*="feature-styles-module"] th),
+.themeDark .content :global([class*="feature-styles-module"] dt) {
+  color: #f8fafc !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module"] p),
+.themeDark .content :global([class*="feature-styles-module"] span),
+.themeDark .content :global([class*="feature-styles-module"] small),
+.themeDark .content :global([class*="feature-styles-module"] em),
+.themeDark .content :global([class*="feature-styles-module"] dd),
+.themeDark .content :global([class*="feature-styles-module"] td),
+.themeDark .content :global([class*="feature-styles-module"] li),
+.themeDark .content :global([class*="feature-styles-module"] label) {
+  color: #cbd5e1 !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module"] input),
+.themeDark .content :global([class*="feature-styles-module"] select),
+.themeDark .content :global([class*="feature-styles-module"] textarea),
+.themeDark .content :global([class*="feature-styles-module"] [contenteditable="true"]) {
+  border-color: rgba(148, 163, 184, 0.34) !important;
+  background: rgba(15, 23, 42, 0.92) !important;
+  color: #f8fafc !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module"] input::placeholder),
+.themeDark .content :global([class*="feature-styles-module"] textarea::placeholder) {
+  color: #94a3b8 !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module"] table),
+.themeDark .content :global([class*="feature-styles-module"] thead),
+.themeDark .content :global([class*="feature-styles-module"] tbody),
+.themeDark .content :global([class*="feature-styles-module"] tr) {
+  background: transparent !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module"] thead tr),
+.themeDark .content :global([class*="feature-styles-module"] th),
+.themeDark .content :global([class*="feature-styles-module"] [class*="Header"]) {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module"] button:not([class*="reportsKpi"]):not([class*="active"]):not([class*="Active"])) {
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__detailTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__classesTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__cashbookTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__commissionTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsSubTabs"] button) {
+  background: rgba(15, 23, 42, 0.78) !important;
+  color: #dbeafe !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__reportsTabActive"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__activeDetailTab"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsSubTabActive"]) {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28) !important;
+}
+
+.fontSmall {
+  font-size: 0.94rem;
+}
+
+.fontSmall .main,
+.fontSmall .sidebar {
+  zoom: 0.94;
+}
+
+.fontLarge {
+  font-size: 1.06rem;
+}
+
+.fontLarge .main,
+.fontLarge .sidebar {
+  zoom: 1.06;
 }
 
 @media (max-width: 900px) {
