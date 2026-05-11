@@ -13,16 +13,19 @@ import {
   Eye,
   Filter,
   FileSpreadsheet,
+  GraduationCap,
   Mail,
   Pencil,
   Phone,
   Plus,
   Search,
   Settings,
+  ShieldCheck,
   Trash2,
   Upload,
   UploadCloud,
   User,
+  UserCheck,
   UserPlus,
   X,
 } from "lucide-react";
@@ -171,12 +174,16 @@ function toCustomerCsv(rows: Customer[]) {
 }
 
 export default function CustomersView() {
+  const [moduleTab, setModuleTab] = useState<"list" | "learning">("list");
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailTab, setDetailTab] = useState("Thông tin cơ bản");
+  const [autoAddTrainingResult, setAutoAddTrainingResult] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedLearningContext, setSelectedLearningContext] = useState<CustomerLearningContext | null>(null);
+  const [learningResults, setLearningResults] = useState<Record<string, TrainingResultEntry[]>>({});
   const [nestedModal, setNestedModal] = useState<"group" | "source" | "companion" | null>(null);
   const [rows, setRows] = useState(customerRows);
   const [query, setQuery] = useState("");
@@ -318,10 +325,52 @@ export default function CustomersView() {
   const activeAdvCount = (Object.keys(advFilter) as Array<keyof AdvFilter>).filter(
     (key) => advFilter[key] !== DEFAULT_ADV_FILTER[key]
   ).length;
+  const selectedDetailLearningContext =
+    selectedLearningContext ??
+    (selectedCustomer
+      ? buildLearningRows(rows, learningResults).find((row) => row.customer.code === selectedCustomer.code) ?? null
+      : null);
 
   return (
     <>
       <section className={styles.customerScreen}>
+        <div className={styles.customerModuleTabs}>
+          <button
+            className={moduleTab === "list" ? styles.customerModuleTabActive : styles.customerModuleTab}
+            onClick={() => setModuleTab("list")}
+            type="button"
+          >
+            Danh sách hội viên
+          </button>
+          <button
+            className={moduleTab === "learning" ? styles.customerModuleTabActive : styles.customerModuleTab}
+            onClick={() => setModuleTab("learning")}
+            type="button"
+          >
+            Hồ sơ tập luyện
+          </button>
+        </div>
+
+        {moduleTab === "learning" ? (
+          <CustomerLearningOverview
+            customers={rows}
+            learningResults={learningResults}
+            onOpenCustomer={(customer, tab, autoAdd = false, context) => {
+              setSelectedCustomer(customer);
+              setSelectedLearningContext(context ?? null);
+              setDetailTab(tab);
+              setAutoAddTrainingResult(autoAdd);
+              setDetailOpen(true);
+            }}
+            onSaveTrainingResult={(customerCode, entry) => {
+              setLearningResults((current) => ({
+                ...current,
+                [customerCode]: [entry, ...(current[customerCode] ?? [])],
+              }));
+            }}
+          />
+        ) : (
+          <>
         <div className={styles.customerToolbar}>
           <h2>Danh sách thành viên</h2>
           <div className={styles.customerActions}>
@@ -598,6 +647,8 @@ export default function CustomersView() {
             </div>
           </div>
         </section>
+          </>
+        )}
       </section>
 
       {addOpen ? (
@@ -650,15 +701,681 @@ export default function CustomersView() {
           onClose={() => {
             setDetailOpen(false);
             setSelectedCustomer(null);
+            setSelectedLearningContext(null);
+            setAutoAddTrainingResult(false);
           }}
           onEdit={() => {
             if (!selectedCustomer) return;
             setDetailOpen(false);
+            setAutoAddTrainingResult(false);
             setEditOpen(true);
+          }}
+          autoAddTrainingResult={autoAddTrainingResult}
+          extraProfile={selectedDetailLearningContext?.profile}
+          extraTas={selectedDetailLearningContext?.tas}
+          extraTrainingResults={
+            selectedDetailLearningContext
+              ? selectedDetailLearningContext.trainings
+              : selectedCustomer
+                ? learningResults[selectedCustomer.code]
+                : undefined
+          }
+          onTrainingResultsChange={(nextResults) => {
+            if (!selectedCustomer) return;
+            setLearningResults((current) => ({ ...current, [selectedCustomer.code]: nextResults }));
+            setSelectedLearningContext((current) => current ? { ...current, trainings: nextResults } : current);
           }}
         />
       ) : null}
     </>
+  );
+}
+
+type TrainingResultEntry = {
+  name: string;
+  pkg: string;
+  tier: string;
+  date: string;
+  coach: string;
+  ta: string;
+  session: string;
+  content: string;
+  contentSub: string;
+  drill: string;
+  drillSub: string;
+  note: string;
+};
+
+type CustomerLearningRow = {
+  customer: Customer;
+  assignedCoach: string;
+  assignedPackage: string;
+  assignedTier: string;
+  profile: Profile | null;
+  trainings: TrainingResultEntry[];
+  latestTraining: TrainingResultEntry | null;
+  tas: TaEntry[];
+};
+
+type CustomerLearningContext = Pick<CustomerLearningRow, "profile" | "tas" | "trainings">;
+
+const LEARNING_CONTRACT_ASSIGNMENTS = [
+  { pkg: "Eagle", tier: "Premium", coach: "Trần Quốc Toàn", type: "Gói HLV 1-1" },
+  { pkg: "Birdie", tier: "Standard", coach: "Nguyễn Văn Hải", type: "Lớp nhóm" },
+  { pkg: "Par", tier: "Basic", coach: "Trần Quốc Toàn", type: "Gói HLV cá nhân" },
+  { pkg: "Eagle", tier: "Premium", coach: "Lê Minh", type: "Gói HLV 1-1" },
+];
+
+const LEARNING_PROFILE_VARIANTS: Array<Partial<Profile>> = [
+  {
+    level: "Beginner",
+    handicap: "Chưa có HCP",
+    golfStartTime: "20/05/2026",
+    playingGoal: "Nắm vững grip, setup và lên sân 9 hố",
+    handedness: "Phải",
+    otherSports: "Gym, chạy bộ",
+    clubs: "Bộ gậy thuê tại trung tâm",
+    coachFreq: "2",
+    selfFreq: "1",
+    fitness: 4,
+    healthNotes: "Cần lưu ý cổ tay phải khi tập driver",
+  },
+  {
+    level: "Experienced",
+    handicap: "HCP 24",
+    golfStartTime: "03/2024",
+    playingGoal: "Ổn định short game và giảm điểm xuống dưới 95",
+    handedness: "Phải",
+    otherSports: "Tennis",
+    clubs: "Callaway Rogue ST",
+    coachFreq: "1",
+    selfFreq: "2",
+    fitness: 3,
+    healthNotes: "Không có chấn thương đáng lưu ý",
+    golfDuration: "1 năm",
+    currentHandicap: "24",
+    targetHandicap: "18",
+    satisfiedPart: "Putting dưới 2m",
+    improveAspects: "Chipping quanh green, kiểm soát khoảng cách wedge",
+    struggles: "Bóng slice khi dùng driver",
+    detailedDesc: "Muốn có routine rõ hơn trước mỗi cú đánh để giảm lỗi tâm lý.",
+    iron7Distance: "125 yard",
+    driverDistance: "205 yard",
+  },
+  {
+    level: "Beginner",
+    handicap: "Chưa có HCP",
+    golfStartTime: "05/2026",
+    playingGoal: "Học thử để chọn gói HLV phù hợp",
+    handedness: "Trái",
+    otherSports: "Yoga",
+    clubs: "Chưa có bộ gậy riêng",
+    coachFreq: "1",
+    selfFreq: "1",
+    fitness: 5,
+    healthNotes: "Thể lực tốt, cần làm quen nhịp swing",
+  },
+  {
+    level: "Experienced",
+    handicap: "HCP 16",
+    golfStartTime: "2022",
+    playingGoal: "Tăng độ ổn định iron và chuẩn bị giải nội bộ",
+    handedness: "Phải",
+    otherSports: "Bơi",
+    clubs: "Titleist T200",
+    coachFreq: "2",
+    selfFreq: "3",
+    fitness: 4,
+    healthNotes: "Cần khởi động kỹ vùng lưng dưới",
+    golfDuration: "3 năm",
+    currentHandicap: "16",
+    targetHandicap: "12",
+    satisfiedPart: "Iron 7 ổn định",
+    improveAspects: "Course management, bunker shot",
+    struggles: "Mất nhịp khi gặp gió ngược",
+    detailedDesc: "Cần kế hoạch tập theo giải và theo dõi dispersion từng gậy.",
+    iron7Distance: "145 yard",
+    driverDistance: "235 yard",
+  },
+];
+
+const LEARNING_TRAINING_RESULTS: TrainingResultEntry[] = [
+  {
+    name: "Nguyễn Văn A",
+    pkg: "Eagle",
+    tier: "Premium",
+    date: "15/05/2024",
+    coach: "Trần Quốc Toàn",
+    ta: "Lê Minh",
+    session: "Buổi 1",
+    content: "Swing & Driver",
+    contentSub: "Chỉnh sửa tư thế & tốc độ",
+    drill: "Swing & Driver",
+    drillSub: "Bài tập giữ trục và nhịp backswing",
+    note: "Tốc độ đầu gậy cải thiện 15% so với tháng trước.",
+  },
+  {
+    name: "Trần Thị B",
+    pkg: "Birdie",
+    tier: "Standard",
+    date: "18/05/2024",
+    coach: "Nguyễn Văn Hải",
+    ta: "Phạm Hoàng Nam",
+    session: "Buổi 4",
+    content: "Short Game",
+    contentSub: "Chipping quanh green",
+    drill: "Landing zone drill",
+    drillSub: "Tập 30 bóng ở 3 khoảng cách",
+    note: "Cần follow thêm bài tập khoảng cách 20-30 yards.",
+  },
+  {
+    name: "Lê Văn C",
+    pkg: "Par",
+    tier: "Basic",
+    date: "20/05/2024",
+    coach: "Trần Quốc Toàn",
+    ta: "Lê Minh",
+    session: "Buổi 2",
+    content: "Putting",
+    contentSub: "Kiểm soát lực và hướng mặt gậy",
+    drill: "Gate drill",
+    drillSub: "10 phút trước mỗi buổi tự tập",
+    note: "Putting ổn hơn, vẫn cần kiểm tra routine trước bóng.",
+  },
+];
+
+const LEARNING_TA_ASSIGNMENTS: TaEntry[][] = [
+  [
+    { code: "NV-0012", name: "Nguyễn Văn An", phone: "0901234567", email: "an.nguyen@example.com", course: "Golf Swing 3 tháng", schedule: "T2-T4-T6 · 07:00-09:00", note: "Theo sát giai đoạn chỉnh swing." },
+    { code: "NV-0056", name: "Lê Minh Anh", phone: "0923456712", email: "leminhanh@example.com", course: "Short Game Premium", schedule: "T3-T5 · 16:00-18:00", note: "Hỗ trợ ghi nhận bài tập về nhà." },
+  ],
+  [
+    { code: "NV-0072", name: "Phạm Hoàng Nam", phone: "0901224578", email: "phnam@example.com", course: "Driving Range Foundation", schedule: "T3-T5-T7 · 14:00-16:00", note: "Nhắc lịch tự tập và cập nhật kết quả." },
+  ],
+  [
+    { code: "NV-0034", name: "Trần Thị Bình", phone: "0912345678", email: "binh.tran@example.com", course: "Short Game Premium", schedule: "T2-T6 · 18:00-20:00", note: "Follow kỹ phần putting." },
+  ],
+];
+
+function buildLearningRows(customers: Customer[], learningResults: Record<string, TrainingResultEntry[]>): CustomerLearningRow[] {
+  return customers.flatMap((customer, index) => {
+    const isRegistered = customer.registerDate !== "---" && customer.status !== "Chưa đăng ký";
+    const training = LEARNING_TRAINING_RESULTS[index % LEARNING_TRAINING_RESULTS.length];
+    const tas = LEARNING_TA_ASSIGNMENTS[index % LEARNING_TA_ASSIGNMENTS.length];
+    const contract = LEARNING_CONTRACT_ASSIGNMENTS[index % LEARNING_CONTRACT_ASSIGNMENTS.length];
+    const profileVariant = LEARNING_PROFILE_VARIANTS[index % LEARNING_PROFILE_VARIANTS.length];
+    const hasProfile = isRegistered && index % 5 !== 3;
+    const hasTraining = isRegistered && index % 4 !== 2;
+    const assignedTas = isRegistered && index % 6 !== 4 ? tas : [];
+    const isTrainingRelated = isRegistered || hasProfile || hasTraining || assignedTas.length > 0;
+    if (!isTrainingRelated) return [];
+    const hasSavedTrainings = Object.prototype.hasOwnProperty.call(learningResults, customer.code);
+    const savedTrainings = learningResults[customer.code] ?? [];
+    const seededLatest = hasTraining ? {
+      ...training,
+      name: customer.name,
+      pkg: contract.pkg,
+      tier: contract.tier,
+      ta: assignedTas[0]?.name ?? training.ta,
+    } : null;
+    const seededTrainings = seededLatest ? makeTrainingSeries(seededLatest) : [];
+    const trainings = hasSavedTrainings ? savedTrainings : seededTrainings;
+    return [{
+      customer,
+      assignedCoach: contract.coach,
+      assignedPackage: contract.pkg,
+      assignedTier: contract.tier,
+      profile: hasProfile ? {
+        ...DEFAULT_PROFILE,
+        ...profileVariant,
+        name: customer.name,
+        gender: customer.gender,
+        dob: ddmmyyyyToISO(customer.birth) || customer.birth,
+        phone: customer.phone,
+        email: customer.email,
+        coachEpga: hasTraining ? training.coach : contract.coach,
+      } : null,
+      trainings,
+      latestTraining: trainings[0] ?? null,
+      tas: assignedTas,
+    }];
+  });
+}
+
+function getTrainingSessionNumber(training: TrainingResultEntry | null) {
+  const match = training?.session.match(/\d+/);
+  return match ? Number(match[0]) : 0;
+}
+
+function makeTrainingSeries(latest: TrainingResultEntry) {
+  const count = Math.max(1, getTrainingSessionNumber(latest));
+  return Array.from({ length: count }, (_, index): TrainingResultEntry => {
+    const sessionNumber = count - index;
+    const template = LEARNING_TRAINING_RESULTS[(sessionNumber - 1) % LEARNING_TRAINING_RESULTS.length];
+    return {
+      ...template,
+      name: latest.name,
+      pkg: latest.pkg,
+      tier: latest.tier,
+      coach: latest.coach,
+      ta: latest.ta,
+      session: `Buổi ${sessionNumber}`,
+      date: index === 0 ? latest.date : `${String(Math.max(1, 15 + sessionNumber)).padStart(2, "0")}/05/2024`,
+      ...(sessionNumber === count ? latest : {}),
+    };
+  });
+}
+
+function CustomerLearningOverview({
+  customers,
+  learningResults,
+  onOpenCustomer,
+  onSaveTrainingResult,
+}: {
+  customers: Customer[];
+  learningResults: Record<string, TrainingResultEntry[]>;
+  onOpenCustomer: (customer: Customer, tab: string, autoAdd?: boolean, context?: CustomerLearningContext) => void;
+  onSaveTrainingResult: (customerCode: string, entry: TrainingResultEntry) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [taFilter, setTaFilter] = useState("Tất cả TA");
+  const [taFilterQuery, setTaFilterQuery] = useState("");
+  const [taFilterOpen, setTaFilterOpen] = useState(false);
+  const [profileFilter, setProfileFilter] = useState("Tất cả profile");
+  const [resultFilter, setResultFilter] = useState("Tất cả kết quả");
+  const [selected, setSelected] = useState<CustomerLearningRow | null>(null);
+  const [quickAddTarget, setQuickAddTarget] = useState<CustomerLearningRow | null>(null);
+  const [quickProfileTarget, setQuickProfileTarget] = useState<CustomerLearningRow | null>(null);
+  const [quickTaTarget, setQuickTaTarget] = useState<CustomerLearningRow | null>(null);
+  const [profileOverrides, setProfileOverrides] = useState<Record<string, Profile>>({});
+  const [taOverrides, setTaOverrides] = useState<Record<string, TaEntry[]>>({});
+
+  const learningRows = buildLearningRows(customers, learningResults).map((row) => ({
+    ...row,
+    profile: profileOverrides[row.customer.code] ?? row.profile,
+    tas: taOverrides[row.customer.code] ?? row.tas,
+  }));
+  const taOptions = Array.from(new Set(learningRows.flatMap((row) => row.tas.map((ta) => ta.name))));
+  const taFilterOptions = ["Tất cả TA", "Chưa có TA", ...taOptions].filter((option) => {
+    const normalized = taFilterQuery.trim().toLowerCase();
+    return !normalized || option.toLowerCase().includes(normalized);
+  });
+  const withProfile = learningRows.filter((row) => row.profile).length;
+  const withResult = learningRows.filter((row) => row.trainings.length > 0).length;
+  const missingTa = learningRows.filter((row) => row.tas.length === 0).length;
+  const filtered = learningRows.filter((row) => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery) {
+      const haystack = [
+        row.customer.code,
+        row.customer.name,
+        row.customer.phone,
+        row.assignedCoach,
+        row.assignedPackage,
+        row.assignedTier,
+        row.latestTraining?.coach ?? "",
+        row.latestTraining?.ta ?? "",
+        row.latestTraining?.content ?? "",
+        row.latestTraining?.drill ?? "",
+        ...row.trainings.flatMap((training) => [training.date, training.session, training.content, training.drill, training.note]),
+        row.profile?.playingGoal ?? "",
+        ...row.tas.map((ta) => ta.name),
+      ].join(" ").toLowerCase();
+      if (!haystack.includes(normalizedQuery)) return false;
+    }
+    if (profileFilter === "Đã có profile" && !row.profile) return false;
+    if (profileFilter === "Chưa có profile" && row.profile) return false;
+    if (resultFilter === "Đã có kết quả" && row.trainings.length === 0) return false;
+    if (resultFilter === "Chưa có kết quả" && row.trainings.length > 0) return false;
+    if (taFilter === "Chưa có TA" && row.tas.length > 0) return false;
+    if (taFilter !== "Tất cả TA" && taFilter !== "Chưa có TA" && !row.tas.some((ta) => ta.name === taFilter)) return false;
+    return true;
+  });
+
+  return (
+    <>
+      <section className={styles.learningOverview}>
+        <div className={styles.learningHeader}>
+          <div>
+            <h2>Hồ sơ tập luyện</h2>
+            <p>Chỉ hiển thị học viên có liên quan đào tạo; gói và HLV lấy từ hợp đồng/lịch học, kết quả lấy từ tab kết quả tập luyện.</p>
+          </div>
+        </div>
+
+        <div className={styles.learningKpis}>
+          <div className={styles.learningKpiBlue}>
+            <span><GraduationCap size={18} /></span>
+            <div><em>Học viên đào tạo</em><strong>{learningRows.length}</strong></div>
+          </div>
+          <div className={styles.learningKpiGreen}>
+            <span><UserCheck size={18} /></span>
+            <div><em>Có profile</em><strong>{withProfile}/{learningRows.length}</strong></div>
+          </div>
+          <div className={styles.learningKpiPurple}>
+            <span><ShieldCheck size={18} /></span>
+            <div><em>Có kết quả</em><strong>{withResult}/{learningRows.length}</strong></div>
+          </div>
+          <div className={styles.learningKpiAmber}>
+            <span><AlertTriangle size={18} /></span>
+            <div><em>Chưa có TA</em><strong>{missingTa}</strong></div>
+          </div>
+        </div>
+
+        <div className={styles.learningFilters}>
+          <label className={styles.customerSearch}>
+            <Search size={18} />
+            <input
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Tìm tên, mã HV, SĐT, HLV, nội dung tập..."
+              value={query}
+            />
+          </label>
+          <div className={styles.learningTaFilter}>
+            <button onClick={() => setTaFilterOpen((value) => !value)} type="button">
+              <span>{taFilter}</span>
+              <ChevronDown size={15} />
+            </button>
+            {taFilterOpen ? (
+              <div className={styles.learningTaFilterMenu}>
+                <label>
+                  <Search size={15} />
+                  <input
+                    autoFocus
+                    onChange={(event) => setTaFilterQuery(event.target.value)}
+                    placeholder="Tìm TA..."
+                    value={taFilterQuery}
+                  />
+                </label>
+                <div>
+                  {taFilterOptions.map((option) => (
+                    <button
+                      className={taFilter === option ? styles.learningTaFilterActive : undefined}
+                      key={option}
+                      onClick={() => {
+                        setTaFilter(option);
+                        setTaFilterOpen(false);
+                        setTaFilterQuery("");
+                      }}
+                      type="button"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                  {taFilterOptions.length === 0 ? <span>Không tìm thấy TA</span> : null}
+                </div>
+              </div>
+            ) : null}
+          </div>
+          <select className={styles.selectInput} onChange={(event) => setProfileFilter(event.target.value)} value={profileFilter}>
+            {["Tất cả profile", "Đã có profile", "Chưa có profile"].map((option) => <option key={option}>{option}</option>)}
+          </select>
+          <select className={styles.selectInput} onChange={(event) => setResultFilter(event.target.value)} value={resultFilter}>
+            {["Tất cả kết quả", "Đã có kết quả", "Chưa có kết quả"].map((option) => <option key={option}>{option}</option>)}
+          </select>
+        </div>
+
+        <section className={styles.memberTableCard}>
+          <div className={styles.memberTableWrap}>
+            <table className={`${styles.memberTable} ${styles.learningTable}`}>
+              <thead>
+                <tr>
+                  <th>Học viên</th>
+                  <th>Profile</th>
+                  <th>TA phụ trách</th>
+                  <th>Gói tập</th>
+                  <th>HLV</th>
+                  <th>Đã học</th>
+                  <th>Buổi gần nhất</th>
+                  <th>Nội dung gần nhất</th>
+                  <th>Drill/BTVN gần nhất</th>
+                  <th>Ghi chú gần nhất</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((row) => {
+                  const latest = row.latestTraining;
+                  return (
+                    <tr key={row.customer.code}>
+                      <td>
+                        <button className={styles.memberCode} onClick={() => onOpenCustomer(row.customer, "Thông tin cơ bản", false, row)} type="button">{row.customer.code}</button>
+                        <div className={styles.learningMemberCell}><strong>{row.customer.name}</strong><small>{row.customer.phone}</small></div>
+                      </td>
+                      <td>
+                        <div className={styles.learningProfileCell}>
+                        {row.profile ? (
+                          <>
+                              <button className={styles.learningProfileLink} onClick={() => onOpenCustomer(row.customer, "Profile", false, row)} type="button">
+                                {row.profile.level === "Beginner" ? "Mới học Golf" : "Có kinh nghiệm"}
+                              </button>
+                              <span>{row.profile.handicap}</span>
+                              <span>{row.profile.playingGoal}</span>
+                            </>
+                          ) : (
+                            <span className={styles.learningMissingBadge}>Chưa có profile</span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <div className={styles.learningTaStack}>
+                          {row.tas.length ? row.tas.map((ta) => <span key={ta.code}>{ta.name}</span>) : <em>Chưa có TA</em>}
+                        </div>
+                      </td>
+                      <td>
+                        <div className={styles.pkgBadges}>
+                          <span className={styles.pkgPrimary}>{row.assignedPackage}</span>
+                          <span className={styles.pkgSecondary}>{row.assignedTier}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className={styles.learningCoachCell}>
+                          <strong>{latest?.coach ?? row.assignedCoach}</strong>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={styles.learningCountPill}>{Math.max(row.trainings.length, getTrainingSessionNumber(latest))} buổi</span>
+                      </td>
+                      <td>
+                        {latest ? (
+                          <div className={styles.learningLatestCell}>
+                            <strong>{latest.session}</strong>
+                            <span>{latest.date}</span>
+                          </div>
+                        ) : <span className={styles.learningMissingText}>—</span>}
+                      </td>
+                      <td>
+                        {latest ? (
+                          <div className={styles.learningResultSummary}>
+                            <strong>{latest.content}</strong>
+                            <span>{latest.contentSub}</span>
+                          </div>
+                        ) : <span className={styles.learningMissingText}>—</span>}
+                      </td>
+                      <td>
+                        {latest ? (
+                          <div className={styles.learningResultSummary}>
+                            <strong>{latest.drill}</strong>
+                            <span>{latest.drillSub}</span>
+                          </div>
+                        ) : <span className={styles.learningMissingText}>—</span>}
+                      </td>
+                      <td className={styles.learningNoteCell}>{latest?.note ?? "—"}</td>
+                      <td>
+                        <div className={styles.learningActions}>
+                          <button onClick={() => onOpenCustomer(row.customer, "Kết quả tập luyện", false, row)} title="Xem kết quả tập luyện" type="button"><Eye size={15} /></button>
+                          <button onClick={() => setQuickAddTarget(row)} type="button">+ Kết quả</button>
+                          <span className={styles.learningQuickActions}>
+                            {!row.profile ? <button className={styles.learningProfileButton} onClick={() => setQuickProfileTarget(row)} type="button">+ Profile</button> : null}
+                            {row.tas.length === 0 ? <button className={styles.learningTaButton} onClick={() => setQuickTaTarget(row)} type="button">+ TA</button> : null}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td className={styles.emptyTableCell} colSpan={11}>Không có hồ sơ phù hợp với bộ lọc hiện tại.</td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+          <div className={styles.pagination}>
+            <span>Hiển thị {filtered.length} / {learningRows.length} hồ sơ</span>
+            <span>Đang lọc: {taFilter}</span>
+          </div>
+        </section>
+      </section>
+
+      {selected ? (
+        <LearningOverviewDrawer
+          row={selected}
+          onClose={() => setSelected(null)}
+          onOpenCustomer={(tab) => onOpenCustomer(selected.customer, tab)}
+        />
+      ) : null}
+
+      {quickAddTarget ? (
+        <AddTrainingResultModal
+          assignedTas={quickAddTarget.tas}
+          initial={{
+            coach: quickAddTarget.assignedCoach,
+            name: quickAddTarget.customer.name,
+            pkg: `${quickAddTarget.assignedPackage} ${quickAddTarget.assignedTier}`,
+            ta: quickAddTarget.tas.map((ta) => ta.name).join(", "),
+          }}
+          onClose={() => setQuickAddTarget(null)}
+          onSave={(entry) => {
+            onSaveTrainingResult(quickAddTarget.customer.code, entry);
+            setQuickAddTarget(null);
+          }}
+        />
+      ) : null}
+
+      {quickProfileTarget ? (
+        <AddProfileModal
+          initial={{
+            ...DEFAULT_PROFILE,
+            name: quickProfileTarget.customer.name,
+            gender: quickProfileTarget.customer.gender,
+            dob: ddmmyyyyToISO(quickProfileTarget.customer.birth) || quickProfileTarget.customer.birth,
+            phone: quickProfileTarget.customer.phone,
+            email: quickProfileTarget.customer.email,
+            coachEpga: quickProfileTarget.assignedCoach,
+          }}
+          onClose={() => setQuickProfileTarget(null)}
+          onSave={(profile) => {
+            setProfileOverrides((current) => ({ ...current, [quickProfileTarget.customer.code]: profile }));
+            setQuickProfileTarget(null);
+          }}
+        />
+      ) : null}
+
+      {quickTaTarget ? (
+        <AssignTaModal
+          onClose={() => setQuickTaTarget(null)}
+          onSave={(entry) => {
+            setTaOverrides((current) => ({ ...current, [quickTaTarget.customer.code]: [entry] }));
+            setQuickTaTarget(null);
+          }}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function LearningOverviewDrawer({
+  row,
+  onClose,
+  onOpenCustomer,
+}: {
+  row: CustomerLearningRow;
+  onClose: () => void;
+  onOpenCustomer: (tab: string) => void;
+}) {
+  return (
+    <div className={styles.nestedOverlay}>
+      <aside className={styles.learningDrawer}>
+        <header>
+          <div>
+            <h2>{row.customer.name}</h2>
+            <p>{row.customer.code} · {row.customer.phone}</p>
+          </div>
+          <button onClick={onClose} type="button"><X size={18} /></button>
+        </header>
+
+        <div className={styles.learningDrawerBody}>
+          <section>
+            <h3>Profile</h3>
+            {row.profile ? (
+              <div className={styles.profileViewGrid2}>
+                <ProfileViewRow label="Số khoá học" value={row.profile.courseCount} />
+                <ProfileViewRow label="HLV đã từng học tại EPGA" value={row.profile.coachEpga} />
+                <ProfileViewRow label="Học viên/HLV đã từng học ngoài EPGA" value={row.profile.coachOther} />
+                <ProfileViewRow label="Full Name/Họ và Tên:" value={row.profile.name} />
+                <ProfileViewRow label="Gender/Giới tính:" value={row.profile.gender} />
+                <ProfileViewRow label="Date of birth/Ngày sinh:" value={row.profile.dob} />
+                <ProfileViewRow label="Mobile/SĐT:" value={row.profile.phone} />
+                <ProfileViewRow label="Email" value={row.profile.email} />
+                <ProfileViewRow label="Trình độ:" value={row.profile.level === "Beginner" ? "Mới học Golf" : "Có kinh nghiệm"} />
+                <ProfileViewRow label="Handicap:" value={row.profile.handicap} />
+                <ProfileViewRow label="Mục tiêu chơi golf/Playing goal:" value={row.profile.playingGoal} />
+                <ProfileViewRow label="Tay thuận/Handedness:" value={row.profile.handedness} />
+              </div>
+            ) : <div className={styles.learningEmptyBlock}>Khách hàng này chưa có Profile.</div>}
+          </section>
+
+          <section>
+            <h3>Kết quả tập luyện</h3>
+            {row.trainings.length ? (
+              <div className={styles.learningTimeline}>
+                {row.trainings.map((training, index) => (
+                  <article key={`${training.date}-${training.session}-${index}`}>
+                    <div>
+                      <strong>{training.session}</strong>
+                      <span>{training.date} · {training.coach}</span>
+                    </div>
+                    <p>{training.content}{training.contentSub ? ` · ${training.contentSub}` : ""}</p>
+                    <small>{training.drill}{training.drillSub ? ` · ${training.drillSub}` : ""}</small>
+                    <em>{training.note}</em>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.learningResultGrid}>
+                <InfoBlock label="Gói tập">{row.assignedPackage} · {row.assignedTier}</InfoBlock>
+                <InfoBlock label="HLV">{row.assignedCoach}</InfoBlock>
+                <InfoBlock label="Trạng thái kết quả">Chưa có kết quả tập luyện</InfoBlock>
+                <InfoBlock label="Thao tác">Dùng nút + Kết quả ở danh sách để cập nhật.</InfoBlock>
+              </div>
+            )}
+          </section>
+
+          <section>
+            <h3>Trợ giảng TA</h3>
+            <div className={styles.learningTaCards}>
+              {row.tas.length ? row.tas.map((ta) => (
+                <article key={ta.code}>
+                  <strong>{ta.name}</strong>
+                  <span>{ta.code}</span>
+                  <span>{ta.phone} · {ta.email}</span>
+                  <span>{ta.course || "—"}</span>
+                  <span>{ta.schedule}</span>
+                  <em>{ta.note}</em>
+                </article>
+              )) : <div className={styles.learningEmptyBlock}>Khách hàng này chưa được gán TA.</div>}
+            </div>
+          </section>
+        </div>
+
+        <footer>
+          <button onClick={() => onOpenCustomer("Profile")} type="button">Mở Profile</button>
+          <button onClick={() => onOpenCustomer("Kết quả tập luyện")} type="button">Mở kết quả</button>
+          <button className={styles.blueButton} onClick={() => onOpenCustomer("Trợ giảng TA")} type="button">Mở TA</button>
+        </footer>
+      </aside>
+    </div>
   );
 }
 
@@ -1240,13 +1957,23 @@ function AddCompanionModal({
 
 function CustomerDetailModal({
   activeTab,
+  autoAddTrainingResult = false,
   customer,
+  extraProfile,
+  extraTas,
+  extraTrainingResults,
+  onTrainingResultsChange,
   onChangeTab,
   onClose,
   onEdit,
 }: {
   activeTab: string;
+  autoAddTrainingResult?: boolean;
   customer: Customer | null;
+  extraProfile?: Profile | null;
+  extraTas?: TaEntry[];
+  extraTrainingResults?: TrainingResultEntry[];
+  onTrainingResultsChange?: (results: TrainingResultEntry[]) => void;
   onChangeTab: (tab: string) => void;
   onClose: () => void;
   onEdit: () => void;
@@ -1289,7 +2016,15 @@ function CustomerDetailModal({
         </nav>
 
         <div className={styles.detailBody} key={activeTab}>
-          <CustomerDetailTab activeTab={activeTab} customer={customer} />
+          <CustomerDetailTab
+            activeTab={activeTab}
+            autoAddTrainingResult={autoAddTrainingResult}
+            customer={customer}
+            extraProfile={extraProfile}
+            extraTas={extraTas}
+            extraTrainingResults={extraTrainingResults}
+            onTrainingResultsChange={onTrainingResultsChange}
+          />
         </div>
 
         <footer className={styles.modalFooter}>
@@ -1300,7 +2035,23 @@ function CustomerDetailModal({
   );
 }
 
-function CustomerDetailTab({ activeTab, customer }: { activeTab: string; customer: Customer | null }) {
+function CustomerDetailTab({
+  activeTab,
+  autoAddTrainingResult,
+  customer,
+  extraProfile,
+  extraTas,
+  extraTrainingResults,
+  onTrainingResultsChange,
+}: {
+  activeTab: string;
+  autoAddTrainingResult?: boolean;
+  customer: Customer | null;
+  extraProfile?: Profile | null;
+  extraTas?: TaEntry[];
+  extraTrainingResults?: TrainingResultEntry[];
+  onTrainingResultsChange?: (results: TrainingResultEntry[]) => void;
+}) {
   if (activeTab === "Hợp đồng") {
     return <ContractsTab />;
   }
@@ -1314,7 +2065,7 @@ function CustomerDetailTab({ activeTab, customer }: { activeTab: string; custome
   }
 
   if (activeTab === "Kết quả tập luyện") {
-    return <TrainingResultsTab />;
+    return <TrainingResultsTab assignedTas={extraTas} autoAdd={autoAddTrainingResult} extraResults={extraTrainingResults} onResultsChange={onTrainingResultsChange} />;
   }
 
   if (activeTab === "Inbody") {
@@ -1326,39 +2077,53 @@ function CustomerDetailTab({ activeTab, customer }: { activeTab: string; custome
   }
 
   if (activeTab === "Trợ giảng TA") {
-    return <TaTab />;
+    return <TaTab initialTas={extraTas} />;
   }
 
   if (activeTab === "Profile") {
-    return <ProfilesTab />;
+    return <ProfilesTab initialProfile={extraProfile} />;
   }
 
   return <BasicInfoTab customer={customer} />;
 }
 
-function TrainingResultsTab() {
-  const [addOpen, setAddOpen] = useState(false);
+function TrainingResultsTab({
+  assignedTas = [],
+  autoAdd = false,
+  extraResults,
+  onResultsChange,
+}: {
+  assignedTas?: TaEntry[];
+  autoAdd?: boolean;
+  extraResults?: TrainingResultEntry[];
+  onResultsChange?: (results: TrainingResultEntry[]) => void;
+}) {
+  const [addOpen, setAddOpen] = useState(autoAdd);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [removeIndex, setRemoveIndex] = useState<number | null>(null);
   const [page, setPage] = useState(1);
-  const [sessions, setSessions] = useState<Array<{ name: string; pkg: string; tier: string; date: string; coach: string; ta: string; session: string; content: string; contentSub: string; drill: string; drillSub: string; note: string }>>([
-    {
-      name: "Nguyễn Văn An",
-      pkg: "Eagle",
-      tier: "Premium",
-      date: "15/05/2024",
-      coach: "Trần Quốc Toàn",
-      ta: "Lê Minh",
-      session: "Buổi 1",
-      content: "Swing & Driver",
-      contentSub: "Chỉnh sửa tư thế & tốc độ",
-      drill: "Swing & Driver",
-      drillSub: "Chỉnh sửa tư thế & tốc độ",
-      note: "Tốc độ đầu gậy cải thiện 15% so với tháng trước.",
-    },
-  ]);
+  const [sessions, setSessions] = useState<TrainingResultEntry[]>(extraResults ?? []);
+  const updateSessions = (updater: (current: TrainingResultEntry[]) => TrainingResultEntry[]) => {
+    setSessions((current) => {
+      const next = updater(current);
+      onResultsChange?.(next);
+      return next;
+    });
+  };
 
   const handleSave = (entry: typeof sessions[number]) => {
-    setSessions((current) => [entry, ...current]);
+    updateSessions((current) => [entry, ...current]);
     setAddOpen(false);
+  };
+  const handleUpdate = (entry: TrainingResultEntry) => {
+    if (editIndex === null) return;
+    updateSessions((current) => current.map((session, index) => (index === editIndex ? entry : session)));
+    setEditIndex(null);
+  };
+  const handleRemove = () => {
+    if (removeIndex === null) return;
+    updateSessions((current) => current.filter((_, index) => index !== removeIndex));
+    setRemoveIndex(null);
   };
 
   return (
@@ -1383,6 +2148,7 @@ function TrainingResultsTab() {
                 <th>Nội dung buổi học</th>
                 <th>Drill/Bài tập về nhà</th>
                 <th>Ghi chú khác</th>
+                <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -1402,7 +2168,13 @@ function TrainingResultsTab() {
                   </td>
                   <td>{s.date}</td>
                   <td>{s.coach}</td>
-                  <td>{s.ta}</td>
+                  <td>
+                    <div className={styles.trainingTaStack}>
+                      {s.ta.split(",").map((ta) => ta.trim()).filter(Boolean).map((ta) => (
+                        <span key={ta}>{ta}</span>
+                      ))}
+                    </div>
+                  </td>
                   <td><strong>{s.session}</strong></td>
                   <td>
                     <strong>{s.content}</strong>
@@ -1413,8 +2185,23 @@ function TrainingResultsTab() {
                     <div className={styles.cellMuted}>{s.drillSub}</div>
                   </td>
                   <td className={styles.cellTruncate}>{s.note}</td>
+                  <td>
+                    <div className={styles.rowActions}>
+                      <button aria-label={`Sửa kết quả ${s.session}`} onClick={() => setEditIndex(i)} type="button">
+                        <Edit size={14} />
+                      </button>
+                      <button aria-label={`Xóa kết quả ${s.session}`} className={styles.dangerIconBtn} onClick={() => setRemoveIndex(i)} type="button">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
+              {sessions.length === 0 ? (
+                <tr>
+                  <td className={styles.emptyTableCell} colSpan={10}>Chưa có kết quả tập luyện nào cho học viên này.</td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
@@ -1425,31 +2212,77 @@ function TrainingResultsTab() {
           <button onClick={() => setPage((p) => p + 1)} type="button"><ChevronRight size={14} /></button>
         </div>
       </section>
-      {addOpen ? <AddTrainingResultModal onClose={() => setAddOpen(false)} onSave={handleSave} /> : null}
+      {addOpen ? <AddTrainingResultModal assignedTas={assignedTas} onClose={() => setAddOpen(false)} onSave={handleSave} /> : null}
+      {editIndex !== null ? (
+        <AddTrainingResultModal
+          assignedTas={assignedTas}
+          initial={sessions[editIndex]}
+          onClose={() => setEditIndex(null)}
+          onSave={handleUpdate}
+          title="Sửa kết quả tập luyện"
+        />
+      ) : null}
+      {removeIndex !== null ? (
+        <CustomerConfirmDialog
+          title="Xóa kết quả tập luyện"
+          message={`Xóa kết quả ${sessions[removeIndex]?.session ?? "tập luyện"} khỏi hồ sơ học viên?`}
+          confirmLabel="Xóa kết quả"
+          tone="danger"
+          onCancel={() => setRemoveIndex(null)}
+          onConfirm={handleRemove}
+        />
+      ) : null}
     </>
   );
 }
 
 function AddTrainingResultModal({
+  assignedTas = [],
+  initial,
   onClose,
   onSave,
+  title = "Thêm kết quả tập luyện",
 }: {
+  assignedTas?: TaEntry[];
+  initial?: Partial<TrainingResultEntry>;
   onClose: () => void;
-  onSave: (entry: { name: string; pkg: string; tier: string; date: string; coach: string; ta: string; session: string; content: string; contentSub: string; drill: string; drillSub: string; note: string }) => void;
+  onSave: (entry: TrainingResultEntry) => void;
+  title?: string;
 }) {
+  const initialTaNames = Array.from(new Set(
+    (initial?.ta ? initial.ta.split(",").map((name) => name.trim()).filter(Boolean) : assignedTas.map((ta) => ta.name))
+  ));
+  const taChoices = assignedTas.length
+    ? assignedTas
+    : initialTaNames.map((name, index) => ({ code: `TA-${index + 1}`, email: "", name, phone: "" }));
   const [form, setForm] = useState({
-    name: "Nguyễn Văn Minh",
-    pkg: "",
-    date: "2026-05-05",
-    session: "Buổi 1",
-    coach: "",
-    ta: "",
-    content: "",
-    drill: "",
-    note: "",
+    name: initial?.name ?? "Nguyễn Văn Minh",
+    pkg: initial?.pkg ? `${initial.pkg} ${initial.tier ?? ""}`.trim() : "",
+    date: initial?.date ? ddmmyyyyToISO(initial.date) || initial.date : "2026-05-05",
+    session: initial?.session ?? "Buổi 1",
+    coach: initial?.coach ?? "",
+    ta: initialTaNames.join(", "),
+    content: initial?.content ?? "",
+    contentSub: initial?.contentSub ?? "",
+    drill: initial?.drill === "—" ? "" : initial?.drill ?? "",
+    drillSub: initial?.drillSub ?? "",
+    note: initial?.note === "—" ? "" : initial?.note ?? "",
   });
+  const [selectedTaNames, setSelectedTaNames] = useState<string[]>(initialTaNames);
   const update = (key: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
+
+  const setSelectedTas = (names: string[]) => {
+    const uniqueNames = Array.from(new Set(names));
+    setSelectedTaNames(uniqueNames);
+    update("ta", uniqueNames.join(", "));
+  };
+
+  const toggleTa = (name: string) => {
+    setSelectedTas(selectedTaNames.includes(name)
+      ? selectedTaNames.filter((selected) => selected !== name)
+      : [...selectedTaNames, name]);
+  };
 
   const submit = () => {
     if (!form.pkg || !form.coach || !form.content.trim()) return;
@@ -1459,12 +2292,12 @@ function AddTrainingResultModal({
       tier: form.pkg.split(" ").slice(1).join(" ") || "Premium",
       date: form.date.split("-").reverse().join("/"),
       coach: form.coach,
-      ta: form.ta || "—",
+      ta: selectedTaNames.join(", ") || form.ta || "—",
       session: form.session,
-      content: form.content.split("\n")[0] || form.content,
-      contentSub: form.content.split("\n").slice(1).join(" "),
-      drill: form.drill.split("\n")[0] || form.drill || "—",
-      drillSub: form.drill.split("\n").slice(1).join(" "),
+      content: form.content,
+      contentSub: form.contentSub,
+      drill: form.drill || "—",
+      drillSub: form.drillSub,
       note: form.note || "—",
     });
   };
@@ -1473,22 +2306,27 @@ function AddTrainingResultModal({
     <div className={styles.nestedOverlay}>
       <section className={styles.miniModal}>
         <header className={styles.miniHeader}>
-          <h2>Thêm kết quả tập luyện</h2>
+          <h2>{title}</h2>
           <button onClick={onClose} type="button"><X size={18} /></button>
         </header>
         <div className={styles.miniBody}>
-          <div className={styles.miniGrid}>
+          <div className={`${styles.miniGrid} ${styles.trainingResultGrid}`}>
             <label>
               <span>Tên KH</span>
               <input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Nguyễn Văn Minh" />
             </label>
             <label>
               <span>Nội dung buổi học <b>*</b></span>
-              <textarea
+              <input
                 onChange={(e) => update("content", e.target.value)}
-                placeholder="Nhập thông tin..."
-                rows={3}
+                placeholder="VD: Short Game"
                 value={form.content}
+              />
+              <textarea
+                onChange={(e) => update("contentSub", e.target.value)}
+                placeholder="Chipping quanh green, kiểm soát landing zone..."
+                rows={2}
+                value={form.contentSub}
               />
             </label>
             <label>
@@ -1502,11 +2340,16 @@ function AddTrainingResultModal({
             </label>
             <label>
               <span>Drill/BTVN</span>
-              <textarea
+              <input
                 onChange={(e) => update("drill", e.target.value)}
-                placeholder="Nhập gợi ý bài tập..."
-                rows={3}
+                placeholder="VD: Landing zone drill"
                 value={form.drill}
+              />
+              <textarea
+                onChange={(e) => update("drillSub", e.target.value)}
+                placeholder="Tập 30 bóng ở 3 khoảng cách, ghi lại tỉ lệ bóng vào vùng mục tiêu..."
+                rows={2}
+                value={form.drillSub}
               />
             </label>
             <label>
@@ -1537,11 +2380,31 @@ function AddTrainingResultModal({
             </label>
             <label>
               <span>Trợ giảng (TA)</span>
-              <select className={styles.selectInput} value={form.ta} onChange={(e) => update("ta", e.target.value)}>
-                <option value="">Chọn trợ giảng</option>
-                <option>Lê Minh</option>
-                <option>Phạm Hoàng Nam</option>
-              </select>
+              {assignedTas.length > 1 ? <small className={styles.fieldHelper}>Có {assignedTas.length} TA được gán, chọn TA phụ trách buổi tập.</small> : null}
+              <div className={styles.taMultiSelect}>
+                {taChoices.length ? (
+                  <div className={styles.taCheckboxGrid}>
+                    {taChoices.map((ta) => (
+                      <label key={ta.code}>
+                        <input
+                          checked={selectedTaNames.includes(ta.name)}
+                          onChange={() => toggleTa(ta.name)}
+                          type="checkbox"
+                        />
+                        <span>{ta.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : <span className={styles.taEmptyHint}>Học viên chưa được gán TA.</span>}
+                <div className={styles.taSelectedChips}>
+                  {selectedTaNames.map((name) => (
+                    <button key={name} onClick={() => toggleTa(name)} type="button">
+                      {name}<X size={12} />
+                    </button>
+                  ))}
+                  {selectedTaNames.length === 0 ? <span>Chưa chọn TA</span> : null}
+                </div>
+              </div>
             </label>
           </div>
         </div>
@@ -1803,8 +2666,8 @@ const COURSE_OPTIONS = [
   "Driving Range Foundation",
 ];
 
-function TaTab() {
-  const [tas, setTas] = useState<TaEntry[]>([
+function TaTab({ initialTas }: { initialTas?: TaEntry[] }) {
+  const [tas, setTas] = useState<TaEntry[]>(initialTas ?? [
     { code: "NV-0012", name: "Nguyễn Văn An", phone: "0901234567", email: "an.nguyen@example.com", course: "", schedule: "T2-T4-T6 · 07:00-09:00", note: "Nhiệt tình, có kinh nghiệm hỗ trợ học viên" },
     { code: "NV-0034", name: "Trần Thị Bình", phone: "0912345678", email: "binh.tran@example.com", course: "", schedule: "T3-T5-T7 · 14:00-16:00", note: "Chuyên môn React, hỗ trợ tốt các dự án thực tế" },
   ]);
@@ -2839,9 +3702,9 @@ const DEFAULT_PROFILE: Profile = {
   driverDistance: "",
 };
 
-function ProfilesTab() {
+function ProfilesTab({ initialProfile }: { initialProfile?: Profile | null }) {
   const [showModal, setShowModal] = useState(false);
-  const [profile, setProfile] = useState<Profile | null>(DEFAULT_PROFILE);
+  const [profile, setProfile] = useState<Profile | null>(initialProfile ?? DEFAULT_PROFILE);
   const [activeStep, setActiveStep] = useState<1 | 2>(1);
   const [deleteOpen, setDeleteOpen] = useState(false);
 

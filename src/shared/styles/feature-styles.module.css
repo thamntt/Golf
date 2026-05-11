@@ -3456,6 +3456,719 @@
   color: #667085;
 }
 
+.customerModuleTabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-bottom: 18px;
+  padding: 5px;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.customerModuleTab,
+.customerModuleTabActive {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #475569;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.customerModuleTab:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.customerModuleTabActive {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.24);
+}
+
+.learningOverview {
+  display: grid;
+  gap: 16px;
+}
+
+.learningHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 22px;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 52%, #f0fdf4 100%);
+}
+
+.learningHeader h2 {
+  margin: 0 0 6px;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.learningHeader p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.learningKpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.learningKpis > div {
+  position: relative;
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+  padding: 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.07);
+}
+
+.learningKpis > div::after {
+  content: "";
+  position: absolute;
+  top: -28px;
+  right: -18px;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  opacity: 0.18;
+}
+
+.learningKpis > div > span {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  color: #ffffff;
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.16);
+}
+
+.learningKpis strong {
+  display: block;
+  margin-top: 5px;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.learningKpis em {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.learningKpiBlue { border-color: #bfdbfe !important; background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%) !important; }
+.learningKpiGreen { border-color: #bbf7d0 !important; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%) !important; }
+.learningKpiPurple { border-color: #ddd6fe !important; background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%) !important; }
+.learningKpiAmber { border-color: #fde68a !important; background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%) !important; }
+
+.learningKpiBlue > span { background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%); }
+.learningKpiGreen > span { background: linear-gradient(135deg, #059669 0%, #34d399 100%); }
+.learningKpiPurple > span { background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); }
+.learningKpiAmber > span { background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%); }
+
+.learningKpiBlue::after { background: #2563eb; }
+.learningKpiGreen::after { background: #059669; }
+.learningKpiPurple::after { background: #7c3aed; }
+.learningKpiAmber::after { background: #d97706; }
+
+.learningFilters {
+  display: grid;
+  grid-template-columns: minmax(680px, 1fr) 150px 150px 150px;
+  gap: 12px;
+  align-items: center;
+}
+
+.learningFilters > .customerSearch {
+  min-width: 680px;
+}
+
+.learningFilters .customerSearch,
+.learningFilters .selectInput,
+.learningTaFilter > button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.learningFilters .customerSearch:focus-within,
+.learningFilters .selectInput:focus,
+.learningTaFilter > button:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), 0 10px 22px rgba(15, 23, 42, 0.08);
+}
+
+.learningTaFilter {
+  position: relative;
+  min-width: 150px;
+}
+
+.learningTaFilter > button {
+  width: 100%;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: #0f172a;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.learningTaFilter > button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.learningTaFilterMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 35;
+  width: 260px;
+  overflow: hidden;
+  border: 1px solid #dbe3ef;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18);
+}
+
+.learningTaFilterMenu label {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.learningTaFilterMenu input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: #0f172a;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.learningTaFilterMenu > div {
+  max-height: 230px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.learningTaFilterMenu > div > button {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #334155;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.learningTaFilterMenu > div > button:hover,
+.learningTaFilterActive {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+
+.learningTaFilterMenu > div > span {
+  display: block;
+  padding: 10px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.learningTable {
+  min-width: 1480px;
+}
+
+.learningProfileCell,
+.learningTaStack {
+  display: grid;
+  gap: 5px;
+  min-width: 190px;
+  max-width: 260px;
+}
+
+.learningProfileCell {
+  min-width: 210px;
+  max-width: 280px;
+}
+
+.learningMemberCell {
+  display: grid;
+  gap: 3px;
+  min-width: 120px;
+}
+
+.learningMemberCell strong {
+  color: #0f172a;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.learningMemberCell small {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.learningProfileCell strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.learningProfileLink {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1d4ed8;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: left;
+  cursor: pointer;
+}
+
+.learningProfileLink:hover {
+  text-decoration: underline;
+}
+
+.learningProfileCell span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.learningTaStack span {
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.learningTaStack em,
+.learningMissingBadge {
+  width: fit-content;
+  padding: 5px 8px;
+  border: 1px solid #fde68a;
+  border-radius: 999px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.learningMissingText {
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.learningCoachCell,
+.learningLatestCell,
+.learningResultSummary {
+  display: grid;
+  gap: 5px;
+  min-width: 132px;
+}
+
+.learningCoachCell span,
+.learningLatestCell span,
+.learningResultSummary span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.learningCoachCell strong,
+.learningLatestCell strong,
+.learningResultSummary strong {
+  color: #0f172a;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.learningCountPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 7px 10px;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 100%);
+  color: #3730a3;
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.learningResultSummary {
+  min-width: 180px;
+}
+
+.learningNoteCell {
+  min-width: 220px;
+  max-width: 320px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.learningActions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 380px;
+}
+
+.learningActions button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+  min-width: max-content;
+  padding: 0 12px;
+  border: 1px solid #dbe3ef;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.learningActions button:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.learningActions button:last-child {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.learningActions button:first-child {
+  flex: 0 0 34px;
+  min-width: 34px;
+  width: 34px;
+  padding: 0;
+  border-color: #dbeafe;
+  background: #f8fbff;
+  color: #2563eb;
+}
+
+.learningActions button:nth-child(2) {
+  min-width: 92px;
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.learningActions button:nth-child(3) {
+  min-width: 86px;
+  border-color: #c4b5fd;
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.learningQuickActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  margin-left: 10px;
+  min-width: max-content;
+}
+
+.learningQuickActions button {
+  min-width: 118px;
+  padding-inline: 16px;
+  white-space: nowrap;
+}
+
+.learningActions .learningQuickActions .learningProfileButton {
+  min-width: 124px;
+  border-color: #a78bfa;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  color: #5b21b6;
+}
+
+.learningActions .learningQuickActions .learningTaButton {
+  min-width: 74px;
+  border-color: #fed7aa;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  color: #c2410c;
+}
+
+.learningDrawer {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  bottom: 24px;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  width: min(760px, calc(100vw - 48px));
+  overflow: hidden;
+  border: 1px solid #dbe3ef;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.28);
+}
+
+.learningDrawer > header,
+.learningDrawer > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.learningDrawer > header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.learningDrawer > header p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.learningDrawer > header button {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.learningDrawerBody {
+  display: grid;
+  gap: 14px;
+  padding: 18px 22px;
+  overflow-y: auto;
+}
+
+.learningDrawerBody section {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.learningDrawerBody h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.learningDrawer .profileViewGrid2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.learningDrawer .profileViewRow {
+  min-width: 0;
+}
+
+.learningDrawer .profileViewRow strong {
+  overflow-wrap: anywhere;
+}
+
+.learningResultGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.learningTimeline {
+  display: grid;
+  gap: 10px;
+}
+
+.learningTimeline article {
+  position: relative;
+  display: grid;
+  gap: 7px;
+  padding: 14px 14px 14px 18px;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.learningTimeline article::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2563eb 0%, #22c55e 100%);
+}
+
+.learningTimeline article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.learningTimeline strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.learningTimeline span,
+.learningTimeline small,
+.learningTimeline em,
+.learningTimeline p {
+  margin: 0;
+  color: #475569;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+.learningTimeline p {
+  color: #1e293b;
+  font-weight: 800;
+}
+
+.learningTaCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.learningTaCards article {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+
+.learningTaCards strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.learningTaCards span,
+.learningTaCards em {
+  color: #475569;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.learningEmptyBlock {
+  padding: 14px;
+  border: 1px dashed #fbbf24;
+  border-radius: 12px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.learningDrawer > footer {
+  margin-top: auto;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 0;
+}
+
+.learningDrawer > footer button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 @media (max-width: 1280px) {
   .statsGrid,
   .cardGrid,
@@ -3684,6 +4397,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: max-content;
 }
 
 .taName > span {
@@ -3703,6 +4417,7 @@
 .taName strong {
   color: #101828;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .taOff {
@@ -4100,6 +4815,16 @@
   vertical-align: middle;
 }
 
+.softTable td:first-child,
+.upperTable td:first-child {
+  white-space: nowrap;
+}
+
+.softTable td:first-child strong,
+.upperTable td:first-child strong {
+  white-space: nowrap;
+}
+
 .softTable tbody tr:hover {
   background: #f8fafc;
 }
@@ -4457,11 +5182,14 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px 16px;
+  align-items: start;
 }
 
 .miniGrid label {
   display: grid;
   gap: 6px;
+  align-content: start;
+  align-self: start;
   color: #344054;
   font-size: 13px;
   font-weight: 700;
@@ -4497,7 +5225,78 @@
 }
 
 .miniGrid textarea {
-  min-height: 90px;
+  min-height: 74px;
+}
+
+.trainingResultGrid {
+  grid-auto-flow: row;
+}
+
+.trainingResultGrid label:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.trainingResultGrid label:nth-child(3) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.trainingResultGrid label:nth-child(5) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.trainingResultGrid label:nth-child(6) {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.trainingResultGrid label:nth-child(7) {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.trainingResultGrid label:nth-child(9) {
+  grid-column: 1 / -1;
+  grid-row: 4;
+}
+
+.trainingResultGrid label:nth-child(2),
+.trainingResultGrid label:nth-child(4),
+.trainingResultGrid label:nth-child(8) {
+  grid-column: 1 / -1;
+}
+
+.trainingResultGrid label:nth-child(2) {
+  grid-row: 5;
+}
+
+.trainingResultGrid label:nth-child(4) {
+  grid-row: 6;
+}
+
+.trainingResultGrid label:nth-child(8) {
+  grid-row: 7;
+}
+
+.trainingTaStack {
+  display: grid;
+  gap: 6px;
+  min-width: 132px;
+}
+
+.trainingTaStack span {
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .miniFooter {
@@ -5253,6 +6052,92 @@
 
 .autocompleteWrap {
   position: relative;
+}
+
+.taMultiSelect {
+  position: relative;
+  display: grid;
+  gap: 8px;
+}
+
+.taCheckboxGrid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.taCheckboxGrid label {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.taCheckboxGrid input {
+  width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  margin: 0;
+  accent-color: #2563eb;
+  flex: 0 0 auto;
+}
+
+.taCheckboxGrid span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taSelectedChips {
+  min-height: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+}
+
+.taSelectedChips button {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px solid #c4b5fd;
+  border-radius: 999px;
+  background: #f5f3ff;
+  color: #6d28d9;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.taSelectedChips span {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.taEmptyHint {
+  display: block;
+  padding: 10px 12px;
+  border: 1px dashed #fbbf24;
+  border-radius: 10px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .autocompleteList {
