@@ -6,6 +6,499 @@
   color: #0f172a;
 }
 
+:global([data-theme="dark"]) [class*="feature-styles-module"] {
+  color-scheme: dark;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Shell"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="shell"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Page"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="page"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Screen"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="screen"] {
+  background: transparent !important;
+  color: #e5e7eb !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Hero"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="hero"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Card"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="card"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Panel"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="panel"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="TableWrap"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="tableWrap"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Filter"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="filter"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Toolbar"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="toolbar"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Tabs"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="tabs"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Chart"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="chart"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Board"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="board"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="List"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="list"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Pane"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="pane"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Wrap"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="wrap"] {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.10), transparent 34%),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.94)) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22) !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Kpi"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="kpi"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Stat"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="stat"] {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24) !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] h1,
+:global([data-theme="dark"]) [class*="feature-styles-module"] h2,
+:global([data-theme="dark"]) [class*="feature-styles-module"] h3,
+:global([data-theme="dark"]) [class*="feature-styles-module"] h4,
+:global([data-theme="dark"]) [class*="feature-styles-module"] h5,
+:global([data-theme="dark"]) [class*="feature-styles-module"] strong,
+:global([data-theme="dark"]) [class*="feature-styles-module"] b,
+:global([data-theme="dark"]) [class*="feature-styles-module"] th,
+:global([data-theme="dark"]) [class*="feature-styles-module"] dt {
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] p,
+:global([data-theme="dark"]) [class*="feature-styles-module"] span,
+:global([data-theme="dark"]) [class*="feature-styles-module"] small,
+:global([data-theme="dark"]) [class*="feature-styles-module"] em,
+:global([data-theme="dark"]) [class*="feature-styles-module"] dd,
+:global([data-theme="dark"]) [class*="feature-styles-module"] td,
+:global([data-theme="dark"]) [class*="feature-styles-module"] li,
+:global([data-theme="dark"]) [class*="feature-styles-module"] label {
+  color: #cbd5e1 !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] input,
+:global([data-theme="dark"]) [class*="feature-styles-module"] select,
+:global([data-theme="dark"]) [class*="feature-styles-module"] textarea {
+  border-color: rgba(148, 163, 184, 0.34) !important;
+  background: rgba(15, 23, 42, 0.92) !important;
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] input::placeholder,
+:global([data-theme="dark"]) [class*="feature-styles-module"] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] table,
+:global([data-theme="dark"]) [class*="feature-styles-module"] thead,
+:global([data-theme="dark"]) [class*="feature-styles-module"] tbody,
+:global([data-theme="dark"]) [class*="feature-styles-module"] tr {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  background: transparent !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] th {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  background: rgba(15, 23, 42, 0.82) !important;
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] button {
+  border-color: rgba(96, 165, 250, 0.26);
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Active"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="active"],
+:global([data-theme="dark"]) [class*="feature-styles-module"] [class*="Active"],
+:global([data-theme="dark"]) [class*="feature-styles-module"] [class*="active"] {
+  border-color: rgba(34, 211, 238, 0.42) !important;
+}
+
+:global([data-theme="dark"]) .teetimeHeader,
+:global([data-theme="dark"]) .teetimeGridCard,
+:global([data-theme="dark"]) .teetimeLegend {
+  border-color: rgba(71, 85, 105, 0.58) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(14, 165, 233, 0.14), transparent 30%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(8, 13, 24, 0.96)) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.26) !important;
+}
+
+:global([data-theme="dark"]) .teetimeDateInput,
+:global([data-theme="dark"]) .teetimeBranchPicker {
+  border-color: rgba(96, 165, 250, 0.26) !important;
+  background: rgba(15, 23, 42, 0.86) !important;
+}
+
+:global([data-theme="dark"]) .teetimeConfigBanner {
+  border: 1px solid rgba(34, 197, 94, 0.28) !important;
+  border-left: 4px solid #22c55e !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.18), transparent 34%),
+    rgba(15, 23, 42, 0.94) !important;
+  color: #bbf7d0 !important;
+}
+
+:global([data-theme="dark"]) .teetimeConfigBanner svg {
+  color: #86efac !important;
+}
+
+:global([data-theme="dark"]) .teetimeConfigBanner strong {
+  color: #f0fdf4 !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.10), transparent 42%),
+    linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(15, 23, 42, 0.96)) !important;
+  border: 1px solid rgba(100, 116, 139, 0.38) !important;
+  color: #e5e7eb !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot:hover {
+  transform: translateY(-2px);
+  border-color: rgba(125, 211, 252, 0.50) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 34px rgba(0, 0, 0, 0.32) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_empty {
+  border-color: rgba(34, 197, 94, 0.42) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34, 197, 94, 0.08), transparent 38%),
+    linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(15, 23, 42, 0.96)) !important;
+  box-shadow:
+    inset 0 3px 0 rgba(34, 197, 94, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_booked {
+  border-color: rgba(245, 158, 11, 0.50) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.14), transparent 40%),
+    linear-gradient(180deg, rgba(24, 22, 16, 0.98), rgba(15, 23, 42, 0.96)) !important;
+  box-shadow:
+    inset 0 3px 0 rgba(245, 158, 11, 0.94),
+    0 10px 24px rgba(0, 0, 0, 0.20) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_full {
+  border-color: rgba(248, 113, 113, 0.52) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(239, 68, 68, 0.14), transparent 40%),
+    linear-gradient(180deg, rgba(31, 18, 23, 0.98), rgba(15, 23, 42, 0.96)) !important;
+  box-shadow:
+    inset 0 3px 0 rgba(248, 113, 113, 0.94),
+    0 10px 24px rgba(0, 0, 0, 0.20) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_past {
+  background: rgba(15, 23, 42, 0.62) !important;
+  border-color: rgba(100, 116, 139, 0.28) !important;
+  box-shadow: inset 0 3px 0 rgba(100, 116, 139, 0.50) !important;
+  opacity: 0.58 !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot strong {
+  color: #f8fafc !important;
+  letter-spacing: 0 !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot em,
+:global([data-theme="dark"]) .teetimeSlotIndex {
+  color: #a7b4c8 !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_empty strong {
+  color: #dcfce7 !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_booked strong {
+  color: #fde68a !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_full strong {
+  color: #fecaca !important;
+}
+
+:global([data-theme="dark"]) .teetimeLegend > span {
+  padding: 7px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.74);
+  color: #cbd5e1 !important;
+}
+
+:global([data-theme="dark"]) .modalOverlay {
+  background: rgba(2, 6, 23, 0.74) !important;
+  backdrop-filter: blur(10px) saturate(120%);
+}
+
+:global([data-theme="dark"]) .contractFormModal {
+  border: 1px solid rgba(100, 116, 139, 0.38) !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(14, 165, 233, 0.14), transparent 30%),
+    linear-gradient(180deg, #101827, #080d18) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48) !important;
+}
+
+:global([data-theme="dark"]) .contractFormBanner {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.18), transparent 32%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(14, 23, 38, 0.96)) !important;
+}
+
+:global([data-theme="dark"]) .contractFormBanner h2,
+:global([data-theme="dark"]) .contractFormBanner p {
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) .contractFormBanner button {
+  background: rgba(15, 23, 42, 0.78) !important;
+  border-color: rgba(148, 163, 184, 0.26) !important;
+  color: #e5e7eb !important;
+}
+
+:global([data-theme="dark"]) .contractFormBody,
+:global([data-theme="dark"]) .contractFormSection,
+:global([data-theme="dark"]) .teetimeSlotSummary > div,
+:global([data-theme="dark"]) .teetimeCustomerSearch,
+:global([data-theme="dark"]) .teetimeCustomerCard,
+:global([data-theme="dark"]) .teetimeCustomerCardActive,
+:global([data-theme="dark"]) .ticketDialog,
+:global([data-theme="dark"]) .ticketDialogBody,
+:global([data-theme="dark"]) .ticketSubModal {
+  border-color: rgba(100, 116, 139, 0.28) !important;
+  background: rgba(15, 23, 42, 0.76) !important;
+  color: #e5e7eb !important;
+}
+
+:global([data-theme="dark"]) .contractKpiIcon {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.20), transparent 34%),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.92), rgba(6, 182, 212, 0.82)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.26) !important;
+}
+
+:global([data-theme="dark"]) .contractRadio,
+:global([data-theme="dark"]) .contractRadioActive {
+  border: 1px solid rgba(100, 116, 139, 0.30) !important;
+  background: rgba(15, 23, 42, 0.82) !important;
+  color: #dbeafe !important;
+  box-shadow: none !important;
+}
+
+:global([data-theme="dark"]) .contractRadio:hover {
+  border-color: rgba(125, 211, 252, 0.48) !important;
+  background: rgba(30, 41, 59, 0.92) !important;
+}
+
+:global([data-theme="dark"]) .contractRadioActive {
+  border-color: rgba(125, 211, 252, 0.72) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.22), transparent 40%),
+    linear-gradient(135deg, rgba(30, 64, 175, 0.72), rgba(15, 23, 42, 0.88)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.14) !important;
+}
+
+:global([data-theme="dark"]) .contractCheckboxLine {
+  border-color: rgba(100, 116, 139, 0.34) !important;
+  background: rgba(15, 23, 42, 0.82) !important;
+  color: #dbeafe !important;
+}
+
+:global([data-theme="dark"]) .contractCheckboxLine:hover {
+  border-color: rgba(125, 211, 252, 0.46) !important;
+  background: rgba(30, 41, 59, 0.92) !important;
+}
+
+:global([data-theme="dark"]) .contractCheckboxLine:has(input[type="checkbox"]:checked) {
+  border-color: rgba(34, 197, 94, 0.42) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.18), transparent 34%),
+    rgba(15, 23, 42, 0.88) !important;
+}
+
+:global([data-theme="dark"]) .contractFormModal input[type="checkbox"],
+:global([data-theme="dark"]) .ticketSubModal input[type="checkbox"] {
+  border-color: rgba(148, 163, 184, 0.46) !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+:global([data-theme="dark"]) .contractFormModal input[type="checkbox"]:checked,
+:global([data-theme="dark"]) .ticketSubModal input[type="checkbox"]:checked {
+  border-color: rgba(34, 197, 94, 0.72) !important;
+  background: linear-gradient(135deg, #16a34a, #0ea5e9) !important;
+}
+
+:global([data-theme="dark"]) .contractFormSection {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+}
+
+:global([data-theme="dark"]) .contractSectionHeader svg,
+:global([data-theme="dark"]) .contractFormBanner h2 svg {
+  color: #7dd3fc !important;
+}
+
+:global([data-theme="dark"]) .contractFormFooter,
+:global([data-theme="dark"]) .ticketSubModal footer,
+:global([data-theme="dark"]) .ticketDialog footer {
+  border-top-color: rgba(148, 163, 184, 0.18) !important;
+  background: rgba(8, 13, 24, 0.94) !important;
+}
+
+:global([data-theme="dark"]) .teetimePreviewBanner {
+  border-color: rgba(59, 130, 246, 0.30) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.18), transparent 34%),
+    rgba(15, 23, 42, 0.82) !important;
+}
+
+:global([data-theme="dark"]) .teetimePreviewBanner svg,
+:global([data-theme="dark"]) .teetimePreviewBanner strong {
+  color: #bfdbfe !important;
+}
+
+:global([data-theme="dark"]) .teetimePreviewBanner span {
+  color: #dbeafe !important;
+}
+
+:global([data-theme="dark"]) .teetimeWarningBanner {
+  border-color: rgba(245, 158, 11, 0.34) !important;
+  background: rgba(120, 53, 15, 0.28) !important;
+  color: #fde68a !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlotPill,
+:global([data-theme="dark"]) .contractFilterChip,
+:global([data-theme="dark"]) .contractRowActions button,
+:global([data-theme="dark"]) .contractLinkBtn {
+  border-color: rgba(96, 165, 250, 0.24) !important;
+  background: rgba(15, 23, 42, 0.82) !important;
+  color: #dbeafe !important;
+}
+
+:global([data-theme="dark"]) .teetimeCustomerCard:hover,
+:global([data-theme="dark"]) .teetimeCustomerCardActive {
+  border-color: rgba(34, 211, 238, 0.45) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.16), transparent 36%),
+    rgba(15, 23, 42, 0.94) !important;
+}
+
+:global([data-theme="dark"]) .teetimeCustomerAvatar {
+  background: linear-gradient(135deg, #2563eb, #06b6d4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28) !important;
+}
+
+:global([data-theme="dark"]) .contractActionMenu {
+  border-color: rgba(100, 116, 139, 0.32) !important;
+  background: #0f172a !important;
+  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.38) !important;
+}
+
+:global([data-theme="dark"]) .contractMenuItem,
+:global([data-theme="dark"]) .contractMenuDisabled {
+  color: #e5e7eb !important;
+}
+
+:global([data-theme="dark"]) .contractMenuItem:hover {
+  background: rgba(59, 130, 246, 0.16) !important;
+}
+
+:global([data-theme="dark"]) .ticketDialogIcon {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.92), rgba(14, 165, 233, 0.78)) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10) !important;
+}
+
+:global([data-theme="dark"]) .settingsBusinessSaveBar,
+:global([data-theme="dark"]) .settingsBusinessSaveBar button,
+:global([data-theme="dark"]) .settingsQrField > div,
+:global([data-theme="dark"]) .settingsQrField section button,
+:global([data-theme="dark"]) .settingsRuleList label,
+:global([data-theme="dark"]) .settingsVatExample article,
+:global([data-theme="dark"]) .settingsCodeFooter,
+:global([data-theme="dark"]) .settingsCodeFooter button,
+:global([data-theme="dark"]) .settingsCodeHeaderActions button,
+:global([data-theme="dark"]) .settingsCodeChips span,
+:global([data-theme="dark"]) .checkinDeviceHeader,
+:global([data-theme="dark"]) .checkinSearch,
+:global([data-theme="dark"]) .checkinBtnGhost,
+:global([data-theme="dark"]) .checkinDeviceFilter,
+:global([data-theme="dark"]) .checkinTableWrap,
+:global([data-theme="dark"]) .checkinTableFooter {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.94)) !important;
+  color: #e5e7eb !important;
+}
+
+:global([data-theme="dark"]) .settingsBusinessSaveBar button:last-child,
+:global([data-theme="dark"]) .settingsCodeFooter button:last-child {
+  border-color: rgba(34, 211, 238, 0.42) !important;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  color: #ffffff !important;
+}
+
+:global([data-theme="dark"]) .settingsQrPreview {
+  border-color: rgba(96, 165, 250, 0.28) !important;
+  background: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) .checkinTable th {
+  background: rgba(15, 23, 42, 0.82) !important;
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) .checkinDeviceFilter span,
+:global([data-theme="dark"]) .checkinDeviceCode {
+  background: rgba(15, 23, 42, 0.76) !important;
+  color: #dbeafe !important;
+}
+
+:global([data-theme="dark"]) .checkinDeviceFilterActive,
+:global([data-theme="dark"]) .checkinDeviceFilterActive span {
+  border-color: rgba(34, 211, 238, 0.42) !important;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  color: #ffffff !important;
+}
+
+:global([data-theme="dark"]) .checkinStatusActive,
+:global([data-theme="dark"]) [class*="StatusGreen"],
+:global([data-theme="dark"]) [class*="statusGreen"],
+:global([data-theme="dark"]) [class*="Tone_success"] {
+  background: rgba(22, 163, 74, 0.18) !important;
+  color: #86efac !important;
+}
+
+:global([data-theme="dark"]) .checkinStatusOffline,
+:global([data-theme="dark"]) [class*="StatusRed"],
+:global([data-theme="dark"]) [class*="statusRed"],
+:global([data-theme="dark"]) [class*="Tone_warning"] {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+}
+
 .collapsedShell {
   grid-template-columns: 84px minmax(0, 1fr);
 }
@@ -27160,4 +27653,316 @@ button.classesCalendarCell:hover { background: #eff6ff; }
   .reportsDataTable button span:first-child {
     font-weight: 850;
   }
+}
+
+:global([data-theme="dark"]) .facility,
+:global([data-theme="dark"]) .dashboardFinanceCard > div,
+:global([data-theme="dark"]) .dashboardActionList button,
+:global([data-theme="dark"]) .pricingSearch,
+:global([data-theme="dark"]) .cashbookSearch,
+:global([data-theme="dark"]) .teetimeHeader,
+:global([data-theme="dark"]) .teetimeDateInput,
+:global([data-theme="dark"]) .teetimeBranchPicker,
+:global([data-theme="dark"]) .teetimeGridCard,
+:global([data-theme="dark"]) .teetimeLegend,
+:global([data-theme="dark"]) .teetimeConfigBanner,
+:global([data-theme="dark"]) .lineBoxV2,
+:global([data-theme="dark"]) .commissionTypeSwitch,
+:global([data-theme="dark"]) .commissionMatrixTable td,
+:global([data-theme="dark"]) .reportsOverviewTiles button,
+:global([data-theme="dark"]) .reportsTrendHotspots button,
+:global([data-theme="dark"]) .reportsTrendHotspots button span,
+:global([data-theme="dark"]) .reportsDataTable > div,
+:global([data-theme="dark"]) .reportsDataTable button {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.10), transparent 34%),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.94)) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.20) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.94)) !important;
+  border-color: rgba(148, 163, 184, 0.26) !important;
+  color: #e5e7eb !important;
+  opacity: 1 !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_empty {
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.22), rgba(15, 23, 42, 0.94)) !important;
+  border-color: rgba(74, 222, 128, 0.40) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_booked {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(15, 23, 42, 0.94)) !important;
+  border-color: rgba(251, 191, 36, 0.45) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_full {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(15, 23, 42, 0.94)) !important;
+  border-color: rgba(248, 113, 113, 0.45) !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot_past {
+  background: rgba(15, 23, 42, 0.58) !important;
+  border-color: rgba(100, 116, 139, 0.42) !important;
+  opacity: 0.72 !important;
+}
+
+:global([data-theme="dark"]) .teetimeSlot strong,
+:global([data-theme="dark"]) .teetimeSlot em,
+:global([data-theme="dark"]) .teetimeSlotIndex,
+:global([data-theme="dark"]) .lineBoxV2 strong,
+:global([data-theme="dark"]) .lineBoxV2 span,
+:global([data-theme="dark"]) .facilityTitle,
+:global([data-theme="dark"]) .facility dt,
+:global([data-theme="dark"]) .facility dd,
+:global([data-theme="dark"]) .reportsOverviewTiles strong,
+:global([data-theme="dark"]) .reportsOverviewTiles span,
+:global([data-theme="dark"]) .reportsOverviewTiles em,
+:global([data-theme="dark"]) .reportsTrendHotspots button,
+:global([data-theme="dark"]) .reportsTrendHotspots button span,
+:global([data-theme="dark"]) .reportsTrendHotspots button b,
+:global([data-theme="dark"]) .reportsTrendHotspots button strong,
+:global([data-theme="dark"]) .reportsTrendHotspots button em {
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) .contractBadgeActive,
+:global([data-theme="dark"]) .cashbookStatusDone {
+  background: rgba(22, 163, 74, 0.18) !important;
+  color: #86efac !important;
+}
+
+:global([data-theme="dark"]) .contractBadgeSuspended,
+:global([data-theme="dark"]) .cashbookStatusPending {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fcd34d !important;
+}
+
+:global([data-theme="dark"]) .contractBadgeExpired,
+:global([data-theme="dark"]) .cashbookStatusCancel {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+}
+
+:global([data-theme="dark"]) .contractBadgeClosed,
+:global([data-theme="dark"]) .contractBadgeConverted,
+:global([data-theme="dark"]) .servicePill,
+:global([data-theme="dark"]) .ticketTypeSingle,
+:global([data-theme="dark"]) .ticketTypeGroup,
+:global([data-theme="dark"]) .ticketCategoryBadge {
+  background: rgba(59, 130, 246, 0.18) !important;
+  color: #bfdbfe !important;
+}
+
+:global([data-theme="dark"]) .memberCode,
+:global([data-theme="dark"]) .bookingCode,
+:global([data-theme="dark"]) .cashbookLink,
+:global([data-theme="dark"]) .contractTabBtn,
+:global([data-theme="dark"]) .commissionRatePill,
+:global([data-theme="dark"]) .teetimeTodayBtn {
+  color: #93c5fd !important;
+}
+
+:global([data-theme="dark"]) .contractTabActive,
+:global([data-theme="dark"]) .commissionTypeSwitch button:first-child {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  color: #ffffff !important;
+}
+
+:global([data-theme="dark"]) .dashboardMainColumn {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+:global([data-theme="dark"]) .facilityGrid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+}
+
+:global([data-theme="dark"]) .dashboardFinance div,
+:global([data-theme="dark"]) .dashboardAlerts button,
+:global([data-theme="dark"]) .lineGridFooter,
+:global([data-theme="dark"]) .coachLegend > span,
+:global([data-theme="dark"]) .coachCellEmpty,
+:global([data-theme="dark"]) .classesSearchBox,
+:global([data-theme="dark"]) .classesTypeChip,
+:global([data-theme="dark"]) .checkinDateLabel,
+:global([data-theme="dark"]) .checkinChip,
+:global([data-theme="dark"]) .customerSearch,
+:global([data-theme="dark"]) .customerFilterChips button,
+:global([data-theme="dark"]) .employeeSearch,
+:global([data-theme="dark"]) .pricingTab,
+:global([data-theme="dark"]) .pagination button,
+:global([data-theme="dark"]) .pagination input {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.94)) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18) !important;
+}
+
+:global([data-theme="dark"]) .pricingTabActive,
+:global([data-theme="dark"]) .classesTypeChipActive,
+:global([data-theme="dark"]) .checkinChipActive,
+:global([data-theme="dark"]) .pagination .currentPage {
+  border-color: rgba(34, 211, 238, 0.42) !important;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  color: #ffffff !important;
+}
+
+:global([data-theme="dark"]) .dashboardFinance div *,
+:global([data-theme="dark"]) .dashboardAlerts button *,
+:global([data-theme="dark"]) .lineGridFooter *,
+:global([data-theme="dark"]) .lineLegend,
+:global([data-theme="dark"]) .lineLegend *,
+:global([data-theme="dark"]) .lineBoxMemberTag,
+:global([data-theme="dark"]) .coachLegend,
+:global([data-theme="dark"]) .coachLegend *,
+:global([data-theme="dark"]) .coachStatusBadge,
+:global([data-theme="dark"]) .classesTypeChip,
+:global([data-theme="dark"]) .checkinChip,
+:global([data-theme="dark"]) .employeeCode,
+:global([data-theme="dark"]) .ticketDateCell,
+:global([data-theme="dark"]) .contractTableFooter,
+:global([data-theme="dark"]) .cellMuted,
+:global([data-theme="dark"]) .pagination,
+:global([data-theme="dark"]) .pagination * {
+  color: #dbeafe !important;
+}
+
+:global([data-theme="dark"]) .dashboardWarnRow {
+  border-color: rgba(245, 158, 11, 0.38) !important;
+  background: rgba(245, 158, 11, 0.16) !important;
+}
+
+:global([data-theme="dark"]) .employeeEyebrow,
+:global([data-theme="dark"]) .employeeStatusActive {
+  background: rgba(22, 163, 74, 0.18) !important;
+  color: #86efac !important;
+}
+
+:global([data-theme="dark"]) .employeeStatusPause {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fcd34d !important;
+}
+
+:global([data-theme="dark"]) .employeeStatusOff {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+}
+
+:global([data-theme="dark"]) .facilityGrid,
+:global([data-theme="dark"]) .dashboardOverviewGrid .facilityGrid,
+:global([data-theme="dark"]) .dashboardGrid .facilityGrid {
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] {
+  color-scheme: dark;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Shell"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="shell"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Page"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="page"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Screen"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="screen"] {
+  background: transparent !important;
+  color: #e5e7eb !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Hero"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="hero"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Card"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="card"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Panel"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="panel"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="TableWrap"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="tableWrap"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Filter"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="filter"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Toolbar"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="toolbar"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Tabs"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="tabs"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Chart"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="chart"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Board"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="board"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="List"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="list"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Pane"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="pane"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Wrap"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="wrap"] {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.10), transparent 34%),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.94)) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22) !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] h1,
+:global([data-theme="dark"]) [class*="feature-styles-module"] h2,
+:global([data-theme="dark"]) [class*="feature-styles-module"] h3,
+:global([data-theme="dark"]) [class*="feature-styles-module"] h4,
+:global([data-theme="dark"]) [class*="feature-styles-module"] h5,
+:global([data-theme="dark"]) [class*="feature-styles-module"] strong,
+:global([data-theme="dark"]) [class*="feature-styles-module"] b,
+:global([data-theme="dark"]) [class*="feature-styles-module"] th,
+:global([data-theme="dark"]) [class*="feature-styles-module"] dt {
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] p,
+:global([data-theme="dark"]) [class*="feature-styles-module"] span,
+:global([data-theme="dark"]) [class*="feature-styles-module"] small,
+:global([data-theme="dark"]) [class*="feature-styles-module"] em,
+:global([data-theme="dark"]) [class*="feature-styles-module"] dd,
+:global([data-theme="dark"]) [class*="feature-styles-module"] td,
+:global([data-theme="dark"]) [class*="feature-styles-module"] li,
+:global([data-theme="dark"]) [class*="feature-styles-module"] label {
+  color: #cbd5e1 !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] input,
+:global([data-theme="dark"]) [class*="feature-styles-module"] select,
+:global([data-theme="dark"]) [class*="feature-styles-module"] textarea {
+  border-color: rgba(148, 163, 184, 0.34) !important;
+  background: rgba(15, 23, 42, 0.92) !important;
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] input::placeholder,
+:global([data-theme="dark"]) [class*="feature-styles-module"] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] table,
+:global([data-theme="dark"]) [class*="feature-styles-module"] thead,
+:global([data-theme="dark"]) [class*="feature-styles-module"] tbody,
+:global([data-theme="dark"]) [class*="feature-styles-module"] tr {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  background: transparent !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] th {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  background: rgba(15, 23, 42, 0.82) !important;
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"] button {
+  border-color: rgba(96, 165, 250, 0.26);
+}
+
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="Active"],
+:global([data-theme="dark"]) [class*="feature-styles-module"][class*="active"],
+:global([data-theme="dark"]) [class*="feature-styles-module"] [class*="Active"],
+:global([data-theme="dark"]) [class*="feature-styles-module"] [class*="active"] {
+  border-color: rgba(34, 211, 238, 0.42) !important;
 }

@@ -12,8 +12,11 @@ import {
   Pencil,
   Plus,
   Power,
+  Save,
   Search,
   Settings,
+  ShoppingBag,
+  Tag,
   Ticket,
   Timer,
   Trash2,
@@ -109,6 +112,12 @@ function formatDays(days: string[]): string {
   return days.map((d) => DAY_PILLS.find((p) => p.id === d)?.full ?? d).join(", ");
 }
 
+const CONTRACT_SERVICE_TYPES = ["Member - Golf tập thành viên", "Practice", "Combo", "Trial"] as const;
+const CONTRACT_SERVICE_GROUPS = ["Teetime", "Practice", "Combo", "Trial", "Academy", "Corporate"] as const;
+const TICKET_SERVICE_TYPES = ["Teetime", "Practice", "Combo", "Event", "Caddie", "Gửi gậy", "Dịch vụ khác"] as const;
+const TICKET_OTHER_SERVICE_OPTIONS = ["Caddie", "Xe điện (Buggy)", "Bộ gậy thuê", "Banh tập", "Gửi gậy", "F&B", "Phí khách đi cùng"] as const;
+const TICKET_SERVICE_GROUPS = ["Dịch vụ golf lẻ", "Teetime", "Practice", "Dịch vụ phụ trợ", "F&B", "Sự kiện"] as const;
+
 type ContractPackage = {
   code: string;
   name: string;
@@ -126,7 +135,7 @@ type SingleTicket = {
   code: string;
   name: string;
   desc: string;
-  serviceType: "Teetime" | "Practice" | "Dịch vụ khác";
+  serviceType: (typeof TICKET_SERVICE_TYPES)[number];
   durationHours: string;
   status: "Hoạt động" | "Tạm ngưng";
   prices: { weekday: string; weekend: string; holiday: string; peak: string };
@@ -153,8 +162,8 @@ const INITIAL_TIMESLOTS: TimeSlot[] = [
 ];
 
 const INITIAL_PACKAGES: ContractPackage[] = [
-  { code: "P001", name: "Gói Cơ Bản Golf", desc: "Gói nhập môn, phù hợp người mới chơi", serviceType: "Member - Golf", branch: "NextVision", sessions: "8 buổi", duration: "1 tháng", price: "2.000.000 đ", status: "Hoạt động", usage: 5 },
-  { code: "P002", name: "Gói Cao Cấp Golf", desc: "Gói VIP cho hội viên thâm niên", serviceType: "Member - Golf", branch: "NextVision", sessions: "24 buổi", duration: "3 tháng", price: "5.500.000 đ", status: "Hoạt động", usage: 12 },
+  { code: "P001", name: "Gói Cơ Bản Golf", desc: "Gói nhập môn, phù hợp người mới chơi", serviceType: "Member - Golf tập thành viên", branch: "NextVision", sessions: "8 buổi", duration: "1 tháng", price: "2.000.000 đ", status: "Hoạt động", usage: 5 },
+  { code: "P002", name: "Gói Cao Cấp Golf", desc: "Gói VIP cho hội viên thâm niên", serviceType: "Member - Golf tập thành viên", branch: "NextVision", sessions: "24 buổi", duration: "3 tháng", price: "5.500.000 đ", status: "Hoạt động", usage: 12 },
   { code: "P003", name: "Gói Premium Practice", desc: "Driving range + putting green", serviceType: "Practice", branch: "NextVision", sessions: "30 buổi", duration: "6 tháng", price: "4.200.000 đ", status: "Hoạt động", usage: 8 },
   { code: "P004", name: "Gói Family Combo", desc: "Cho cả gia đình 4 người", serviceType: "Combo", branch: "NextVision", sessions: "50 buổi", duration: "12 tháng", price: "18.500.000 đ", status: "Hoạt động", usage: 3 },
   { code: "P005", name: "Gói Trial 7 ngày", desc: "Gói dùng thử cho khách mới", serviceType: "Trial", branch: "NextVision", sessions: "4 buổi", duration: "1 tuần", price: "800.000 đ", status: "Tạm ngưng", usage: 0 },
@@ -476,6 +485,8 @@ export default function PricingView() {
           initial={editingPackage}
           onClose={() => { setPackageFormOpen(false); setEditingPackage(null); }}
           onSubmit={submitPackage}
+          onTimeslotsChange={setTimeslots}
+          onZonesChange={setZones}
           timeslots={timeslots}
           zones={zones}
         />
@@ -1479,12 +1490,16 @@ function ContractPackageFormModal({
   initial,
   onClose,
   onSubmit,
+  onTimeslotsChange,
+  onZonesChange,
   timeslots,
   zones,
 }: {
   initial: ContractPackage | null;
   onClose: () => void;
   onSubmit: (pkg: ContractPackage) => void;
+  onTimeslotsChange: (items: TimeSlot[]) => void;
+  onZonesChange: (items: Zone[]) => void;
   timeslots: TimeSlot[];
   zones: Zone[];
 }) {
@@ -1494,8 +1509,9 @@ function ContractPackageFormModal({
   const [name, setName] = useState(initial?.name ?? "");
   const [desc, setDesc] = useState(initial?.desc ?? "");
   const [pkgStatus, setPkgStatus] = useState<"Hoạt động" | "Tạm ngưng">(initial?.status ?? "Hoạt động");
-  const [serviceType, setServiceType] = useState(initial?.serviceType ?? "Member - Golf");
+  const [serviceType, setServiceType] = useState(initial?.serviceType ?? CONTRACT_SERVICE_TYPES[0]);
   const [serviceGroup, setServiceGroup] = useState("Teetime");
+  const [serviceGroupOptions, setServiceGroupOptions] = useState<string[]>([...CONTRACT_SERVICE_GROUPS]);
   const [branch, setBranch] = useState(initial?.branch ?? "NextVision");
   const [timeslotId, setTimeslotId] = useState("");
   const [packageMode, setPackageMode] = useState<"fixed" | "flex">("fixed");
@@ -1511,6 +1527,11 @@ function ContractPackageFormModal({
   const [hhUnit, setHhUnit] = useState<"VND" | "%">("VND");
   const [hhSale, setHhSale] = useState("");
   const [hhCoach, setHhCoach] = useState("");
+  const [serviceTypes, setServiceTypes] = useState(() => {
+    const base = [...CONTRACT_SERVICE_TYPES];
+    return Array.from(new Set([...base, initial?.serviceType].filter(Boolean))) as string[];
+  });
+  const [quickModal, setQuickModal] = useState<"service" | "group" | "zone" | "timeslot" | null>(null);
   const [error, setError] = useState("");
 
   const code = initial?.code ?? `PKG - MNNZ55DX - 350`;
@@ -1545,6 +1566,33 @@ function ContractPackageFormModal({
     setSelectedZones((c) => c.includes(zcode) ? c.filter((z) => z !== zcode) : [...c, zcode]);
   const toggleSlot = (id: string) =>
     setSelectedSlots((c) => c.includes(id) ? c.filter((s) => s !== id) : [...c, id]);
+
+  const addServiceType = (value: string) => {
+    setServiceTypes((current) => Array.from(new Set([value, ...current])));
+    setServiceType(value);
+    setQuickModal(null);
+  };
+
+  const addServiceGroup = (value: string) => {
+    const normalized = value.trim();
+    if (!normalized) return;
+    setServiceGroupOptions((current) => Array.from(new Set([normalized, ...current])));
+    setServiceGroup(normalized);
+    setQuickModal(null);
+  };
+
+  const addZone = (zone: Zone) => {
+    onZonesChange([zone, ...zones]);
+    setSelectedZones((current) => Array.from(new Set([zone.code, ...current])));
+    setQuickModal(null);
+  };
+
+  const addTimeslot = (slot: TimeSlot) => {
+    onTimeslotsChange([slot, ...timeslots]);
+    setTimeslotId(slot.id);
+    setSelectedSlots((current) => Array.from(new Set([slot.id, ...current])));
+    setQuickModal(null);
+  };
 
   return (
     <div className={styles.modalOverlay}>
@@ -1587,16 +1635,12 @@ function ContractPackageFormModal({
             <div className={styles.cpField}>
               <label className={styles.cpLabel}>
                 Loại Dịch Vụ <b>*</b>
-                <button type="button" className={styles.cpAddLink} onClick={() => setServiceType("Custom Golf Service")}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setQuickModal("service")}>
                   <Plus size={12} /> Thêm loại dịch vụ
                 </button>
               </label>
               <select className={styles.cpInput} value={serviceType} onChange={(e) => setServiceType(e.target.value)}>
-                <option>Thành Viên</option>
-                <option>Member - Golf</option>
-                <option>Practice</option>
-                <option>Combo</option>
-                <option>Trial</option>
+                {serviceTypes.map((type) => <option key={type}>{type}</option>)}
               </select>
             </div>
           </div>
@@ -1605,14 +1649,12 @@ function ContractPackageFormModal({
             <div className={styles.cpField}>
               <label className={styles.cpLabel}>
                 Nhóm Dịch Vụ <b>*</b>
-                <button type="button" className={styles.cpAddLink} onClick={() => setServiceType("Member - Golf")}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setQuickModal("group")}>
                   <Plus size={12} /> Thêm nhóm
                 </button>
               </label>
               <select className={styles.cpInput} value={serviceGroup} onChange={(e) => setServiceGroup(e.target.value)}>
-                <option>Teetime</option>
-                <option>Practice</option>
-                <option>Combo</option>
+                {serviceGroupOptions.map((group) => <option key={group}>{group}</option>)}
               </select>
             </div>
             <div className={styles.cpField}>
@@ -1625,7 +1667,7 @@ function ContractPackageFormModal({
             <div className={styles.cpField}>
               <label className={styles.cpLabel}>
                 Khung Thời Gian <b>*</b>
-                <button type="button" className={styles.cpAddLink} onClick={() => setSelectedSlots((current) => current.length ? current : timeslots.slice(0, 1).map((slot) => slot.id))}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setQuickModal("timeslot")}>
                   <Plus size={12} /> Thêm khung giờ
                 </button>
               </label>
@@ -1709,7 +1751,7 @@ function ContractPackageFormModal({
           <section className={styles.cpSection}>
             <header>
               <h3><MapPin size={16} /> Quản Lý Khu Vực</h3>
-              <button type="button" className={styles.cpAddBtn} onClick={() => setSelectedZones((current) => current.length ? current : zones.slice(0, 1).map((zone) => zone.code))}>
+              <button type="button" className={styles.cpAddBtn} onClick={() => setQuickModal("zone")}>
                 <Plus size={14} /> Thêm khu vực
               </button>
             </header>
@@ -1726,7 +1768,7 @@ function ContractPackageFormModal({
           <section className={styles.cpSection}>
             <header>
               <h3><Timer size={16} /> Quản Lý Khung Giờ</h3>
-              <button type="button" className={styles.cpAddBtn} onClick={() => setSelectedSlots((current) => current.length ? current : timeslots.slice(0, 1).map((slot) => slot.id))}>
+              <button type="button" className={styles.cpAddBtn} onClick={() => setQuickModal("timeslot")}>
                 <Plus size={14} /> Thêm khung giờ
               </button>
             </header>
@@ -1905,7 +1947,132 @@ function ContractPackageFormModal({
           </button>
           <button className={styles.cpCancelBtn} onClick={onClose} type="button">Hủy</button>
         </footer>
+        {quickModal === "service" ? (
+          <QuickServiceTypeModal existing={serviceTypes} onClose={() => setQuickModal(null)} onSubmit={addServiceType} />
+        ) : null}
+        {quickModal === "group" ? (
+          <ContractServiceGroupModal onClose={() => setQuickModal(null)} onSubmit={addServiceGroup} />
+        ) : null}
+        {quickModal === "zone" ? (
+          <ZoneFormModal
+            defaultBranch={branch}
+            existing={null}
+            onClose={() => setQuickModal(null)}
+            onSubmit={addZone}
+          />
+        ) : null}
+        {quickModal === "timeslot" ? (
+          <TimeslotFormModal
+            existing={null}
+            onClose={() => setQuickModal(null)}
+            onSubmit={addTimeslot}
+            zones={zones}
+          />
+        ) : null}
       </section>
+    </div>
+  );
+}
+
+function QuickServiceTypeModal({
+  existing,
+  onClose,
+  onSubmit,
+}: {
+  existing: string[];
+  onClose: () => void;
+  onSubmit: (value: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+
+  const updateName = (value: string) => {
+    setName(value);
+    setError("");
+    if (!code) {
+      setCode(value.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, ""));
+    }
+  };
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = name.trim();
+    if (!value) { setError("Nhập tên loại dịch vụ."); return; }
+    if (!code.trim()) { setError("Nhập mã loại dịch vụ."); return; }
+    if (existing.some((item) => item.toLowerCase() === value.toLowerCase())) {
+      setError("Loại dịch vụ này đã tồn tại.");
+      return;
+    }
+    onSubmit(value);
+  };
+
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <form className={styles.ticketSubModal} onSubmit={submit}>
+        <header><h3><Ticket size={16} /> Thêm loại dịch vụ</h3><button onClick={onClose} type="button"><X size={16} /></button></header>
+        {error ? <div className={styles.formError}><AlertCircle size={14} /> {error}</div> : null}
+        <div className={styles.contractGrid2}>
+          <label>
+            <span>Tên loại dịch vụ <b>*</b></span>
+            <input value={name} onChange={(event) => updateName(event.target.value)} placeholder="VD: Corporate Golf, Academy Junior..." autoFocus />
+          </label>
+          <label>
+            <span>Mã loại <b>*</b></span>
+            <input value={code} onChange={(event) => { setCode(event.target.value.toUpperCase()); setError(""); }} placeholder="VD: ACADEMY_JUNIOR" />
+          </label>
+          <label className={styles.fullField}>
+            <span>Nhóm nghiệp vụ</span>
+            <select className={styles.selectInput} defaultValue="Hợp đồng hội viên">
+              <option>Hợp đồng hội viên</option>
+              <option>Practice package</option>
+              <option>Combo hợp đồng</option>
+              <option>Trial / dùng thử</option>
+            </select>
+          </label>
+        </div>
+        <footer>
+          <button className={styles.contractFilterChip} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.blueButton} type="submit"><Plus size={14} /> Thêm loại dịch vụ</button>
+        </footer>
+      </form>
+    </div>
+  );
+}
+
+function ContractServiceGroupModal({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void;
+  onSubmit: (value: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = name.trim();
+    if (!value) { setError("Nhập tên nhóm dịch vụ hợp đồng."); return; }
+    onSubmit(value);
+  };
+
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <form className={styles.ticketSubModal} onSubmit={submit}>
+        <header><h3><ShoppingBag size={16} /> Thêm nhóm dịch vụ hợp đồng</h3><button onClick={onClose} type="button"><X size={16} /></button></header>
+        <div className={styles.contractGrid2}>
+          {error ? <div className={styles.formError}><AlertCircle size={14} /> {error}</div> : null}
+          <label className={styles.fullField}>
+            <span>Tên nhóm dịch vụ <b>*</b></span>
+            <input value={name} onChange={(event) => { setName(event.target.value); setError(""); }} placeholder="VD: Academy, Corporate, Family..." autoFocus />
+          </label>
+        </div>
+        <footer>
+          <button className={styles.contractFilterChip} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.greenButton} type="submit"><Plus size={14} /> Lưu nhóm dịch vụ</button>
+        </footer>
+      </form>
     </div>
   );
 }
@@ -1934,8 +2101,16 @@ function SingleTicketFormModal({
   const [name, setName] = useState(initial?.name ?? "");
   const [duration, setDuration] = useState(initial?.durationHours?.match(/[\d.]+/)?.[0] ?? "4");
   const [serviceType, setServiceType] = useState<SingleTicket["serviceType"]>(initial?.serviceType ?? "Teetime");
+  const [ticketServiceTypes, setTicketServiceTypes] = useState<SingleTicket["serviceType"][]>(() => {
+    const base = [...TICKET_SERVICE_TYPES];
+    return Array.from(new Set([...base, initial?.serviceType].filter(Boolean))) as SingleTicket["serviceType"][];
+  });
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [groupModalOpen, setGroupModalOpen] = useState(false);
   const [otherService, setOtherService] = useState("");
+  const [otherServiceOptions, setOtherServiceOptions] = useState<string[]>([...TICKET_OTHER_SERVICE_OPTIONS]);
   const [serviceGroup, setServiceGroup] = useState("");
+  const [serviceGroupOptions, setServiceGroupOptions] = useState<string[]>([...TICKET_SERVICE_GROUPS]);
   const [staffCode, setStaffCode] = useState("");
   const [staffName, setStaffName] = useState("");
   const [desc, setDesc] = useState(initial?.desc ?? "");
@@ -1996,6 +2171,25 @@ function SingleTicketFormModal({
       delete next[key];
       return next;
     });
+
+  const addTicketServiceType = (value: string) => {
+    const normalized = value.trim() as SingleTicket["serviceType"];
+    if (!normalized) return;
+    setTicketServiceTypes((current) => Array.from(new Set([normalized, ...current])));
+    setOtherServiceOptions((current) => Array.from(new Set([normalized, ...current])));
+    setServiceType(normalized);
+    setOtherService(normalized);
+    setCategoryModalOpen(false);
+    clearError("otherService");
+  };
+
+  const addTicketServiceGroup = (value: string) => {
+    const normalized = value.trim();
+    if (!normalized) return;
+    setServiceGroupOptions((current) => Array.from(new Set([normalized, ...current])));
+    setServiceGroup(normalized);
+    setGroupModalOpen(false);
+  };
 
   const validate = () => {
     const next: Record<string, string> = {};
@@ -2072,12 +2266,6 @@ function SingleTicketFormModal({
         </header>
         <div className={styles.ticketPriceToolbar}>
           <span className={styles.ticketRequiredHint}><b>*</b> Thông tin bắt buộc</span>
-          <div className={styles.ticketToolbarActions}>
-            <button className={styles.cpCancelBtn} onClick={onClose} type="button">Hủy</button>
-            <button className={styles.tpSaveBtn} onClick={submit} type="button">
-              <Download size={14} /> Lưu bảng giá
-            </button>
-          </div>
         </div>
 
         <div className={styles.ticketPriceBody}>
@@ -2103,29 +2291,37 @@ function SingleTicketFormModal({
             <div className={styles.tpField}>
               <label>Loại dịch vụ <b>*</b></label>
               <select value={serviceType} onChange={(e) => { setServiceType(e.target.value as SingleTicket["serviceType"]); clearError("duration"); clearError("otherService"); }}>
-                <option>Teetime</option>
-                <option>Practice</option>
-                <option>Dịch vụ khác</option>
+                {ticketServiceTypes.map((type) => <option key={type}>{type}</option>)}
               </select>
             </div>
             <div className={fieldClass("otherService")}>
               <div className={styles.tpFieldHead}>
                 <label>Dịch vụ khác</label>
-                <button type="button" className={styles.cpAddLink} onClick={() => { setServiceType("Dịch vụ khác"); clearError("otherService"); }}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setCategoryModalOpen(true)}>
                   <Plus size={12} /> Thêm dịch vụ khác
                 </button>
               </div>
-              <input value={otherService} onChange={(e) => { setOtherService(e.target.value); clearError("otherService"); }} placeholder="Nhập tên dịch vụ khác" disabled={serviceType !== "Dịch vụ khác"} />
+              <select
+                value={otherService}
+                onChange={(e) => { setOtherService(e.target.value); clearError("otherService"); }}
+                disabled={serviceType !== "Dịch vụ khác"}
+              >
+                <option value="">Chọn dịch vụ khác</option>
+                {otherServiceOptions.map((item) => <option key={item}>{item}</option>)}
+              </select>
               {fieldError("otherService")}
             </div>
             <div className={styles.tpField}>
               <div className={styles.tpFieldHead}>
                 <label>Nhóm dịch vụ</label>
-                <button type="button" className={styles.cpAddLink} onClick={() => setServiceGroup("Dịch vụ golf lẻ")}>
+                <button type="button" className={styles.cpAddLink} onClick={() => setGroupModalOpen(true)}>
                   <Plus size={12} /> Thêm nhóm
                 </button>
               </div>
-              <input value={serviceGroup} onChange={(e) => setServiceGroup(e.target.value)} placeholder="Nhập tên nhóm dịch vụ" />
+              <select value={serviceGroup} onChange={(e) => setServiceGroup(e.target.value)}>
+                <option value="">Chọn nhóm dịch vụ</option>
+                {serviceGroupOptions.map((item) => <option key={item}>{item}</option>)}
+              </select>
             </div>
             <div className={styles.tpRow2}>
               <div className={styles.tpField}>
@@ -2328,7 +2524,120 @@ function SingleTicketFormModal({
             </small>
           </section>
         </div>
+        <footer className={styles.cpFooter}>
+          <button className={styles.cpCancelBtn} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.cpSubmitBtn} onClick={submit} type="button">
+            <Save size={14} /> Lưu bảng giá
+          </button>
+        </footer>
+        {categoryModalOpen ? (
+          <TicketServiceTypeModal
+            existing={ticketServiceTypes}
+            onClose={() => setCategoryModalOpen(false)}
+            onSubmit={addTicketServiceType}
+          />
+        ) : null}
+        {groupModalOpen ? (
+          <TicketServiceGroupModal
+            onClose={() => setGroupModalOpen(false)}
+            onSubmit={addTicketServiceGroup}
+          />
+        ) : null}
       </section>
+    </div>
+  );
+}
+
+function TicketServiceTypeModal({
+  existing,
+  onClose,
+  onSubmit,
+}: {
+  existing: string[];
+  onClose: () => void;
+  onSubmit: (value: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+
+  const updateName = (value: string) => {
+    setName(value);
+    setError("");
+    if (!code) {
+      setCode(value.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, ""));
+    }
+  };
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = name.trim();
+    if (!value) { setError("Nhập tên loại dịch vụ vé lẻ."); return; }
+    if (!code.trim()) { setError("Nhập mã loại dịch vụ."); return; }
+    if (existing.some((item) => item.toLowerCase() === value.toLowerCase())) {
+      setError("Loại dịch vụ này đã tồn tại trong Vé Lẻ.");
+      return;
+    }
+    onSubmit(value);
+  };
+
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <form className={styles.ticketSubModal} onSubmit={submit}>
+        <header><h3><Tag size={16} /> Thêm loại dịch vụ vé lẻ</h3><button onClick={onClose} type="button"><X size={16} /></button></header>
+        {error ? <div className={styles.formError}><AlertCircle size={14} /> {error}</div> : null}
+        <div className={styles.contractGrid2}>
+          <label>
+            <span>Tên loại dịch vụ <b>*</b></span>
+            <input value={name} onChange={(event) => updateName(event.target.value)} placeholder="VD: Event, Caddie, Gửi gậy..." autoFocus />
+          </label>
+          <label>
+            <span>Mã loại <b>*</b></span>
+            <input value={code} onChange={(event) => { setCode(event.target.value.toUpperCase()); setError(""); }} placeholder="VD: EVENT, CADDIE" />
+          </label>
+        </div>
+        <footer>
+          <button className={styles.contractFilterChip} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.greenButton} type="submit"><Plus size={14} /> Lưu loại DV vé lẻ</button>
+        </footer>
+      </form>
+    </div>
+  );
+}
+
+function TicketServiceGroupModal({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void;
+  onSubmit: (value: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = name.trim();
+    if (!value) { setError("Nhập tên nhóm dịch vụ."); return; }
+    onSubmit(value);
+  };
+
+  return (
+    <div className={styles.nestedOverlay} role="dialog" aria-modal="true">
+      <form className={styles.ticketSubModal} onSubmit={submit}>
+        <header><h3><ShoppingBag size={16} /> Thêm nhóm dịch vụ vé lẻ</h3><button onClick={onClose} type="button"><X size={16} /></button></header>
+        <div className={styles.contractGrid2}>
+          {error ? <div className={styles.formError}><AlertCircle size={14} /> {error}</div> : null}
+          <label className={styles.fullField}>
+            <span>Tên nhóm dịch vụ <b>*</b></span>
+            <input value={name} onChange={(event) => { setName(event.target.value); setError(""); }} placeholder="VD: Dịch vụ golf lẻ, Phụ trợ sân, F&B..." autoFocus />
+          </label>
+        </div>
+        <footer>
+          <button className={styles.contractFilterChip} onClick={onClose} type="button">Hủy</button>
+          <button className={styles.greenButton} type="submit"><Plus size={14} /> Lưu nhóm dịch vụ</button>
+        </footer>
+      </form>
     </div>
   );
 }

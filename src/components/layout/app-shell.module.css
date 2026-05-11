@@ -1044,6 +1044,12 @@
   font-weight: 900;
 }
 
+.accountTheme button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  filter: grayscale(0.35);
+}
+
 .accountSegment .accountSegmentActive,
 .accountTheme .accountThemeActive {
   background: linear-gradient(135deg, #7c3aed, #2563eb);
@@ -1490,6 +1496,11 @@
   color: #cbd5e1;
 }
 
+.themeDark .accountPrefs label,
+.themeDark .accountMenu footer {
+  color: #cbd5e1;
+}
+
 .themeDark .navigation button {
   color: #dbeafe;
 }
@@ -1501,8 +1512,10 @@
 
 .themeDark .navigation button:hover,
 .themeDark .activeNav {
-  background: #f8fafc !important;
-  color: #1d4ed8 !important;
+  border-color: rgba(96, 165, 250, 0.45) !important;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.28), rgba(14, 165, 233, 0.18)) !important;
+  color: #eff6ff !important;
+  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.28);
 }
 
 .themeDark .navigation button:hover .navIcon,
@@ -1524,6 +1537,10 @@
   border-color: rgba(148, 163, 184, 0.28);
   background: rgba(30, 41, 59, 0.86);
   color: #e5e7eb;
+}
+
+.themeDark .notificationButton {
+  overflow: visible;
 }
 
 .themeDark .accountWorkDialog > header,
@@ -1689,6 +1706,181 @@
   background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
   color: #ffffff !important;
   box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28) !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTabBar"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCard"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsBusinessProfile"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsBusinessForm"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsBusinessSection"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPaymentMethods"] article),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsBranchCard"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTemplateCard"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCodeCard"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsSubTabs"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsRoleList"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPermissionTable"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsInlineRoleForm"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPermissionGrid"] article),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsAgentList"] article),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsAgentTable"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTableWrap"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoTableWrap"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsProviderStatus"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsModal"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsModalBody"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsModalSection"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsSearchSelect"] > div:not([class*="settingsSearchSelectedValue"])),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsQrField"] > div),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsQrPreview"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsVatOptions"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsVatExample"] article),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsProviderGrid"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsThemeGrid"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsFormGrid"] label),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCheckGrid"] label),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsRuleList"] label),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsControlRow"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoTable"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCodeFooter"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCodeLivePreview"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinDeviceHeader"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinSearch"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinTableWrap"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinTableFooter"]) {
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  background:
+    linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.94)) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22) !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTabBar"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsFilterTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsToolbarLine"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsActionRow"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsBranchCard"] footer button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTemplateCard"] footer button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCodeGrid"] footer button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoGrid"] footer button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsSearchSelect"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsWizardTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsDeviceTypeTabs"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsAgentTable"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCodeHeaderActions"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCodeFooter"] button),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinBtnGhost"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinDeviceFilter"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinIconBtn"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinDeviceNameBtn"]) {
+  border-color: rgba(96, 165, 250, 0.28) !important;
+  background: rgba(15, 23, 42, 0.72) !important;
+  color: #dbeafe !important;
+  box-shadow: none !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTabBar"] button:hover),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsFilterTabs"] button:hover),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsSearchSelect"] button:hover) {
+  border-color: rgba(125, 211, 252, 0.5) !important;
+  background: rgba(30, 64, 175, 0.34) !important;
+  color: #ffffff !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTabActive"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsModalTabActive"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsProviderActive"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsVatActive"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPaymentActive"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsRoleActive"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsSearchSelectActive"]) {
+  border-color: rgba(34, 211, 238, 0.42) !important;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.44), rgba(20, 184, 166, 0.30)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.24) !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinDeviceFilterActive"]) {
+  border-color: rgba(34, 211, 238, 0.42) !important;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+  color: #ffffff !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsBusinessChecklist"] span),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTemplateCard"] dl),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsBranchCard"] dl),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPermissionTable"] > div:first-child),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPermissionGroupRow"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsAgentTable"] > div:first-child),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoTable"] th),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPaymentMethods"] article > span),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCodeCard"] header > span),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsSearchSelectedValue"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsFinanceSample"] article),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsCodeChips"] span),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinDeviceFilter"] span),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinDeviceCode"]) {
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  background: rgba(15, 23, 42, 0.76) !important;
+  color: #e5e7eb !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoTable"] th),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoTable"] td),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTable"] th),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsTable"] td),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsAgentTable"] > div),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPermissionTable"] > div),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinTable"] th),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinTable"] td) {
+  border-color: rgba(148, 163, 184, 0.2) !important;
+  color: #dbeafe !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusGreen"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusBadgeGreen"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoTypeGreen"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinStatusActive"]) {
+  background: rgba(22, 163, 74, 0.18) !important;
+  color: #86efac !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusAmber"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusBadgeAmber"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoTypeAmber"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinStatusPending"]) {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fcd34d !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusRed"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusBadgeRed"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__checkinStatusOffline"]) {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusSlate"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusBadgeSlate"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsStatusBadgeViolet"]),
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsPromoTypePurple"]) {
+  background: rgba(129, 140, 248, 0.18) !important;
+  color: #c4b5fd !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsHiddenFile"]) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+.themeDark .content :global([class*="feature-styles-module__ZzLFva__settingsBusinessSaveBar"]) {
+  border-color: rgba(96, 165, 250, 0.26) !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  color: #dbeafe !important;
+  box-shadow: 0 -18px 42px rgba(0, 0, 0, 0.28) !important;
 }
 
 .fontSmall {
