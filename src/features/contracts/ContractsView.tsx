@@ -351,6 +351,12 @@ type Conversion = {
 };
 
 type ContractTab = "list" | "renewal" | "upgrade" | "suspension" | "transfer" | "conversion";
+export type ContractWorkflowRequest = {
+  id: number;
+  mode: "create" | "detail";
+  customerCode?: string;
+  contractId?: string;
+};
 
 // =====================================================================================
 // SECTION B — Mock seed data
@@ -928,6 +934,109 @@ export default function ContractsView() {
   );
 }
 
+export function ContractWorkflowOverlay({
+  onClose,
+  request,
+}: {
+  onClose: () => void;
+  request: ContractWorkflowRequest;
+}) {
+  const [contracts, setContracts] = useState<Contract[]>(INITIAL_CONTRACTS);
+  const [customersState, setCustomersState] = useState<CustomerLite[]>(CUSTOMERS);
+  const [groups, setGroups] = useState<CustomerGroup[]>(INITIAL_GROUPS);
+  const [sources, setSources] = useState<CustomerSource[]>(INITIAL_SOURCES);
+  const [contractTypesState, setContractTypesState] = useState<ContractType[]>(INITIAL_CONTRACT_TYPES);
+  const [trainers, setTrainers] = useState<Trainer[]>(INITIAL_TRAINERS);
+  const [vouchersState, setVouchersState] = useState<Voucher[]>(INITIAL_VOUCHERS);
+  const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPE_OPTIONS]);
+  const [bankAccounts] = useState<BankAccount[]>(INITIAL_BANK_ACCOUNTS);
+  const [posDevices] = useState<PosDevice[]>(INITIAL_POS_DEVICES);
+  const [cashFunds] = useState<CashFund[]>(INITIAL_CASH_FUNDS);
+  const [mode, setMode] = useState<"detail" | "edit" | "create">(request.mode);
+  const targetContract =
+    contracts.find((contract) => contract.id === request.contractId) ??
+    contracts.find((contract) => contract.customerCode === request.customerCode) ??
+    contracts[0];
+  const [printContract, setPrintContract] = useState<Contract | null>(null);
+
+  const handleCreateGroup = (name: string, description: string) => {
+    setGroups((current) => [...current, { id: `G-${Date.now().toString(36).toUpperCase()}`, name, description }]);
+  };
+  const handleCreateSource = (name: string, description: string) => {
+    setSources((current) => [...current, { id: `S-${Date.now().toString(36).toUpperCase()}`, name, description }]);
+  };
+  const handleCreateContractType = (name: string, description: string) => {
+    setContractTypesState((current) => [...current, { id: `CT-${Date.now().toString(36).toUpperCase()}`, name, description }]);
+  };
+  const handleCreateServiceType = (name: string) => {
+    setServiceTypes((current) => current.includes(name) ? current : [...current, name]);
+  };
+  const handleCreateTrainer = (name: string, specialty: string) => {
+    setTrainers((current) => [...current, { id: `TR-${Date.now().toString(36).toUpperCase()}`, name, specialty }]);
+  };
+  const handleCreateVoucher = (voucher: Voucher) => {
+    setVouchersState((current) => [...current, voucher]);
+  };
+  const handleCreateCustomer = (customer: CustomerLite) => {
+    setCustomersState((current) => [...current, customer]);
+  };
+  const handleSubmit = (next: Contract) => {
+    setContracts((current) => current.some((contract) => contract.id === next.id)
+      ? current.map((contract) => contract.id === next.id ? next : contract)
+      : [next, ...current]);
+    onClose();
+  };
+
+  if (mode === "detail") {
+    return (
+      <>
+        <ContractDetailModal
+          contract={targetContract}
+          onClose={onClose}
+          onEdit={() => setMode("edit")}
+          onPrint={() => setPrintContract(targetContract)}
+        />
+        {printContract ? (
+          <PrintTemplateDialog
+            onClose={() => setPrintContract(null)}
+            onConfirm={() => setPrintContract(null)}
+            title={`In hợp đồng ${printContract.id}`}
+          />
+        ) : null}
+      </>
+    );
+  }
+
+  return (
+    <ContractFormModal
+      key={`${request.id}-${mode}`}
+      initial={mode === "edit" ? targetContract : null}
+      initialCustomerCode={mode === "create" ? request.customerCode : undefined}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      existingIds={contracts.map((contract) => contract.id)}
+      customers={customersState}
+      packages={PACKAGE_LIBRARY}
+      groups={groups}
+      sources={sources}
+      contractTypes={contractTypesState}
+      trainers={trainers}
+      vouchers={vouchersState}
+      serviceTypes={serviceTypes}
+      bankAccounts={bankAccounts}
+      posDevices={posDevices}
+      cashFunds={cashFunds}
+      onCreateGroup={handleCreateGroup}
+      onCreateSource={handleCreateSource}
+      onCreateContractType={handleCreateContractType}
+      onCreateServiceType={handleCreateServiceType}
+      onCreateTrainer={handleCreateTrainer}
+      onCreateVoucher={handleCreateVoucher}
+      onCreateCustomer={handleCreateCustomer}
+    />
+  );
+}
+
 function TabButton({
   active,
   count,
@@ -1264,6 +1373,7 @@ function ContractListTab({
 
       {formOpen ? (
         <ContractFormModal
+          key={editingContract?.id ?? "new"}
           initial={editingContract}
           onClose={() => { setFormOpen(false); setEditingContract(null); }}
           onSubmit={handleSubmit}
@@ -1431,6 +1541,7 @@ function ContractActionMenu({
 function ContractFormModal({
   existingIds,
   initial,
+  initialCustomerCode,
   onClose,
   onSubmit,
   groups,
@@ -1454,6 +1565,7 @@ function ContractFormModal({
 }: {
   existingIds: string[];
   initial: Contract | null;
+  initialCustomerCode?: string;
   onClose: () => void;
   onSubmit: (contract: Contract) => void;
   groups: CustomerGroup[];
@@ -1479,9 +1591,11 @@ function ContractFormModal({
   const isEdit = Boolean(initial);
 
   // ---- Section 1: Khách hàng ----
-  const initialCustomer = initial ? customers.find((c) => c.code === initial.customerCode) : undefined;
+  const initialCustomer = initial
+    ? customers.find((c) => c.code === initial.customerCode)
+    : customers.find((c) => c.code === initialCustomerCode);
   const [customerMode, setCustomerMode] = useState<"existing" | "new">(isEdit ? "existing" : "existing");
-  const [customerCode, setCustomerCode] = useState<string>(initial?.customerCode ?? customers[0]?.code ?? "");
+  const [customerCode, setCustomerCode] = useState<string>(initial?.customerCode ?? initialCustomerCode ?? customers[0]?.code ?? "");
   const [showAdvanced, setShowAdvanced] = useState<boolean>(true);
   const [memberCode, setMemberCode] = useState<string>(initialCustomer?.code ?? customerCode);
   const [bioCode, setBioCode] = useState<string>(initialCustomer?.bioCode ?? "");

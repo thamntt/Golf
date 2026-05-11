@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
@@ -38,6 +38,7 @@ import {
   InfoLine,
   SelectField,
 } from "@/shared/components";
+import { ContractWorkflowOverlay, type ContractWorkflowRequest } from "@/features/contracts/ContractsView";
 import { customerRows } from "@/shared/data";
 import type { Customer } from "@/shared/types";
 
@@ -172,6 +173,8 @@ function toCustomerCsv(rows: Customer[]) {
   });
   return [headers.join(","), ...body].join("\n");
 }
+
+type CustomerContractRequest = Omit<ContractWorkflowRequest, "id">;
 
 export default function CustomersView() {
   const [moduleTab, setModuleTab] = useState<"list" | "learning">("list");
@@ -751,19 +754,21 @@ type CustomerLearningRow = {
   assignedCoach: string;
   assignedPackage: string;
   assignedTier: string;
+  contractEnd: string;
   profile: Profile | null;
   trainings: TrainingResultEntry[];
   latestTraining: TrainingResultEntry | null;
   tas: TaEntry[];
+  totalSessions: number;
 };
 
 type CustomerLearningContext = Pick<CustomerLearningRow, "profile" | "tas" | "trainings">;
 
 const LEARNING_CONTRACT_ASSIGNMENTS = [
-  { pkg: "Eagle", tier: "Premium", coach: "Trần Quốc Toàn", type: "Gói HLV 1-1" },
-  { pkg: "Birdie", tier: "Standard", coach: "Nguyễn Văn Hải", type: "Lớp nhóm" },
-  { pkg: "Par", tier: "Basic", coach: "Trần Quốc Toàn", type: "Gói HLV cá nhân" },
-  { pkg: "Eagle", tier: "Premium", coach: "Lê Minh", type: "Gói HLV 1-1" },
+  { pkg: "Eagle", tier: "Premium", coach: "Trần Quốc Toàn", type: "Gói HLV 1-1", totalSessions: 24, contractEnd: "31/12/2026" },
+  { pkg: "Birdie", tier: "Standard", coach: "Nguyễn Văn Hải", type: "Lớp nhóm", totalSessions: 12, contractEnd: "30/09/2026" },
+  { pkg: "Par", tier: "Basic", coach: "Trần Quốc Toàn", type: "Gói HLV cá nhân", totalSessions: 8, contractEnd: "31/08/2026" },
+  { pkg: "Eagle", tier: "Premium", coach: "Lê Minh", type: "Gói HLV 1-1", totalSessions: 36, contractEnd: "31/03/2027" },
 ];
 
 const LEARNING_PROFILE_VARIANTS: Array<Partial<Profile>> = [
@@ -925,6 +930,7 @@ function buildLearningRows(customers: Customer[], learningResults: Record<string
       assignedCoach: contract.coach,
       assignedPackage: contract.pkg,
       assignedTier: contract.tier,
+      contractEnd: contract.contractEnd,
       profile: hasProfile ? {
         ...DEFAULT_PROFILE,
         ...profileVariant,
@@ -938,6 +944,7 @@ function buildLearningRows(customers: Customer[], learningResults: Record<string
       trainings,
       latestTraining: trainings[0] ?? null,
       tas: assignedTas,
+      totalSessions: contract.totalSessions,
     }];
   });
 }
@@ -964,6 +971,10 @@ function makeTrainingSeries(latest: TrainingResultEntry) {
       ...(sessionNumber === count ? latest : {}),
     };
   });
+}
+
+function getCompletedTrainingCount(row: CustomerLearningRow) {
+  return Math.max(row.trainings.length, getTrainingSessionNumber(row.latestTraining));
 }
 
 function CustomerLearningOverview({
@@ -1124,7 +1135,7 @@ function CustomerLearningOverview({
                   <th>TA phụ trách</th>
                   <th>Gói tập</th>
                   <th>HLV</th>
-                  <th>Đã học</th>
+                  <th>Tiến độ</th>
                   <th>Buổi gần nhất</th>
                   <th>Nội dung gần nhất</th>
                   <th>Drill/BTVN gần nhất</th>
@@ -1135,6 +1146,8 @@ function CustomerLearningOverview({
               <tbody>
                 {filtered.map((row) => {
                   const latest = row.latestTraining;
+                  const completedCount = getCompletedTrainingCount(row);
+                  const progress = Math.min(100, Math.round((completedCount / Math.max(1, row.totalSessions)) * 100));
                   return (
                     <tr key={row.customer.code}>
                       <td>
@@ -1173,7 +1186,14 @@ function CustomerLearningOverview({
                         </div>
                       </td>
                       <td>
-                        <span className={styles.learningCountPill}>{Math.max(row.trainings.length, getTrainingSessionNumber(latest))} buổi</span>
+                        <div className={styles.learningProgress} title={`Đã học ${completedCount}/${row.totalSessions} buổi · HĐ hết ${row.contractEnd}`}>
+                          <div>
+                            <strong>{completedCount}/{row.totalSessions}</strong>
+                            <span>{progress}%</span>
+                          </div>
+                          <em><i style={{ width: `${progress}%` }} /></em>
+                          <small>HĐ hết {row.contractEnd}</small>
+                        </div>
                       </td>
                       <td>
                         {latest ? (
@@ -2053,7 +2073,7 @@ function CustomerDetailTab({
   onTrainingResultsChange?: (results: TrainingResultEntry[]) => void;
 }) {
   if (activeTab === "Hợp đồng") {
-    return <ContractsTab />;
+    return <ContractsTab customer={customer} />;
   }
 
   if (activeTab === "Lịch sử giao dịch") {
@@ -2452,9 +2472,6 @@ function InbodyTab() {
       <section className={styles.detailCard}>
         <div className={styles.tabSectionHeader}>
           <h3>Inbody</h3>
-          <button className={styles.blueButton} onClick={() => setAddOpen(true)} type="button">
-            <Plus size={16} />Thêm kết quả
-          </button>
         </div>
         <article className={styles.greenCard}>
           <header className={styles.greenCardHeader}>
@@ -2572,7 +2589,7 @@ function AddGolfMeasurementModal({
           <button onClick={onClose} type="button"><X size={18} /></button>
         </header>
         <div className={styles.measureBody}>
-          <h3 className={styles.measureSection}>4. THEO DÕI CÁC CHỈ SỐ ĐO ĐẠC TRỌNG YẾU</h3>
+          <h3 className={styles.measureSection}>THEO DÕI CÁC CHỈ SỐ ĐO ĐẠC TRỌNG YẾU</h3>
           <div className={styles.measureGrid}>
             <label>
               <span>NGÀY ĐO <b>*</b></span>
@@ -3085,48 +3102,65 @@ function BasicInfoTab({ customer }: { customer: Customer | null }) {
   );
 }
 
-function ContractsTab() {
-  const contracts: Array<[string, string, string, string, string, string]> = [
-    ["Golf Teetime - VIP", "Hết hạn", "HD001", "15/1/2024", "15/7/2024", "15,000,000 VND"],
-    ["Golf Practice - Premium", "Còn hạn", "HD002", "1/2/2024", "31/12/2026", "25,000,000 VND"],
+type CustomerContract = {
+  code: string;
+  debt: string;
+  end: string;
+  name: string;
+  paid: string;
+  sale: string;
+  start: string;
+  status: string;
+  trainer: string;
+  value: string;
+};
+
+function ContractsTab({
+  customer,
+}: {
+  customer: Customer | null;
+}) {
+  const displayCustomer = customer ?? customerRows[0];
+  const [workflowRequest, setWorkflowRequest] = useState<ContractWorkflowRequest | null>(null);
+  const contracts: CustomerContract[] = [
+    { code: "CT001", debt: "0 VND", end: "15/7/2024", name: "Golf Teetime - VIP", paid: "15,000,000 VND", sale: "Nguyễn Thị Lan", start: "15/1/2024", status: "Hết hạn", trainer: "Trần Quốc Toàn", value: "15,000,000 VND" },
+    { code: "CT002", debt: "5,000,000 VND", end: "31/12/2026", name: "Golf Practice - Premium", paid: "20,000,000 VND", sale: "Phạm Văn Đức", start: "1/2/2024", status: "Còn hạn", trainer: "Nguyễn Văn Hải", value: "25,000,000 VND" },
   ];
-  const [selectedContract, setSelectedContract] = useState<typeof contracts[number] | null>(null);
+  const openInContracts = (request: CustomerContractRequest) => {
+    setWorkflowRequest({ ...request, id: Date.now() });
+  };
   return (
     <>
       <section className={styles.detailCard}>
         <div className={styles.tabSectionHeader}>
           <h3>Danh sách hợp đồng</h3>
-          <button className={styles.blueButton} type="button">
+          <button className={styles.blueButton} onClick={() => openInContracts({ mode: "create", customerCode: displayCustomer.code })} type="button">
             <Plus size={16} />Thêm hợp đồng
           </button>
         </div>
-        {contracts.map(([name, status, code, start, end, value]) => (
-          <article className={styles.contractCard} key={code}>
+        {contracts.map((contract) => (
+          <article className={styles.contractCard} key={contract.code}>
             <div>
-              <h4>{name} <CustomerStatus status={status} /></h4>
+              <h4>{contract.name} <CustomerStatus status={contract.status} /></h4>
               <div className={styles.contractGrid}>
-                <InfoBlock label="Mã hợp đồng"><span className={styles.memberCode}>{code}</span></InfoBlock>
-                <InfoBlock label="Ngày bắt đầu">{start}</InfoBlock>
-                <InfoBlock label="Ngày kết thúc">{end}</InfoBlock>
-                <InfoBlock label="Giá trị"><span className={styles.dateGreen}>{value}</span></InfoBlock>
+                <InfoBlock label="Mã hợp đồng">
+                  <button className={styles.memberCode} onClick={() => openInContracts({ mode: "detail", contractId: contract.code, customerCode: displayCustomer.code })} type="button">
+                    {contract.code}
+                  </button>
+                </InfoBlock>
+                <InfoBlock label="Ngày bắt đầu">{contract.start}</InfoBlock>
+                <InfoBlock label="Ngày kết thúc">{contract.end}</InfoBlock>
+                <InfoBlock label="Giá trị"><span className={styles.dateGreen}>{contract.value}</span></InfoBlock>
               </div>
             </div>
-            <button type="button" onClick={() => setSelectedContract([name, status, code, start, end, value])}>Xem chi tiết</button>
+            <button type="button" onClick={() => openInContracts({ mode: "detail", contractId: contract.code, customerCode: displayCustomer.code })}>Xem chi tiết</button>
           </article>
         ))}
       </section>
-      {selectedContract ? (
-        <CustomerInfoDialog
-          title={`Chi tiết hợp đồng ${selectedContract[2]}`}
-          rows={[
-            ["Gói dịch vụ", selectedContract[0]],
-            ["Trạng thái", selectedContract[1]],
-            ["Ngày bắt đầu", selectedContract[3]],
-            ["Ngày kết thúc", selectedContract[4]],
-            ["Giá trị", selectedContract[5]],
-            ["Liên kết nghiệp vụ", "Hợp đồng, Lịch HLV, Teetime, Check-in/out và Sổ quỹ"],
-          ]}
-          onClose={() => setSelectedContract(null)}
+      {workflowRequest ? (
+        <ContractWorkflowOverlay
+          request={workflowRequest}
+          onClose={() => setWorkflowRequest(null)}
         />
       ) : null}
     </>
@@ -3282,6 +3316,7 @@ type MealPlan = {
 
 function MealPlanTab() {
   const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [plan, setPlan] = useState<MealPlan | null>({
     name: "Kế hoạch Giảm mỡ - Tăng cơ",
@@ -3304,16 +3339,19 @@ function MealPlanTab() {
 
   if (!plan) {
     return (
-      <section className={styles.detailCard}>
+      <>
         <div className={styles.tabSectionHeader}>
           <h3>Meal Plan</h3>
           <button className={styles.blueButton} onClick={() => setAddOpen(true)} type="button">
-            <Plus size={16} />Thêm kế hoạch
+            <Plus size={16} />Thêm mới
           </button>
         </div>
-        <p className={styles.mgmtMuted}>Khách hàng chưa có Meal Plan nào.</p>
+        <section className={styles.detailCard}>
+          <h3>Thông tin Meal Plan</h3>
+          <p className={styles.mgmtMuted}>Khách hàng chưa có Meal Plan nào.</p>
+        </section>
         {addOpen ? <AddMealPlanModal onClose={() => setAddOpen(false)} onSave={(p) => { setPlan(p); setAddOpen(false); }} /> : null}
-      </section>
+      </>
     );
   }
 
@@ -3323,20 +3361,18 @@ function MealPlanTab() {
 
   return (
     <>
-      <section className={styles.detailCard}>
-        <div className={styles.tabSectionHeader}>
-          <h3>Meal Plan</h3>
-          <button className={styles.blueButton} onClick={() => setAddOpen(true)} type="button">
-            <Plus size={16} />Thêm kế hoạch
-          </button>
-        </div>
-      </section>
+      <div className={styles.tabSectionHeader}>
+        <h3>Meal Plan</h3>
+        <button className={styles.blueButton} onClick={() => setAddOpen(true)} type="button">
+          <Plus size={14} />Thêm mới
+        </button>
+      </div>
 
       <section className={styles.detailCard}>
         <div className={styles.tabSectionHeader}>
           <h3>Thông tin Meal Plan</h3>
           <div className={styles.cardActions}>
-            <button className={styles.outlineButton} onClick={() => setAddOpen(true)} type="button">
+            <button className={styles.outlineButton} onClick={() => setEditOpen(true)} type="button">
               <Edit size={14} />Chỉnh sửa
             </button>
             <button className={styles.dangerOutline} onClick={handleDelete} type="button">
@@ -3398,7 +3434,8 @@ function MealPlanTab() {
         </div>
       </section>
 
-      {addOpen ? <AddMealPlanModal onClose={() => setAddOpen(false)} onSave={(p) => { setPlan(p); setAddOpen(false); }} initial={plan} /> : null}
+      {addOpen ? <AddMealPlanModal onClose={() => setAddOpen(false)} onSave={(p) => { setPlan(p); setAddOpen(false); }} /> : null}
+      {editOpen ? <AddMealPlanModal onClose={() => setEditOpen(false)} onSave={(p) => { setPlan(p); setEditOpen(false); }} initial={plan} /> : null}
       {deleteOpen ? (
         <CustomerConfirmDialog
           title="Xóa Meal Plan"
@@ -4368,3 +4405,5 @@ function DeleteCustomerModal({
     </div>
   );
 }
+
+
