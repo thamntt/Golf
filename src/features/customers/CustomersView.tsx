@@ -1942,18 +1942,19 @@ function AddCompanionModal({
               </div>
               {error ? <small className={styles.fieldErrorText}>{error}</small> : null}
             </label>
-            <div className={styles.radioRow}>
-              {["Nam", "Nữ"].map((option) => (
-                <button className={gender === option ? styles.radioPillActive : styles.radioPill} key={option} onClick={() => setGender(option)} type="button">
-                  {option}
-                </button>
-              ))}
+            <div className={styles.companionGenderField}>
+              <span>Giới tính</span>
+              <div className={styles.radioRow}>
+                {["Nam", "Nữ"].map((option) => (
+                  <button className={gender === option ? styles.radioPillActive : styles.radioPill} key={option} onClick={() => setGender(option)} type="button">
+                    {option}
+                  </button>
+                ))}
+              </div>
             </div>
             <SelectField label="Nhóm quan hệ" onChange={setRelation} options={["Người thân", "Vợ/Chồng", "Con", "Bạn tập", "Đối tác"]} value={relation || "Người thân"} />
             <FormField label="Ghi chú" placeholder="Ghi chú" />
-          </div>
-          <FormField label="Ngày sinh" />
-          <div className={styles.formGrid}>
+            <FormField label="Ngày sinh" type="date" />
             <FormField label="Chiều cao (m)" value="1.70" />
             <FormField label="Cân nặng (kg)" value="65" />
             <label>
@@ -2187,7 +2188,7 @@ function TrainingResultsTab({
                     </div>
                   </td>
                   <td>{s.date}</td>
-                  <td>{s.coach}</td>
+                  <td className={styles.trainingCoachCell}>{s.coach}</td>
                   <td>
                     <div className={styles.trainingTaStack}>
                       {s.ta.split(",").map((ta) => ta.trim()).filter(Boolean).map((ta) => (
@@ -2204,7 +2205,7 @@ function TrainingResultsTab({
                     <strong>{s.drill}</strong>
                     <div className={styles.cellMuted}>{s.drillSub}</div>
                   </td>
-                  <td className={styles.cellTruncate}>{s.note}</td>
+                  <td className={styles.trainingNoteFull}>{s.note}</td>
                   <td>
                     <div className={styles.rowActions}>
                       <button aria-label={`Sửa kết quả ${s.session}`} onClick={() => setEditIndex(i)} type="button">

@@ -2704,6 +2704,12 @@
   background: #344054;
 }
 
+.infoBlock .statusRed,
+.infoBlock .statusGreen,
+.infoBlock .statusDark {
+  color: #ffffff;
+}
+
 .cardDots {
   display: flex;
   align-items: center;
@@ -3129,7 +3135,7 @@
 }
 
 .companionModal {
-  width: 420px;
+  width: min(760px, calc(100vw - 48px));
 }
 
 .companionModal header {
@@ -3143,18 +3149,57 @@
 
 .companionBody {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 16px;
+  row-gap: 12px;
   padding: 22px;
 }
 
 .companionFields {
   display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  align-self: start;
+  align-content: start;
   gap: 12px;
 }
 
+.companionBody > div:first-child {
+  display: grid;
+  gap: 8px;
+}
+
+.companionBody > div:first-child > label:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.companionFields label > span,
+.companionGenderField > span {
+  white-space: nowrap;
+}
+
+.companionGenderField {
+  display: grid;
+  gap: 7px;
+  color: #101828;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .companionBody,
+  .companionFields {
+    grid-template-columns: 1fr;
+  }
+}
+
 .uploadBox {
-  height: 150px;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  min-height: 0;
   display: grid;
   place-items: center;
   border: 1px dashed #cfd6e3;
@@ -4326,6 +4371,22 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.trainingCoachCell {
+  min-width: 150px;
+  white-space: nowrap;
+}
+
+.trainingNoteFull {
+  min-width: 220px;
+  max-width: 340px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .sessionBadge {

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   AlertCircle,
   ArrowDownRight,
@@ -33,6 +33,7 @@ import {
   TrendingUp,
   UserCog,
   Users,
+  UploadCloud,
   Wallet,
   X,
   XCircle,
@@ -2525,26 +2526,108 @@ function AddCompanionModal({
   onSubmit: (c: Companion) => void;
 }) {
   const [name, setName] = useState("");
-  const [relation, setRelation] = useState("Vợ/Chồng");
+  const [gender, setGender] = useState("Nam");
+  const [relation, setRelation] = useState("Người thân");
+  const [birthDate, setBirthDate] = useState("");
+  const [height, setHeight] = useState("1.70");
+  const [weight, setWeight] = useState("65");
   const [phone, setPhone] = useState("");
+  const [note, setNote] = useState("");
+  const [error, setError] = useState("");
+  const [preview, setPreview] = useState("");
+  const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
+  const submit = () => {
+    if (!name.trim()) {
+      setError("Nhập họ tên người đi cùng.");
+      return;
+    }
+    onSubmit({ id: `NDC-${Date.now()}`, name: name.trim(), relation, phone });
+  };
   return (
     <div className={styles.nestedOverlay}>
-      <div className={styles.smallModal}>
-        <header><h2>Thêm người đi cùng (NDC)</h2><button onClick={onClose} type="button"><X size={16} /></button></header>
-        <div className={styles.smallModalBody}>
-          <label><span>Họ tên <b>*</b></span><input autoFocus onChange={(e) => setName(e.target.value)} value={name} /></label>
-          <label><span>Quan hệ</span>
-            <select className={styles.selectInput} onChange={(e) => setRelation(e.target.value)} value={relation}>
-              {["Vợ/Chồng", "Con", "Bạn bè", "Đồng nghiệp", "Khác"].map((r) => <option key={r}>{r}</option>)}
-            </select>
-          </label>
-          <label><span>SĐT</span><input onChange={(e) => setPhone(e.target.value)} value={phone} /></label>
+      <section className={styles.companionModal}>
+        <header>
+          <h2>Thêm người đi cùng</h2>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.companionBody}>
+          <div>
+            <label>Ảnh <b>*</b></label>
+            <label className={styles.uploadBox}>
+              {preview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img alt="Ảnh người đi cùng" src={preview} />
+              ) : <><UploadCloud size={42} /><span>Tải ảnh lên</span></>}
+              <input accept="image/*" className={styles.hiddenFileInput} onChange={handleFile} type="file" />
+            </label>
+            <button className={styles.greenButton} onClick={() => setPreview("")} type="button">Webcam</button>
+          </div>
+          <div className={styles.companionFields}>
+            <label>
+              <span>Họ và tên <b>*</b></span>
+              <div className={`${styles.inputWrap} ${error ? styles.inputWrapError : ""}`}>
+                <input autoFocus onChange={(e) => { setName(e.target.value); setError(""); }} placeholder="Họ tên người đi cùng" value={name} />
+              </div>
+              {error ? <small className={styles.fieldErrorText}>{error}</small> : null}
+            </label>
+            <div className={styles.companionGenderField}>
+              <span>Giới tính</span>
+              <div className={styles.radioRow}>
+                {["Nam", "Nữ"].map((option) => (
+                  <button className={gender === option ? styles.radioPillActive : styles.radioPill} key={option} onClick={() => setGender(option)} type="button">
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label>
+              <span>Nhóm quan hệ</span>
+              <select className={styles.selectInput} onChange={(e) => setRelation(e.target.value)} value={relation}>
+                {["Người thân", "Vợ/Chồng", "Con", "Bạn tập", "Đối tác"].map((r) => <option key={r}>{r}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>Ghi chú</span>
+              <div className={styles.inputWrap}>
+                <input onChange={(e) => setNote(e.target.value)} placeholder="Ghi chú" value={note} />
+              </div>
+            </label>
+            <label>
+              <span>Ngày sinh</span>
+              <div className={styles.inputWrap}>
+                <input onChange={(e) => setBirthDate(e.target.value)} type="date" value={birthDate} />
+              </div>
+            </label>
+            <label>
+              <span>Chiều cao (m)</span>
+              <div className={styles.inputWrap}>
+                <input inputMode="decimal" onChange={(e) => setHeight(e.target.value)} value={height} />
+              </div>
+            </label>
+            <label>
+              <span>Cân nặng (kg)</span>
+              <div className={styles.inputWrap}>
+                <input inputMode="numeric" onChange={(e) => setWeight(e.target.value)} value={weight} />
+              </div>
+            </label>
+            <label>
+              <span>SĐT liên hệ</span>
+              <div className={styles.inputWrap}>
+                <input inputMode="tel" onChange={(e) => setPhone(e.target.value)} placeholder="Số điện thoại" value={phone} />
+              </div>
+            </label>
+          </div>
         </div>
         <footer>
-          <button className={styles.outlineButton} onClick={onClose} type="button">Hủy</button>
-          <button className={styles.blueButton} disabled={!name.trim()} onClick={() => onSubmit({ id: `NDC-${Date.now()}`, name: name.trim(), relation, phone })} type="button">Thêm</button>
+          <button onClick={onClose} type="button">Hủy bỏ</button>
+          <button className={styles.greenButton} onClick={submit} type="button">
+            <PlusCircle size={16} />Thêm người đi cùng
+          </button>
         </footer>
-      </div>
+      </section>
     </div>
   );
 }
