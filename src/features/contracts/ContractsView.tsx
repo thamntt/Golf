@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   AlertCircle,
   ArrowDownRight,
@@ -14,7 +14,6 @@ import {
   Eye,
   FileSignature,
   FileText,
-  Filter,
   HandCoins,
   History,
   Layers,
@@ -652,6 +651,10 @@ export default function ContractsView() {
   const [suspensions, setSuspensions] = useState<Suspension[]>(INITIAL_SUSPENSIONS);
   const [transfers, setTransfers] = useState<Transfer[]>(INITIAL_TRANSFERS);
   const [conversions, setConversions] = useState<Conversion[]>(INITIAL_CONVERSIONS);
+  const [listActionForm, setListActionForm] = useState<{
+    kind: "renewal" | "upgrade" | "suspension" | "transfer" | "conversion";
+    contractId: string;
+  } | null>(null);
 
   // Mutable lookup state
   const [customersState, setCustomersState] = useState<CustomerLite[]>(CUSTOMERS);
@@ -744,24 +747,19 @@ export default function ContractsView() {
             contracts={contracts}
             onChange={setContracts}
             onAddRenewal={(contract) => {
-              setActiveTab("renewal");
-              flash(`Mở Tab Gia Hạn cho ${contract.id}`);
+              setListActionForm({ kind: "renewal", contractId: contract.id });
             }}
             onAddUpgrade={(contract) => {
-              setActiveTab("upgrade");
-              flash(`Mở Tab Nâng Cấp cho ${contract.id}`);
+              setListActionForm({ kind: "upgrade", contractId: contract.id });
             }}
             onAddSuspension={(contract) => {
-              setActiveTab("suspension");
-              flash(`Mở Tab Bảo Lưu cho ${contract.id}`);
+              setListActionForm({ kind: "suspension", contractId: contract.id });
             }}
             onAddTransfer={(contract) => {
-              setActiveTab("transfer");
-              flash(`Mở Tab Chuyển Nhượng cho ${contract.id}`);
+              setListActionForm({ kind: "transfer", contractId: contract.id });
             }}
             onAddConversion={(contract) => {
-              setActiveTab("conversion");
-              flash(`Mở Tab Chuyển Đổi cho ${contract.id}`);
+              setListActionForm({ kind: "conversion", contractId: contract.id });
             }}
             flash={flash}
             customers={customersState}
@@ -838,6 +836,93 @@ export default function ContractsView() {
 
       {toast ? (
         <div className={styles.contractToast}>{toast}</div>
+      ) : null}
+
+      {listActionForm?.kind === "renewal" ? (
+        <RenewalFormModal
+          contracts={contracts}
+          existingRenewals={renewals}
+          initialContractId={listActionForm.contractId}
+          onClose={() => setListActionForm(null)}
+          onSubmit={(renewal, contract) => {
+            setRenewals((current) => [renewal, ...current]);
+            setContracts((current) =>
+              current.map((c) =>
+                c.id === contract.id
+                  ? {
+                      ...c,
+                      endDate: renewal.newEndDate,
+                      totalSessions: c.totalSessions + renewal.addedSessions,
+                      remainingSessions: c.remainingSessions + renewal.addedSessions,
+                      renewalCount: c.renewalCount + 1,
+                      history: [
+                        ...c.history,
+                        { date: nowString(), actor: renewal.saleStaff, action: `Gia hạn (${renewal.id})`, detail: `+${renewal.addedSessions} buổi · ${formatCurrency(renewal.total)}` },
+                      ],
+                    }
+                  : c
+              )
+            );
+            flash(`Đã tạo ${renewal.id} từ HĐ ${contract.id}`);
+            setListActionForm(null);
+          }}
+        />
+      ) : null}
+
+      {listActionForm?.kind === "upgrade" ? (
+        <UpgradeFormModal
+          contracts={contracts}
+          existing={upgrades}
+          initialContractId={listActionForm.contractId}
+          onClose={() => setListActionForm(null)}
+          onSubmit={(upgrade) => {
+            setUpgrades((current) => [upgrade, ...current]);
+            flash(`Đã tạo yêu cầu nâng cấp ${upgrade.id} từ HĐ ${upgrade.contractId}`);
+            setListActionForm(null);
+          }}
+        />
+      ) : null}
+
+      {listActionForm?.kind === "suspension" ? (
+        <SuspensionFormModal
+          contracts={contracts}
+          existing={suspensions}
+          initialContractId={listActionForm.contractId}
+          onClose={() => setListActionForm(null)}
+          onSubmit={(suspension) => {
+            setSuspensions((current) => [suspension, ...current]);
+            flash(`Đã tạo yêu cầu bảo lưu ${suspension.id} từ HĐ ${listActionForm.contractId}`);
+            setListActionForm(null);
+          }}
+        />
+      ) : null}
+
+      {listActionForm?.kind === "transfer" ? (
+        <TransferFormModal
+          contracts={contracts}
+          existing={transfers}
+          initialContractId={listActionForm.contractId}
+          onClose={() => setListActionForm(null)}
+          onSubmit={(transfer) => {
+            setTransfers((current) => [transfer, ...current]);
+            flash(`Đã tạo yêu cầu chuyển nhượng ${transfer.id} từ HĐ ${transfer.contractId}`);
+            setListActionForm(null);
+          }}
+        />
+      ) : null}
+
+      {listActionForm?.kind === "conversion" ? (
+        <ConversionFormModal
+          contracts={contracts}
+          existing={conversions}
+          initialContractId={listActionForm.contractId}
+          onClose={() => setListActionForm(null)}
+          onSubmit={(conversion) => {
+            setConversions((current) => [conversion, ...current]);
+            flash(`Đã tạo yêu cầu chuyển đổi ${conversion.id} từ HĐ ${conversion.oldContractId}`);
+            setListActionForm(null);
+          }}
+        />
       ) : null}
     </>
   );
@@ -1058,9 +1143,6 @@ function ContractListTab({
           ))}
         </div>
         <div className={styles.contractListActions}>
-          <button className={styles.iconButton} onClick={() => flash("Đang xuất danh sách HĐ ra Excel...")} title="Xuất Excel" type="button">
-            <Filter size={16} />
-          </button>
           <button className={styles.greenButton} onClick={openCreate} type="button">
             <PlusCircle size={16} /> Thêm Mới Hợp Đồng
           </button>
@@ -1259,6 +1341,31 @@ function ContractStatusBadge({ status }: { status: ContractStatus }) {
   return <span className={className}>{statusLabel(status)}</span>;
 }
 
+function useContractMenuPosition() {
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [style, setStyle] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
+
+  useLayoutEffect(() => {
+    const menu = menuRef.current;
+    const trigger = menu?.parentElement?.querySelector("button");
+    if (!menu || !trigger) return;
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const menuWidth = Math.min(300, window.innerWidth - 32);
+    const menuHeight = Math.min(menu.scrollHeight || 260, window.innerHeight - 32);
+    const left = Math.min(Math.max(16, triggerRect.right - menuWidth), window.innerWidth - menuWidth - 16);
+    const preferredTop = triggerRect.bottom + 8;
+    const top =
+      preferredTop + menuHeight > window.innerHeight - 16
+        ? Math.max(16, triggerRect.top - menuHeight - 8)
+        : preferredTop;
+
+    setStyle({ left, top });
+  }, []);
+
+  return { menuRef, style };
+}
+
 function ContractActionMenu({
   contract,
   onClose,
@@ -1280,6 +1387,7 @@ function ContractActionMenu({
   onConvert: () => void;
   onHistory: () => void;
 }) {
+  const { menuRef, style } = useContractMenuPosition();
   const isActive = contract.status === "active";
   const items: Array<{ icon: typeof FileText; label: string; onClick: () => void; disabled?: boolean; hint?: string }> = [
     { icon: Printer, label: "In hợp đồng", onClick: onPrint },
@@ -1294,7 +1402,7 @@ function ContractActionMenu({
   return (
     <>
       <button className={styles.contractMenuBackdrop} onClick={onClose} type="button" aria-label="Đóng menu" />
-      <div className={styles.contractActionMenu}>
+      <div className={styles.contractActionMenu} ref={menuRef} style={style}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -3127,16 +3235,20 @@ function RenewalStatusBadge({ status }: { status: Renewal["status"] }) {
 function RenewalFormModal({
   contracts,
   existingRenewals,
+  initialContractId,
   onClose,
   onSubmit,
 }: {
   contracts: Contract[];
   existingRenewals: Renewal[];
+  initialContractId?: string;
   onClose: () => void;
   onSubmit: (renewal: Renewal, contract: Contract) => void;
 }) {
   const eligible = contracts.filter((c) => c.status === "active");
-  const [contractId, setContractId] = useState<string>(eligible[0]?.id ?? "");
+  const [contractId, setContractId] = useState<string>(
+    eligible.some((c) => c.id === initialContractId) ? initialContractId ?? "" : eligible[0]?.id ?? ""
+  );
   const selected = contracts.find((c) => c.id === contractId);
   const pkg = selected ? lookupPackage(selected.packageCode) : undefined;
 
@@ -3739,6 +3851,7 @@ function UpgradeActionMenu({
   onComplete: () => void;
   onPrint: () => void;
 }) {
+  const { menuRef, style } = useContractMenuPosition();
   const items: Array<{ icon: typeof FileText; label: string; onClick: () => void; disabled?: boolean }> = [
     { icon: ThumbsUp, label: "Phê duyệt", onClick: onApprove, disabled: upgrade.status !== "pending_approval" },
     { icon: ThumbsDown, label: "Từ chối", onClick: onReject, disabled: upgrade.status !== "pending_approval" },
@@ -3751,7 +3864,7 @@ function UpgradeActionMenu({
   return (
     <>
       <button className={styles.contractMenuBackdrop} onClick={onClose} type="button" aria-label="Đóng" />
-      <div className={styles.contractActionMenu}>
+      <div className={styles.contractActionMenu} ref={menuRef} style={style}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -3774,16 +3887,20 @@ function UpgradeActionMenu({
 function UpgradeFormModal({
   contracts,
   existing,
+  initialContractId,
   onClose,
   onSubmit,
 }: {
   contracts: Contract[];
   existing: Upgrade[];
+  initialContractId?: string;
   onClose: () => void;
   onSubmit: (upgrade: Upgrade) => void;
 }) {
   const eligible = contracts.filter((c) => c.status === "active" && !c.hasUpgraded);
-  const [contractId, setContractId] = useState<string>(eligible[0]?.id ?? "");
+  const [contractId, setContractId] = useState<string>(
+    eligible.some((c) => c.id === initialContractId) ? initialContractId ?? "" : eligible[0]?.id ?? ""
+  );
   const selected = contracts.find((c) => c.id === contractId);
   const oldPackage = selected ? lookupPackage(selected.packageCode) : undefined;
 
@@ -4380,6 +4497,7 @@ function SuspensionActionMenu({
   onPay: () => void;
   onPrint: () => void;
 }) {
+  const { menuRef, style } = useContractMenuPosition();
   const items: Array<{ icon: typeof FileText; label: string; onClick: () => void; disabled?: boolean }> = [
     { icon: ThumbsUp, label: "Phê duyệt", onClick: onApprove, disabled: suspension.status !== "pending_approval" },
     { icon: ThumbsDown, label: "Từ chối", onClick: onReject, disabled: suspension.status !== "pending_approval" },
@@ -4391,7 +4509,7 @@ function SuspensionActionMenu({
   return (
     <>
       <button className={styles.contractMenuBackdrop} onClick={onClose} type="button" />
-      <div className={styles.contractActionMenu}>
+      <div className={styles.contractActionMenu} ref={menuRef} style={style}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -4414,17 +4532,21 @@ function SuspensionActionMenu({
 function SuspensionFormModal({
   contracts,
   existing,
+  initialContractId,
   onClose,
   onSubmit,
 }: {
   contracts: Contract[];
   existing: Suspension[];
+  initialContractId?: string;
   onClose: () => void;
   onSubmit: (suspension: Suspension) => void;
 }) {
   const eligible = contracts.filter((c) => c.status === "active" && c.suspensionCount < 2);
   const [type, setType] = useState<"Đơn" | "Nhóm">("Đơn");
-  const [selectedIds, setSelectedIds] = useState<string[]>(eligible[0] ? [eligible[0].id] : []);
+  const [selectedIds, setSelectedIds] = useState<string[]>(
+    eligible.some((c) => c.id === initialContractId) ? [initialContractId ?? ""] : eligible[0] ? [eligible[0].id] : []
+  );
   const [startDate, setStartDate] = useState<string>(todayString());
   const [endDate, setEndDate] = useState<string>(addDaysToDate(todayString(), 30));
   const [reason, setReason] = useState<string>("");
@@ -4991,6 +5113,7 @@ function TransferActionMenu({
   onPay: () => void;
   onPrint: () => void;
 }) {
+  const { menuRef, style } = useContractMenuPosition();
   const items: Array<{ icon: typeof FileText; label: string; onClick: () => void; disabled?: boolean }> = [
     { icon: ThumbsUp, label: "Phê duyệt", onClick: onApprove, disabled: transfer.status !== "pending_approval" },
     { icon: ThumbsDown, label: "Từ chối", onClick: onReject, disabled: transfer.status !== "pending_approval" },
@@ -5002,7 +5125,7 @@ function TransferActionMenu({
   return (
     <>
       <button className={styles.contractMenuBackdrop} onClick={onClose} type="button" />
-      <div className={styles.contractActionMenu}>
+      <div className={styles.contractActionMenu} ref={menuRef} style={style}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -5025,11 +5148,13 @@ function TransferActionMenu({
 function TransferFormModal({
   contracts,
   existing,
+  initialContractId,
   onClose,
   onSubmit,
 }: {
   contracts: Contract[];
   existing: Transfer[];
+  initialContractId?: string;
   onClose: () => void;
   onSubmit: (transfer: Transfer) => void;
 }) {
@@ -5040,7 +5165,9 @@ function TransferFormModal({
       !c.hasTransferred &&
       c.totalAmount === c.paid
   );
-  const [contractId, setContractId] = useState<string>(eligible[0]?.id ?? "");
+  const [contractId, setContractId] = useState<string>(
+    eligible.some((c) => c.id === initialContractId) ? initialContractId ?? "" : eligible[0]?.id ?? ""
+  );
   const selected = contracts.find((c) => c.id === contractId);
   const fromCustomer = selected ? lookupCustomer(selected.customerCode) : undefined;
 
@@ -5637,6 +5764,7 @@ function ConversionActionMenu({
   onPay: () => void;
   onPrint: () => void;
 }) {
+  const { menuRef, style } = useContractMenuPosition();
   const items: Array<{ icon: typeof FileText; label: string; onClick: () => void; disabled?: boolean }> = [
     { icon: ThumbsUp, label: "Phê duyệt", onClick: onApprove, disabled: conversion.status !== "pending_approval" },
     { icon: ThumbsDown, label: "Từ chối", onClick: onReject, disabled: conversion.status !== "pending_approval" },
@@ -5648,7 +5776,7 @@ function ConversionActionMenu({
   return (
     <>
       <button className={styles.contractMenuBackdrop} onClick={onClose} type="button" />
-      <div className={styles.contractActionMenu}>
+      <div className={styles.contractActionMenu} ref={menuRef} style={style}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -5671,16 +5799,20 @@ function ConversionActionMenu({
 function ConversionFormModal({
   contracts,
   existing,
+  initialContractId,
   onClose,
   onSubmit,
 }: {
   contracts: Contract[];
   existing: Conversion[];
+  initialContractId?: string;
   onClose: () => void;
   onSubmit: (conversion: Conversion) => void;
 }) {
   const eligible = contracts.filter((c) => c.status === "active" && !c.hasConverted);
-  const [contractId, setContractId] = useState<string>(eligible[0]?.id ?? "");
+  const [contractId, setContractId] = useState<string>(
+    eligible.some((c) => c.id === initialContractId) ? initialContractId ?? "" : eligible[0]?.id ?? ""
+  );
   const selected = contracts.find((c) => c.id === contractId);
   const customer = selected ? lookupCustomer(selected.customerCode) : undefined;
   const oldPkg = selected ? lookupPackage(selected.packageCode) : undefined;

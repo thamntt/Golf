@@ -2599,6 +2599,11 @@
   background: #ffffff;
 }
 
+.memberTableCard:has(.contractActionMenu),
+.memberTableWrap:has(.contractActionMenu) {
+  overflow: visible;
+}
+
 .memberTableWrap {
   overflow-x: auto;
 }
@@ -9299,21 +9304,34 @@
 .contractMenuBackdrop {
   position: fixed;
   inset: 0;
-  width: auto;
-  height: auto;
-  background: transparent;
-  border: none;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
   cursor: default;
-  z-index: 25;
-  padding: 0;
-  border-radius: 0;
+  z-index: 1000;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.contractMenuBackdrop:hover,
+.contractRowActions .contractMenuBackdrop:hover {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  transform: none !important;
 }
 
 .contractActionMenu {
-  position: absolute;
-  top: 32px;
-  right: 0;
-  z-index: 30;
+  position: fixed;
+  z-index: 1001;
   width: min(300px, calc(100vw - 40px));
   max-width: calc(100vw - 40px);
   padding: 6px;
@@ -9363,12 +9381,19 @@
 .contractRowActions .contractMenuBackdrop {
   position: fixed;
   inset: 0;
-  width: auto;
-  height: auto;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  opacity: 1 !important;
+  transform: none !important;
+  z-index: 1000;
 }
 
 .contractRowActions .contractActionMenu button.contractMenuDisabled {
@@ -10266,10 +10291,17 @@
 
 .conversionForm3Col {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "old old"
+    "new payment";
   gap: 14px;
   align-items: start;
 }
+
+.conversionFormCol:nth-child(1) { grid-area: old; }
+.conversionFormCol:nth-child(2) { grid-area: new; }
+.conversionFormCol:nth-child(3) { grid-area: payment; }
 
 .conversionFormCol {
   background: #fff;
@@ -10292,6 +10324,65 @@
 
 .conversionFormCol h4 svg {
   color: #2563eb;
+}
+
+.conversionFormCol .contractContractList {
+  max-height: 236px !important;
+}
+
+.conversionFormCol .contractContractRow {
+  grid-template-columns: 24px 70px minmax(0, 1fr) 96px;
+  grid-template-areas:
+    "radio code customer date"
+    "radio code package sessions";
+  gap: 4px 8px;
+  padding: 10px 12px;
+  min-height: 74px;
+}
+
+.conversionFormCol:first-child .contractContractRow {
+  grid-template-columns: 24px 86px minmax(0, 1.2fr) minmax(0, 1fr) 78px 118px;
+  grid-template-areas: "radio code customer package sessions date";
+  min-height: 58px;
+}
+
+.conversionFormCol .contractContractRow input {
+  grid-area: radio;
+  align-self: center;
+}
+
+.conversionFormCol .contractContractRow > strong {
+  grid-area: code;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.conversionFormCol .contractContractRow span:nth-of-type(1) {
+  grid-area: customer;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.conversionFormCol .contractContractRow span:nth-of-type(2) {
+  grid-area: package;
+  min-width: 0;
+  color: #475569;
+  line-height: 1.25;
+}
+
+.conversionFormCol .contractContractRow span:nth-of-type(3) {
+  grid-area: sessions;
+  justify-self: end;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.conversionFormCol .contractContractRow span:nth-of-type(4) {
+  grid-area: date;
+  justify-self: end;
+  color: #334155;
+  white-space: nowrap;
 }
 
 @media (max-width: 1100px) {
@@ -10572,6 +10663,60 @@
 .inputWithBtn > input,
 .inputWithBtn > select {
   flex: 1;
+}
+
+.contractFormModal label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contractFormModal label > span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.contractFormModal label > input:not([type="checkbox"]):not([type="radio"]),
+.contractFormModal label > select,
+.contractFormModal label > textarea {
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid #dbe3ef;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 10px 13px;
+  font: inherit;
+  font-size: 13.5px;
+  line-height: 1.35;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.contractFormModal label > textarea {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.contractFormModal label > input:not([type="checkbox"]):not([type="radio"]):hover,
+.contractFormModal label > select:hover,
+.contractFormModal label > textarea:hover {
+  border-color: #b8c6d9;
+}
+
+.contractFormModal label > input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+.contractFormModal label > select:focus-visible,
+.contractFormModal label > textarea:focus-visible {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.contractFormModal label > input[readonly],
+.contractFormModal label > input:read-only {
+  background: #f8fafc;
+  color: #475569;
 }
 
 .contractAutoBtn,
@@ -13086,10 +13231,17 @@ textarea.proInput {
 /* Conversion 3-col form */
 .conversionForm3Col {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "old old"
+    "new payment";
   gap: 14px;
   align-items: start;
 }
+
+.conversionFormCol:nth-child(1) { grid-area: old; }
+.conversionFormCol:nth-child(2) { grid-area: new; }
+.conversionFormCol:nth-child(3) { grid-area: payment; }
 
 .conversionFormCol {
   background: #fff !important;
