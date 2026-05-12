@@ -350,7 +350,7 @@ export default function CustomersView() {
             onClick={() => setModuleTab("learning")}
             type="button"
           >
-            Hồ sơ tập luyện
+            Tổng hợp profile
           </button>
         </div>
 
@@ -995,6 +995,7 @@ function CustomerLearningOverview({
   const [profileFilter, setProfileFilter] = useState("Tất cả profile");
   const [resultFilter, setResultFilter] = useState("Tất cả kết quả");
   const [selected, setSelected] = useState<CustomerLearningRow | null>(null);
+  const [profileOnlyTarget, setProfileOnlyTarget] = useState<CustomerLearningRow | null>(null);
   const [quickAddTarget, setQuickAddTarget] = useState<CustomerLearningRow | null>(null);
   const [quickProfileTarget, setQuickProfileTarget] = useState<CustomerLearningRow | null>(null);
   const [quickTaTarget, setQuickTaTarget] = useState<CustomerLearningRow | null>(null);
@@ -1048,7 +1049,7 @@ function CustomerLearningOverview({
       <section className={styles.learningOverview}>
         <div className={styles.learningHeader}>
           <div>
-            <h2>Hồ sơ tập luyện</h2>
+            <h2>Tổng hợp profile</h2>
             <p>Chỉ hiển thị học viên có liên quan đào tạo; gói và HLV lấy từ hợp đồng/lịch học, kết quả lấy từ tab kết quả tập luyện.</p>
           </div>
         </div>
@@ -1140,7 +1141,6 @@ function CustomerLearningOverview({
                   <th>Nội dung gần nhất</th>
                   <th>Drill/BTVN gần nhất</th>
                   <th>Ghi chú gần nhất</th>
-                  <th>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -1158,7 +1158,7 @@ function CustomerLearningOverview({
                         <div className={styles.learningProfileCell}>
                         {row.profile ? (
                           <>
-                              <button className={styles.learningProfileLink} onClick={() => onOpenCustomer(row.customer, "Profile", false, row)} type="button">
+                              <button className={styles.learningProfileLink} onClick={() => setProfileOnlyTarget(row)} type="button">
                                 {row.profile.level === "Beginner" ? "Mới học Golf" : "Có kinh nghiệm"}
                               </button>
                               <span>{row.profile.handicap}</span>
@@ -1220,22 +1220,12 @@ function CustomerLearningOverview({
                         ) : <span className={styles.learningMissingText}>—</span>}
                       </td>
                       <td className={styles.learningNoteCell}>{latest?.note ?? "—"}</td>
-                      <td>
-                        <div className={styles.learningActions}>
-                          <button onClick={() => onOpenCustomer(row.customer, "Kết quả tập luyện", false, row)} title="Xem kết quả tập luyện" type="button"><Eye size={15} /></button>
-                          <button onClick={() => setQuickAddTarget(row)} type="button">+ Kết quả</button>
-                          <span className={styles.learningQuickActions}>
-                            {!row.profile ? <button className={styles.learningProfileButton} onClick={() => setQuickProfileTarget(row)} type="button">+ Profile</button> : null}
-                            {row.tas.length === 0 ? <button className={styles.learningTaButton} onClick={() => setQuickTaTarget(row)} type="button">+ TA</button> : null}
-                          </span>
-                        </div>
-                      </td>
                     </tr>
                   );
                 })}
                 {filtered.length === 0 ? (
                   <tr>
-                    <td className={styles.emptyTableCell} colSpan={11}>Không có hồ sơ phù hợp với bộ lọc hiện tại.</td>
+                    <td className={styles.emptyTableCell} colSpan={10}>Không có hồ sơ phù hợp với bộ lọc hiện tại.</td>
                   </tr>
                 ) : null}
               </tbody>
@@ -1253,6 +1243,13 @@ function CustomerLearningOverview({
           row={selected}
           onClose={() => setSelected(null)}
           onOpenCustomer={(tab) => onOpenCustomer(selected.customer, tab)}
+        />
+      ) : null}
+
+      {profileOnlyTarget ? (
+        <LearningProfileModal
+          row={profileOnlyTarget}
+          onClose={() => setProfileOnlyTarget(null)}
         />
       ) : null}
 
@@ -1395,6 +1392,37 @@ function LearningOverviewDrawer({
           <button className={styles.blueButton} onClick={() => onOpenCustomer("Trợ giảng TA")} type="button">Mở TA</button>
         </footer>
       </aside>
+    </div>
+  );
+}
+
+function LearningProfileModal({
+  row,
+  onClose,
+}: {
+  row: CustomerLearningRow;
+  onClose: () => void;
+}) {
+  return (
+    <div className={styles.nestedOverlay}>
+      <section className={styles.detailModal}>
+        <header className={styles.detailHeader}>
+          <div className={styles.detailIdentity}>
+            <span>{row.customer.name.charAt(0).toUpperCase()}</span>
+            <div>
+              <h2>Profile golf</h2>
+              <p>{row.customer.name} · {row.customer.code}</p>
+            </div>
+          </div>
+          <button onClick={onClose} type="button"><X size={20} /></button>
+        </header>
+        <div className={styles.detailBody}>
+          <ProfilesTab initialProfile={row.profile} />
+        </div>
+        <footer className={styles.modalFooter}>
+          <button onClick={onClose} type="button">Đóng</button>
+        </footer>
+      </section>
     </div>
   );
 }
