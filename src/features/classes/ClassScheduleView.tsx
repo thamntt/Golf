@@ -175,6 +175,8 @@ const minutesBetween = (start: string, end: string): number => {
   return (eh * 60 + em) - (sh * 60 + sm);
 };
 
+const minutesFromCalendarStart = (time: string): number => minutesBetween(HOUR_SLOTS[0], time);
+
 const addMinutes = (time: string, minutes: number): string => {
   const [h, m] = time.split(":").map((x) => parseInt(x, 10));
   const total = h * 60 + m + minutes;
@@ -846,13 +848,13 @@ function CalendarTab({
   }, [classes, classTypes, sessionsThisWeek]);
 
   useEffect(() => {
-    const firstSlotIndex = sessionsThisWeek.reduce((min, session) => {
-      const index = HOUR_SLOTS.indexOf(session.startTime);
-      return index >= 0 ? Math.min(min, index) : min;
-    }, HOUR_SLOTS.length);
-    if (!gridRef.current || firstSlotIndex === HOUR_SLOTS.length) return;
+    const firstStartMinutes = sessionsThisWeek.reduce((min, session) => {
+      const minutes = minutesFromCalendarStart(session.startTime);
+      return minutes >= 0 ? Math.min(min, minutes) : min;
+    }, Number.POSITIVE_INFINITY);
+    if (!gridRef.current || firstStartMinutes === Number.POSITIVE_INFINITY) return;
     const headerHeight = 62;
-    const offsetSlots = Math.max(0, firstSlotIndex - 4);
+    const offsetSlots = Math.max(0, Math.floor(firstStartMinutes / 15) - 4);
     const targetTop = headerHeight + offsetSlots * CLASS_CALENDAR_SLOT_HEIGHT;
     const scrollToFirstClass = () => {
       if (gridRef.current) gridRef.current.scrollTop = targetTop;
@@ -909,11 +911,13 @@ function CalendarTab({
         </div>
         {weekDates.map((date, dayIdx) => {
           const isToday = formatVn(date) === TODAY;
+          const dateVn = formatVn(date);
+          const daySessions = sessionsThisWeek.filter((s) => s.dayOfWeek === dayIdx && s.date === dateVn);
           return (
             <div className={styles.classesCalendarDayCol} key={`day-${dayIdx}`}>
               <div className={`${styles.classesCalendarHead} ${isToday ? styles.classesCalendarHeadToday : ""}`}>
                 <strong>{DAY_FULL_VN[dayIdx]}</strong>
-                <span>{formatVn(date)}</span>
+                <span>{dateVn}</span>
               </div>
               {HOUR_SLOTS.map((slot) => {
                 const isHourMark = slot.endsWith(":00");
@@ -946,7 +950,7 @@ function CalendarTab({
                           style={{
                             background: ct ? `${ct.color}1a` : "#f3f4f6",
                             borderLeftColor: ct?.color ?? "#7c3aed",
-                            height: `${heightSlots * CLASS_CALENDAR_SLOT_HEIGHT - 6}px`,
+                            height: `${heightSlots * CLASS_CALENDAR_SLOT_HEIGHT}px`,
                           }}
                           type="button"
                         >
@@ -963,6 +967,41 @@ function CalendarTab({
                   </div>
                 );
               })}
+              <div className={styles.classesCalendarOverlay}>
+                {daySessions.map((s) => {
+                  const cls = classes.find((c) => c.id === s.classId);
+                  const ct = cls ? classTypes.find((t) => t.id === cls.classTypeId) : undefined;
+                  const coach = cls ? COACHES.find((c) => c.id === cls.coachId) : undefined;
+                  const remaining = (cls?.capacity ?? 0) - s.enrolled.length;
+                  const top = Math.max(0, (minutesFromCalendarStart(s.startTime) / 15) * CLASS_CALENDAR_SLOT_HEIGHT);
+                  const height = Math.max(
+                    CLASS_CALENDAR_SLOT_HEIGHT,
+                    (minutesBetween(s.startTime, s.endTime) / 15) * CLASS_CALENDAR_SLOT_HEIGHT,
+                  );
+                  return (
+                    <button
+                      className={styles.classesSessionCard}
+                      key={`overlay-${s.id}`}
+                      onClick={() => onSessionClick(s.id)}
+                      style={{
+                        background: ct ? `${ct.color}1a` : "#f3f4f6",
+                        borderLeftColor: ct?.color ?? "#7c3aed",
+                        height: `${height}px`,
+                        top: `${top}px`,
+                      }}
+                      type="button"
+                    >
+                      <strong style={{ color: ct?.color ?? "#374151" }}>{cls?.name ?? "—"}</strong>
+                      <span>{s.startTime} – {s.endTime}</span>
+                      <span>{coach?.name ?? "—"}</span>
+                      <span className={styles.classesSessionMeta}>
+                        <Users size={11} /> {s.enrolled.length}/{cls?.capacity ?? 0}
+                        {remaining > 0 ? ` · còn ${remaining}` : " · đã đầy"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           );
         })}

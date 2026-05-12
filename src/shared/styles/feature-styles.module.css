@@ -17473,6 +17473,7 @@ textarea.proInput {
 .classesCalendarDayCol {
   border-right: 1px solid #f1f5f9;
   min-width: 132px;
+  position: relative;
 }
 .classesCalendarDayCol:last-child { border-right: 0; }
 .classesCalendarHead {
@@ -17534,6 +17535,7 @@ textarea.proInput {
   color: #cbd5e1;
 }
 .classesCalendarCell {
+  display: block;
   height: 40px;
   border: 0;
   background: #fff;
@@ -17547,9 +17549,24 @@ textarea.proInput {
   border-top: 1px solid #dbe3ed;
 }
 button.classesCalendarCell:hover { background: #eff6ff; }
+.classesCalendarOverlay {
+  position: absolute;
+  top: 62px;
+  left: 0;
+  right: 0;
+  height: 2560px;
+  pointer-events: none;
+  z-index: 2;
+}
+.classesCalendarOverlay .classesSessionCard {
+  pointer-events: auto;
+}
+.classesCalendarCell > .classesSessionCard {
+  display: none;
+}
 .classesSessionCard {
   position: absolute;
-  top: 4px;
+  top: 0;
   left: 5px;
   right: 5px;
   background: #f5f3ff;
