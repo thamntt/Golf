@@ -2610,7 +2610,7 @@
 
 .memberTable {
   width: 100%;
-  min-width: 1680px;
+  min-width: 1880px;
   border-collapse: collapse;
   text-align: left;
 }
@@ -2633,6 +2633,7 @@
   color: #344054;
   font-size: 14px;
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .memberTable .emptyTableCell {
@@ -2651,10 +2652,17 @@
 }
 
 .memberName {
-  max-width: 92px;
+  max-width: none;
+  min-width: 150px;
   color: #101828;
   font-weight: 500;
-  white-space: normal;
+  white-space: nowrap;
+}
+
+.memberName strong,
+.memberName small {
+  display: block;
+  white-space: nowrap;
 }
 
 .bioBadges {
@@ -11196,6 +11204,7 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .contractApprovalDraft { background: #f1f5f9; color: #475569; }
@@ -11572,6 +11581,17 @@
 .contractMoneyCellAmount {
   color: #0f172a;
   font-weight: 600;
+}
+
+.contractMoneyCell,
+.contractMoneyCell strong,
+.contractMoneyCell em,
+.contractMoneyCellAmount,
+.contractTotalCell,
+.contractPaidCell,
+.contractDebtCell,
+.contractZeroCell {
+  white-space: nowrap;
 }
 
 .contractTotalCell { color: #0f172a; }

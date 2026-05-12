@@ -1278,6 +1278,8 @@ function ContractListTab({
                 <th>Còn nợ</th>
                 <th>Ngày bắt đầu</th>
                 <th>Ngày kết thúc</th>
+                <th>Trạng thái</th>
+                <th>NV Sale</th>
                 <th>Người tạo</th>
                 <th>Thao tác</th>
               </tr>
@@ -1285,7 +1287,7 @@ function ContractListTab({
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td className={styles.emptyTableCell} colSpan={16}>Không có hợp đồng nào khớp bộ lọc</td>
+                  <td className={styles.emptyTableCell} colSpan={18}>Không có hợp đồng nào khớp bộ lọc</td>
                 </tr>
               ) : null}
               {filtered.map((c, index) => {
@@ -1323,6 +1325,8 @@ function ContractListTab({
                     </td>
                     <td>{c.startDate}</td>
                     <td>{c.endDate}</td>
+                    <td><ContractStatusBadge status={c.status} /></td>
+                    <td className={styles.cellTruncate} title={c.saleStaff}>{c.saleStaff}</td>
                     <td className={styles.cellTruncate} title={c.creator}>{c.creator}</td>
                     <td>
                       <div className={styles.contractRowActions}>
@@ -3295,50 +3299,59 @@ function RenewalTab({ renewals, contracts, onChangeRenewals, onChangeContracts, 
           <table className={styles.memberTable}>
             <thead>
               <tr>
-                <th>Mã GH</th>
-                <th>Mã HĐ gốc</th>
+                <th>STT</th>
+                <th>Mã HĐ</th>
                 <th>Khách hàng</th>
-                <th>Đơn vị / SL</th>
+                <th>Gói</th>
+                <th>Ngày gia hạn</th>
+                <th>Số tháng</th>
                 <th>Buổi cộng thêm</th>
-                <th>Tổng tiền / Đã thu</th>
-                <th>Ngày KT mới</th>
+                <th>Từ ngày</th>
+                <th>Đến ngày</th>
+                <th>Người tạo</th>
+                <th>Giá gói</th>
+                <th>VAT</th>
+                <th>Tổng tiền</th>
+                <th>Đã TT</th>
+                <th>Còn lại</th>
                 <th>Trạng thái</th>
-                <th>NV Sale</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td className={styles.emptyTableCell} colSpan={10}>Chưa có gia hạn nào</td></tr>
+                <tr><td className={styles.emptyTableCell} colSpan={17}>Chưa có gia hạn nào</td></tr>
               ) : null}
-              {filtered.map((r) => {
+              {filtered.map((r, index) => {
                 const contract = contracts.find((c) => c.id === r.contractId);
                 const customer = contract ? lookupCustomer(contract.customerCode) : undefined;
+                const pkg = contract ? lookupPackage(contract.packageCode) : undefined;
+                const debt = Math.max(0, r.total - r.paid);
                 return (
                   <tr key={r.id}>
+                    <td className={styles.contractRowIndex}>{index + 1}</td>
                     <td>
                       <button className={styles.memberCode} onClick={() => setDetailRenewal(r)} type="button">
-                        {r.id}
+                        {r.contractId}
                       </button>
                     </td>
-                    <td>{r.contractId}</td>
                     <td className={styles.memberName}>
                       <strong>{customer?.name ?? "—"}</strong>
                       <small>{customer?.phone ?? ""}</small>
                     </td>
-                    <td>{r.unit} · {r.quantity}</td>
-                    <td className={styles.contractSessions}><strong>+{r.addedSessions}</strong></td>
-                    <td>
-                      <div className={styles.contractMoneyCell}>
-                        <strong>{formatCurrency(r.total)}</strong>
-                        <em className={r.paid < r.total ? styles.dangerText : styles.contractPaid}>
-                          {r.paid < r.total ? `Còn nợ ${formatCurrency(r.total - r.paid)}` : "Đã thu đủ"}
-                        </em>
-                      </div>
-                    </td>
+                    <td>{pkg?.name ?? contract?.packageCode ?? "—"}</td>
+                    <td>{r.createdAt.split(" ")[0]}</td>
+                    <td>{r.unit === "Tháng" ? `${r.quantity} tháng` : "—"}</td>
+                    <td className={styles.contractSessions}><strong>+{r.addedSessions} buổi</strong></td>
+                    <td>{contract?.endDate ?? "—"}</td>
                     <td>{r.newEndDate}</td>
-                    <td><RenewalStatusBadge status={r.status} /></td>
                     <td>{r.saleStaff}</td>
+                    <td>{formatCurrency(r.unitPrice)}</td>
+                    <td><span className={styles.memberCode}>{r.vatPercent}%</span></td>
+                    <td><strong className={styles.contractTotalCell}>{formatCurrency(r.total)}</strong></td>
+                    <td><strong className={styles.contractPaidCell}>{formatCurrency(r.paid)}</strong></td>
+                    <td><strong className={debt > 0 ? styles.contractDebtCell : styles.contractZeroCell}>{formatCurrency(debt)}</strong></td>
+                    <td><RenewalStatusBadge status={r.status} /></td>
                     <td>
                       <div className={styles.contractRowActions}>
                         <button onClick={() => setDetailRenewal(r)} title="Xem" type="button"><Eye size={14} /></button>
@@ -3835,58 +3848,60 @@ function UpgradeTab({ contracts, flash, onChangeContracts, onChangeUpgrades, upg
           <table className={styles.memberTable}>
             <thead>
               <tr>
-                <th>Mã NC</th>
-                <th>HĐ gốc</th>
+                <th>STT</th>
+                <th>Mã HĐ</th>
                 <th>Khách hàng</th>
-                <th>Từ gói → Sang gói</th>
-                <th>Số buổi cũ/mới</th>
-                <th>GT còn lại</th>
-                <th>Phí NC</th>
-                <th>Tổng tiền / Đã TT</th>
+                <th>Gói hiện tại</th>
+                <th>Ngày nâng cấp</th>
+                <th>Từ gói</th>
+                <th>Lên gói</th>
+                <th>Buổi chuyển</th>
+                <th>Từ ngày</th>
+                <th>Đến ngày</th>
+                <th>Người tạo</th>
+                <th>Giá gói</th>
+                <th>VAT</th>
+                <th>Tổng tiền</th>
+                <th>Đã TT</th>
+                <th>Còn lại</th>
                 <th>Trạng thái</th>
-                <th>NV Sale</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {upgrades.length === 0 ? (
-                <tr><td className={styles.emptyTableCell} colSpan={11}>Chưa có yêu cầu nâng cấp</td></tr>
+                <tr><td className={styles.emptyTableCell} colSpan={18}>Chưa có yêu cầu nâng cấp</td></tr>
               ) : null}
-              {upgrades.map((u) => {
+              {upgrades.map((u, index) => {
                 const c = contracts.find((c) => c.id === u.contractId);
                 const customer = c ? lookupCustomer(c.customerCode) : undefined;
                 const pkgFrom = lookupPackage(u.fromPackage);
                 const pkgTo = lookupPackage(u.toPackage);
+                const debt = Math.max(0, u.total - u.paid);
                 return (
                   <tr key={u.id}>
+                    <td className={styles.contractRowIndex}>{index + 1}</td>
                     <td>
-                      <button className={styles.memberCode} onClick={() => setDetailUpgrade(u)} type="button">{u.id}</button>
+                      <button className={styles.memberCode} onClick={() => setDetailUpgrade(u)} type="button">{u.contractId}</button>
                     </td>
-                    <td>{u.contractId}</td>
                     <td className={styles.memberName}>
                       <strong>{customer?.name ?? "—"}</strong>
                       <small>{customer?.phone ?? ""}</small>
                     </td>
-                    <td>
-                      <span className={styles.contractMutedNote} style={{ fontStyle: "normal" }}>
-                        {pkgFrom?.name ?? u.fromPackage}
-                      </span>
-                      <ArrowRight size={12} style={{ margin: "0 4px", color: "#16a34a", verticalAlign: "middle" }} />
-                      <strong>{pkgTo?.name ?? u.toPackage}</strong>
-                    </td>
-                    <td>{u.oldSessions} → <strong>{u.newSessions}</strong></td>
-                    <td>{formatCurrency(u.oldRemainingValue)}</td>
-                    <td><strong>{formatCurrency(u.upgradeFee)}</strong></td>
-                    <td>
-                      <div className={styles.contractMoneyCell}>
-                        <strong>{formatCurrency(u.total)}</strong>
-                        <em className={u.paid < u.total ? styles.dangerText : styles.contractPaid}>
-                          {u.paid < u.total ? `Nợ ${formatCurrency(u.total - u.paid)}` : "Đủ"}
-                        </em>
-                      </div>
-                    </td>
-                    <td><UpgradeStatusBadge status={u.status} /></td>
+                    <td>{pkgFrom?.name ?? u.fromPackage}</td>
+                    <td>{u.effectiveDate}</td>
+                    <td className={styles.cellMuted}>{pkgFrom?.name ?? u.fromPackage}</td>
+                    <td><strong>{pkgTo?.name ?? u.toPackage}</strong></td>
+                    <td className={styles.contractSessions}><strong>{Math.max(0, u.newSessions - u.oldSessions)} buổi</strong></td>
+                    <td>{u.effectiveDate}</td>
+                    <td>{c?.endDate ?? "—"}</td>
                     <td>{u.saleStaff}</td>
+                    <td>{formatCurrency(pkgTo?.price ?? u.upgradeFee)}</td>
+                    <td><span className={styles.memberCode}>{u.vatPercent}%</span></td>
+                    <td><strong className={styles.contractTotalCell}>{formatCurrency(u.total)}</strong></td>
+                    <td><strong className={styles.contractPaidCell}>{formatCurrency(u.paid)}</strong></td>
+                    <td><strong className={debt > 0 ? styles.contractDebtCell : styles.contractZeroCell}>{formatCurrency(debt)}</strong></td>
+                    <td><UpgradeStatusBadge status={u.status} /></td>
                     <td>
                       <div className={styles.contractRowActions}>
                         <button onClick={() => setDetailUpgrade(u)} title="Xem" type="button"><Eye size={14} /></button>
@@ -4512,37 +4527,42 @@ function SuspensionTab({ contracts, flash, onChangeContracts, onChangeSuspension
           <table className={styles.memberTable}>
             <thead>
               <tr>
-                <th>Mã BL</th>
-                <th>Loại</th>
-                <th>HĐ áp dụng</th>
-                <th>Ngày BĐ — KT</th>
+                <th>STT</th>
+                <th>Mã HĐ</th>
+                <th>Khách hàng</th>
+                <th>Gói</th>
+                <th>Ngày bảo lưu</th>
+                <th>Từ ngày</th>
+                <th>Đến ngày</th>
                 <th>Số ngày</th>
                 <th>Lý do</th>
-                <th>Phí (mặc định 0đ)</th>
                 <th>Trạng thái</th>
-                <th>NV xử lý</th>
+                <th>Người tạo</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {suspensions.length === 0 ? (
-                <tr><td className={styles.emptyTableCell} colSpan={10}>Chưa có yêu cầu bảo lưu</td></tr>
+                <tr><td className={styles.emptyTableCell} colSpan={12}>Chưa có yêu cầu bảo lưu</td></tr>
               ) : null}
-              {suspensions.map((s) => (
+              {suspensions.map((s, index) => {
+                const primaryContract = contracts.find((contract) => contract.id === s.contractIds[0]);
+                const customer = primaryContract ? lookupCustomer(primaryContract.customerCode) : undefined;
+                const pkg = primaryContract ? lookupPackage(primaryContract.packageCode) : undefined;
+                return (
                 <tr key={s.id}>
-                  <td><button className={styles.memberCode} onClick={() => setDetailItem(s)} type="button">{s.id}</button></td>
-                  <td>
-                    <span className={s.type === "Đơn" ? styles.contractApprovalDraft : styles.contractApprovalApproved}>{s.type}</span>
+                  <td className={styles.contractRowIndex}>{index + 1}</td>
+                  <td><button className={styles.memberCode} onClick={() => setDetailItem(s)} type="button">{s.contractIds.join(", ")}</button></td>
+                  <td className={styles.memberName}>
+                    <strong>{s.type === "Nhóm" ? `${s.contractIds.length} hợp đồng` : customer?.name ?? "—"}</strong>
+                    <small>{s.type === "Nhóm" ? "Bảo lưu nhóm" : customer?.phone ?? ""}</small>
                   </td>
-                  <td>
-                    <div className={styles.contractMoneyCell}>
-                      {s.contractIds.map((id) => <strong key={id}>{id}</strong>)}
-                    </div>
-                  </td>
-                  <td>{s.startDate} → {s.endDate}</td>
+                  <td>{s.type === "Nhóm" ? "Nhiều gói" : pkg?.name ?? primaryContract?.packageCode ?? "—"}</td>
+                  <td>{s.createdAt.split(" ")[0]}</td>
+                  <td>{s.startDate}</td>
+                  <td>{s.endDate}</td>
                   <td><strong>{s.durationDays}</strong> ngày</td>
                   <td className={styles.cellTruncate} title={s.reason}>{s.reason}</td>
-                  <td>{formatCurrency(s.fee)}</td>
                   <td><SuspensionStatusBadge status={s.status} /></td>
                   <td>{s.saleStaff}</td>
                   <td>
@@ -4568,7 +4588,8 @@ function SuspensionTab({ contracts, flash, onChangeContracts, onChangeSuspension
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -5122,29 +5143,39 @@ function TransferTab({ contracts, flash, onChangeContracts, onChangeTransfers, t
           <table className={styles.memberTable}>
             <thead>
               <tr>
-                <th>Mã CN</th>
-                <th>HĐ</th>
+                <th>STT</th>
+                <th>Mã HĐ</th>
                 <th>Chủ cũ</th>
                 <th>Chủ mới</th>
+                <th>Gói</th>
                 <th>Ngày CN</th>
+                <th>Buổi còn lại</th>
+                <th>Từ ngày</th>
+                <th>Đến ngày</th>
+                <th>Người tạo</th>
                 <th>Phí CN</th>
-                <th>Tổng tiền / Đã TT</th>
+                <th>VAT</th>
+                <th>Tổng tiền</th>
+                <th>Đã TT</th>
+                <th>Còn lại</th>
                 <th>Trạng thái</th>
-                <th>NV xử lý</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {transfers.length === 0 ? (
-                <tr><td className={styles.emptyTableCell} colSpan={10}>Chưa có yêu cầu chuyển nhượng</td></tr>
+                <tr><td className={styles.emptyTableCell} colSpan={17}>Chưa có yêu cầu chuyển nhượng</td></tr>
               ) : null}
-              {transfers.map((t) => {
+              {transfers.map((t, index) => {
+                const contract = contracts.find((item) => item.id === t.contractId);
+                const pkg = contract ? lookupPackage(contract.packageCode) : undefined;
                 const fromCustomer = lookupCustomer(t.fromCustomer);
                 const toCustomer = lookupCustomer(t.toCustomer);
+                const debt = Math.max(0, t.total - t.paid);
                 return (
                   <tr key={t.id}>
-                    <td><button className={styles.memberCode} onClick={() => setDetailItem(t)} type="button">{t.id}</button></td>
-                    <td>{t.contractId}</td>
+                    <td className={styles.contractRowIndex}>{index + 1}</td>
+                    <td><button className={styles.memberCode} onClick={() => setDetailItem(t)} type="button">{t.contractId}</button></td>
                     <td className={styles.memberName}>
                       <strong>{fromCustomer?.name ?? t.fromCustomer}</strong>
                       <small>{fromCustomer?.phone}</small>
@@ -5153,18 +5184,18 @@ function TransferTab({ contracts, flash, onChangeContracts, onChangeTransfers, t
                       <strong style={{ color: "#9333ea" }}>{toCustomer?.name ?? t.toCustomer}</strong>
                       <small>{toCustomer?.phone}</small>
                     </td>
+                    <td>{pkg?.name ?? contract?.packageCode ?? "—"}</td>
                     <td>{t.effectiveDate}</td>
-                    <td>{formatCurrency(t.fee)}</td>
-                    <td>
-                      <div className={styles.contractMoneyCell}>
-                        <strong>{formatCurrency(t.total)}</strong>
-                        <em className={t.paid < t.total ? styles.dangerText : styles.contractPaid}>
-                          {t.paid < t.total ? `Nợ ${formatCurrency(t.total - t.paid)}` : "Đủ"}
-                        </em>
-                      </div>
-                    </td>
-                    <td><TransferStatusBadge status={t.status} /></td>
+                    <td className={styles.contractSessions}><strong>{contract?.remainingSessions ?? 0} buổi</strong></td>
+                    <td>{t.effectiveDate}</td>
+                    <td>{contract?.endDate ?? "—"}</td>
                     <td>{t.saleStaff}</td>
+                    <td>{formatCurrency(t.fee)}</td>
+                    <td><span className={styles.memberCode}>{t.vatPercent}%</span></td>
+                    <td><strong className={styles.contractTotalCell}>{formatCurrency(t.total)}</strong></td>
+                    <td><strong className={styles.contractPaidCell}>{formatCurrency(t.paid)}</strong></td>
+                    <td><strong className={debt > 0 ? styles.contractDebtCell : styles.contractZeroCell}>{formatCurrency(debt)}</strong></td>
+                    <td><TransferStatusBadge status={t.status} /></td>
                     <td>
                       <div className={styles.contractRowActions}>
                         <button onClick={() => setDetailItem(t)} title="Xem" type="button"><Eye size={14} /></button>
@@ -5754,44 +5785,56 @@ function ConversionTab({ contracts, conversions, flash, onChangeContracts, onCha
           <table className={styles.memberTable}>
             <thead>
               <tr>
-                <th>Mã CĐ</th>
-                <th>HĐ cũ → mới</th>
+                <th>STT</th>
+                <th>Mã HĐ</th>
                 <th>Khách hàng</th>
-                <th>Gói cũ → mới</th>
+                <th>Gói hiện tại</th>
+                <th>Ngày chuyển đổi</th>
+                <th>Từ gói</th>
+                <th>Sang gói</th>
+                <th>HĐ cũ</th>
+                <th>HĐ mới</th>
+                <th>Từ ngày</th>
+                <th>Đến ngày</th>
+                <th>Người tạo</th>
                 <th>Loại</th>
-                <th>Phí CĐ / Hoàn</th>
-                <th>Tổng tiền / Đã TT</th>
+                <th>Phí/Giá gói</th>
+                <th>VAT</th>
+                <th>Tổng tiền</th>
+                <th>Đã TT</th>
+                <th>Còn lại</th>
+                <th>Hoàn tiền</th>
                 <th>Trạng thái</th>
-                <th>NV Sale</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {conversions.length === 0 ? (
-                <tr><td className={styles.emptyTableCell} colSpan={10}>Chưa có yêu cầu chuyển đổi</td></tr>
+                <tr><td className={styles.emptyTableCell} colSpan={21}>Chưa có yêu cầu chuyển đổi</td></tr>
               ) : null}
-              {conversions.map((cv) => {
+              {conversions.map((cv, index) => {
+                const contract = contracts.find((item) => item.id === cv.oldContractId);
                 const customer = lookupCustomer(cv.customerCode);
                 const oldPkg = lookupPackage(cv.oldPackage);
                 const newPkg = lookupPackage(cv.newPackage);
+                const debt = Math.max(0, cv.total - cv.paid);
                 return (
                   <tr key={cv.id}>
-                    <td><button className={styles.memberCode} onClick={() => setDetailItem(cv)} type="button">{cv.id}</button></td>
-                    <td>
-                      <div className={styles.contractMoneyCell}>
-                        <strong>{cv.oldContractId}-OLD</strong>
-                        {cv.newContractId ? <em className={styles.contractPaid}>→ {cv.newContractId}</em> : <em className={styles.cellMuted}>chưa kích hoạt</em>}
-                      </div>
-                    </td>
+                    <td className={styles.contractRowIndex}>{index + 1}</td>
+                    <td><button className={styles.memberCode} onClick={() => setDetailItem(cv)} type="button">{cv.oldContractId}</button></td>
                     <td className={styles.memberName}>
                       <strong>{customer?.name ?? "—"}</strong>
                       <small>{customer?.phone}</small>
                     </td>
-                    <td>
-                      <span className={styles.contractMutedNote} style={{ fontStyle: "normal" }}>{oldPkg?.name}</span>
-                      <ArrowRight size={12} style={{ margin: "0 4px", color: "#2563eb", verticalAlign: "middle" }} />
-                      <strong>{newPkg?.name}</strong>
-                    </td>
+                    <td>{oldPkg?.name ?? cv.oldPackage}</td>
+                    <td>{cv.effectiveDate}</td>
+                    <td className={styles.cellMuted}>{oldPkg?.name ?? cv.oldPackage}</td>
+                    <td><strong>{newPkg?.name ?? cv.newPackage}</strong></td>
+                    <td><span className={styles.contractDebtCell}>{cv.oldContractId}-OLD</span></td>
+                    <td><span className={styles.contractPaidCell}>{cv.newContractId ?? "Chưa kích hoạt"}</span></td>
+                    <td>{cv.effectiveDate}</td>
+                    <td>{contract?.endDate ?? "—"}</td>
+                    <td>{cv.saleStaff}</td>
                     <td>
                       {cv.conversionType === "UPGRADE" ? (
                         <span className={styles.conversionUpgrade}><ArrowUpRight size={12} /> UPGRADE</span>
@@ -5799,21 +5842,13 @@ function ConversionTab({ contracts, conversions, flash, onChangeContracts, onCha
                         <span className={styles.conversionDowngrade}><ArrowDownRight size={12} /> DOWNGRADE</span>
                       )}
                     </td>
-                    <td>
-                      {cv.conversionType === "UPGRADE"
-                        ? <span>{formatCurrency(cv.fee)}</span>
-                        : <span style={{ color: "#9a3412" }}>Hoàn {formatCurrency(cv.refundAmount)}</span>}
-                    </td>
-                    <td>
-                      <div className={styles.contractMoneyCell}>
-                        <strong>{formatCurrency(cv.total)}</strong>
-                        <em className={cv.paid < cv.total ? styles.dangerText : styles.contractPaid}>
-                          {cv.paid < cv.total ? `Còn ${formatCurrency(cv.total - cv.paid)}` : "Đủ"}
-                        </em>
-                      </div>
-                    </td>
+                    <td>{formatCurrency(cv.conversionType === "UPGRADE" ? cv.fee : cv.newPrice)}</td>
+                    <td><span className={styles.memberCode}>{cv.vatPercent}%</span></td>
+                    <td><strong className={styles.contractTotalCell}>{formatCurrency(cv.total)}</strong></td>
+                    <td><strong className={styles.contractPaidCell}>{formatCurrency(cv.paid)}</strong></td>
+                    <td><strong className={debt > 0 ? styles.contractDebtCell : styles.contractZeroCell}>{formatCurrency(debt)}</strong></td>
+                    <td><strong className={cv.refundAmount > 0 ? styles.contractDebtCell : styles.contractZeroCell}>{formatCurrency(cv.refundAmount)}</strong></td>
                     <td><ConversionStatusBadge status={cv.status} /></td>
-                    <td>{cv.saleStaff}</td>
                     <td>
                       <div className={styles.contractRowActions}>
                         <button onClick={() => setDetailItem(cv)} title="Xem" type="button"><Eye size={14} /></button>
